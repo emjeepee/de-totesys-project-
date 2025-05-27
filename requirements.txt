@@ -1,0 +1,17 @@
+pytest
+coverage
+bandit
+black
+audit
+moto
+boto3
+pg8000
+dotenv
+flake8
+parquet
+pandas
+
+
+
+
+
