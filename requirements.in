@@ -2,7 +2,7 @@ pytest
 coverage
 bandit
 black
-audit
+pip-audit
 moto
 boto3
 pg8000
