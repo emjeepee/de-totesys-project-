@@ -1,3 +1,5 @@
+
+# 
 data "aws_iam_policy_document" "allow-lambda-s3-put-access"{
     statement {
       actions = ["s3:PutObject"]
@@ -23,3 +25,17 @@ resource "aws_iam_policy_attachment" "attach_policy" {
   
 }
 
+
+# Create role for second lambda to allow it to be triggered by EventBridge
+
+resource "aws_iam_role" "lambda_exec_role" {
+  name = "lambda-exec-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Principal = { Service = "lambda.amazonaws.com" },
+      Effect = "Allow",
+    }]
+  })
+}
