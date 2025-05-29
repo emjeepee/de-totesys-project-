@@ -27,3 +27,9 @@ variable "processed-bucket"{
     type = string
     default = "11-processed-bucket"
 }
+
+variable "alert_email_address"{
+    type = string
+    sensitive = true
+    description = "email for alerts"
+}
