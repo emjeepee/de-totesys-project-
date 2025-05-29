@@ -13,6 +13,7 @@ resource "aws_cloudwatch_metric_alarm" "fatal_error"{
     comparison_operator = "GreaterThanOrEqualToThreshold"
     evaluation_periods = "1"
     metric_name = "Errors"
+    namespace = "AWS/Lambda"
     statistic = "Sum"
     threshold = 1
     period = "60"
