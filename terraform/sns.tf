@@ -15,6 +15,7 @@ resource "aws_cloudwatch_metric_alarm" "fatal_error"{
     metric_name = "Errors"
     statistic = "Sum"
     threshold = 1
+    period = "60"
     alarm_description = "Alert If Lambda function errors"
     alarm_actions = [aws_sns_topic.lambda_alerts.arn]
     dimensions = {
