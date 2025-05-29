@@ -33,8 +33,10 @@ charset-normalizer==3.4.2
     # via requests
 click==8.2.1
     # via black
-coverage==7.8.2
-    # via -r requirements.in
+coverage[toml]==7.8.2
+    # via
+    #   -r requirements.in
+    #   pytest-cov
 cryptography==45.0.3
     # via moto
 cyclonedx-python-lib==9.1.0
@@ -124,6 +126,10 @@ pygments==2.19.1
 pyparsing==3.2.3
     # via pip-requirements-parser
 pytest==8.3.5
+    # via
+    #   -r requirements.in
+    #   pytest-cov
+pytest-cov==6.1.1
     # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via
