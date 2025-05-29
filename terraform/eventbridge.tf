@@ -23,26 +23,26 @@ resource "aws_cloudwatch_event_rule" "filter_for_events_from_ingestion_bucket" {
 }
 
 
-# Set the target (the second lambda) for the rule created above
-resource "aws_cloudwatch_event_target" "target_second_lambda" {
-  rule      = aws_cloudwatch_event_rule.filter_for_events_from_ingestion_bucket.name
-  arn       = XXX-lambda-function-XXX.arn
-  target_id = "lambda-target"
-}
+# # Set the target (the second lambda) for the rule created above
+# resource "aws_cloudwatch_event_target" "target_second_lambda" {
+#   rule      = aws_cloudwatch_event_rule.filter_for_events_from_ingestion_bucket.name
+#   arn       = XXX-lambda-function-XXX.arn
+#   target_id = "lambda-target"
+# }
 
 
-#  Allow the ingestion S3 bucket to make notifications
-# that will go onto the custom bus created above
-# when files in the ingestion bucket are added to it or
-# when files already in it are modified
-resource "aws_s3_bucket_notification" "bucket_notification" {
-  bucket = aws_s3_bucket.ingestion-bucket.bucket.id
+# #  Allow the ingestion S3 bucket to make notifications
+# # that will go onto the custom bus created above
+# # when files in the ingestion bucket are added to it or
+# # when files already in it are modified
+# resource "aws_s3_bucket_notification" "bucket_notification" {
+#   bucket = aws_s3_bucket.ingestion-bucket.bucket.id
   
-  eventbridge = {
-    event_bridge_arn = aws_cloudwatch_event_bus.trigger_second_lambda.arn
-    events = ["s3:PutObject:*"]
-  }
-}
+#   eventbridge = {
+#     event_bridge_arn = aws_cloudwatch_event_bus.trigger_second_lambda.arn
+#     events = ["s3:PutObject:*"]
+#   }
+# }
 
 
 
