@@ -1,4 +1,6 @@
-#Lambda IAM role
+#-----------------
+#Lambda IAM role |
+#----------------
 
 data "aws_iam_policy_document" "trust_policy" {
   statement {
@@ -18,7 +20,9 @@ resource "aws_iam_role" "first_lambda_function_role" {
     assume_role_policy = data.aws_iam_policy_document.trust_policy.json
 }
 
-# Lambda IAM Policy for s3 Write
+#---------------------------------
+# Lambda IAM Policy for s3 Write |
+#--------------------------------
 
 data "aws_iam_policy_document" "s3_ingestion_data_policy_doc"{
   statement {
@@ -47,10 +51,9 @@ resource "aws_iam_role_policy_attachment" "first_lambda_s3_write_policy_attachme
   policy_arn = aws_iam_policy.s3_write_policy.arn
 }
 
-
-# Create role for second lambda to allow it to be triggered by EventBridge
-
-#Lambda IAM role
+# ----------------
+#Lambda IAM role |
+# ---------------
 
 data "aws_iam_policy_document" "trust_policy" {
   statement {
@@ -70,7 +73,9 @@ resource "aws_iam_role" "first_lambda_function_role" {
     assume_role_policy = data.aws_iam_policy_document.trust_policy.json
 }
 
-# Lambda IAM Policy for s3 Write
+#---------------------------------
+# Lambda IAM Policy for s3 Write |
+#--------------------------------
 
 data "aws_iam_policy_document" "s3_ingestion_data_policy_doc"{
   statement {
@@ -99,20 +104,38 @@ resource "aws_iam_role_policy_attachment" "first_lambda_s3_write_policy_attachme
   policy_arn = aws_iam_policy.s3_write_policy.arn
 }
 
+# ----------------------------------
+# Lambda IAM Policy for Cloudwatch |
+# ---------------------------------
+
+data "aws_iam_policy_document" "first_cloudwatch_document"{
+    statement{
+        actions = ["logs:CreateLogGroup"]
+        resources = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*:*"]
+    }
+
+    statement {
+        actions = [
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+            "logs:PutLogEventsBatch",
+            ]
+        resources = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.first_lambda_function}:*"]
+    }
+}
+
+resource "aws_iam_policy" "cw_policy"{
+    name = "cw-policy-${var.first_lambda_function}"
+    description = "Cloudwatch logging policy for first lambda function"
+    policy = data.aws_iam_policy_document.first_cloudwatch_document.json
+}
+
+resource "aws_iam_role_policy_attachment" "first_lambda_cw_policy_attachment" {
+    role = aws_iam_role.first_lambda_function_role.name
+    policy_arn = aws_iam_policy.cw_policy.arn
+}
 
 # Create role for second lambda to allow it to be triggered by EventBridge
-
-# resource "aws_iam_role" "lambda_exec_role" {
-#   name = "lambda-exec-role"
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17",
-#     Statement = [{
-#       Action = "sts:AssumeRole",
-#       Principal = { Service = "lambda.amazonaws.com" },
-#       Effect = "Allow",
-#     }]
-#   })
-# }
 
 #Define
 # Refer back to trust policy, give trust policy to second lambda function

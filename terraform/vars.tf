@@ -17,3 +17,13 @@ variable "aws_region"{
     type = string
     default = "eu-west-2"
 }
+
+variable "second_lambda_function"{
+    type = string
+    default = "second_lambda_function"
+}
+
+variable "processed-bucket"{
+    type = string
+    default = "11-processed-bucket"
+}
