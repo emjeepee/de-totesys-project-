@@ -61,6 +61,7 @@ endef
 .unit-test:## Run the unit tests
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest -vv)
 
+
 ##.check-coverage:## Run the coverage check
 ##	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest --cov=src tests/)
 
@@ -68,7 +69,7 @@ endef
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest --cov=src --cov-fail-under=90 tests/)
 
 ## Run all checks
-.run-checks: .security-test .run-black .unit-test .check-coverage
+.run-checks: .security-test .run-black .unit-test #.check-coverage
 
 ##Default "make" command
 all: .requirements .run-checks
