@@ -1,5 +1,6 @@
 import json
 
+
 def read_table(table_name, conn, after_time):
     """
     selects all the data from the specified table after the last run time
@@ -31,4 +32,3 @@ def convert_data(data):
         return json.dumps(data)
     except (ValueError, TypeError) as error:
         raise ValueError(f"Data cannot be converted: {error}")
-

@@ -33,14 +33,15 @@ class TestReadTable:
     #     with pytest.raises(ValueError):
     #         read_table("table name", test_conn, "time")
 
+
 class TestConvertToJson:
     def test_convert_valid_data_to_json(self):
-        data = [{'id': 1, 'name': 'first_bag'}, {'id': 2, 'name': 'second_bag'}]
+        data = [{"id": 1, "name": "first_bag"}, {"id": 2, "name": "second_bag"}]
         json_str = convert_data(data)
         assert isinstance(json_str, str)
-    
+
     def test_convert_contains_data_to_json(self):
-        data = [{'id': 1, 'name': 'first_bag'}, {'id': 2, 'name': 'second_bag'}]
+        data = [{"id": 1, "name": "first_bag"}, {"id": 2, "name": "second_bag"}]
         json_str = convert_data(data)
         assert '"id": 1' in json_str
 
@@ -53,8 +54,3 @@ class TestConvertToJson:
         with pytest.raises(ValueError) as error:
             convert_data(data)
         assert "ValueError" in str(error)
-        
-
-    
-
-
