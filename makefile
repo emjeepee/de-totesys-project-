@@ -4,10 +4,10 @@
 PROJECT_NAME = de-totesys-project-
 REGION = eu-west-2
 PYTHON_INTERPRETER = python
-WD=$(shell pwd)
-PYTHONPATH=${WD}
+PWD=$(shell pwd)
+PYTHONPATH=${PWD}
 SHELL := /bin/bash
-PROFILE = default
+# PROFILE = default
 PIP:=pip
 
 .create-environment:## Create python interpreter environment.
@@ -61,8 +61,11 @@ endef
 .unit-test:## Run the unit tests
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest -vv)
 
-.check-coverage:## Run the coverage check
-	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest --cov=src tests/)
+##.check-coverage:## Run the coverage check
+##	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest --cov=src tests/)
+
+.check-coverage: ## Run the coverage check with a 90% threshold for passing:
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest --cov=src --cov-fail-under=90 tests/)
 
 ## Run all checks
 .run-checks: .security-test .run-black .unit-test .check-coverage
