@@ -22,11 +22,6 @@ def aws_credentials():
     os.environ["AWS_DEFAULT_REGION"] = "eu-west-2"
 
 
-# @pytest.fixture(scope="module")
-# def mock_S3_client():
-#     with mock_aws():
-#         yield boto3.client("s3", region_name="eu-west-2")
-
 
 
 
@@ -119,9 +114,8 @@ def test_get_most_recent_table_data_returns_correct_list(S3_setup):
 def test_function_create_formatted_timestamp_creates_correct_timestamp(S3_setup):
     
     # arrange:
-    # now_dt_object = datetime.now()
     formatted_now_string = create_formatted_timestamp()
-    # formatted_now_string = now_dt_object.strftime('%Y-%m-%d_%H-%M-%S')
+
 
     pattern = r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}"
 
@@ -137,13 +131,6 @@ def test_function_update_rows_in_table_correctly_updates_a_table(S3_setup):
     # arrange:
     updated_table = update_rows_in_table(update_rows, mock_design_table_1, 'design')
 
-    # act
-    # response = S3_client.get_object(Bucket=bucket_name, Key=key_mdt)
-    # response is a dictionary with key 'Body'
-    # result_table_json = response['Body'].read().decode('utf-8')
-    # result_table = json.loads(result_table_json)
-    # print(f'type of result_table is >>>> {type(result_table)}')
-        # result_table is a python list of dictionaries
     result_row = [item     for item in updated_table     if item['name']=='abdul'   ][0]
         # result_row will be this dictionary: {"name": "abdul", "team": 24, "project": "terraform"}
 
@@ -162,7 +149,6 @@ def test_function_save_updated_table_to_S3_saves_a_table_to_the_S3(S3_setup):
     save_updated_table_to_S3(mdt_2_json, S3_client, new_key, bucket_name)
     response = S3_client.get_object(Bucket=bucket_name, Key=new_key)
     returned_table_string = response['Body'].read().decode('utf-8')
-    print(f'returned_table_string is >>>> {returned_table_string}')
     returned_table = json.loads(returned_table_string)
 
 
