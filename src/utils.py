@@ -10,21 +10,17 @@ def read_table(table_name, conn, after_time):
     the connection to the database,
     the time which to select records updated after (ie the last time the function was run)
 
-    returns a string to be converted into json
+    returns a dict in the format {table_name: <string to be converted into json>}
     """
-    # try:
     result = conn.run(
         f"""
-        SELECT * FROM :table_name
+        SELECT * FROM {table_name}
         WHERE last_updated > :after_time
         """,
-        table_name=table_name,
         after_time=after_time,
     )
 
-    return result
-    # except Exception:
-    #     raise ValueError
+    return {table_name: result}
 
 
 def convert_data(data):
