@@ -1,6 +1,6 @@
+#----------------------------------------
+#Event Bridge for first lambda function |
 #---------------------------------------
-#Event Bridge for first lambda function|
-#--------------------------------------
 
 # resource "aws_cloudwatch_event_rule" "scheduler" {
 #   name =  "extract-handler-5-minutes"
