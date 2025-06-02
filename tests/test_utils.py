@@ -19,13 +19,14 @@ class TestReadTable:
         # assert
         test_conn.run.assert_called_once_with(
             f"""
-        SELECT * FROM :table_name
+        SELECT * FROM {test_table_name}
         WHERE last_updated > :after_time
         """,
-            table_name=test_table_name,
             after_time=test_time,
         )
-        assert result == "{result: {id: 2, last_updated: '2010-01-01', value: 'row 2'}}"
+        assert result == {
+            "test_table": "{result: {id: 2, last_updated: '2010-01-01', value: 'row 2'}}"
+        }
 
     # def test_raises_value_error(self):
     #     test_conn = Mock()
