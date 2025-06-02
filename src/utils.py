@@ -1,7 +1,7 @@
 import json
+from pg8000.native import Connection
 
-
-def read_table(table_name, conn, after_time):
+def read_table(table_name:str, conn:Connection, after_time:str):
     """
     selects all the data from the specified table after the last run time
 
@@ -23,7 +23,7 @@ def read_table(table_name, conn, after_time):
     return {table_name: result}
 
 
-def convert_data(data):
+def convert_data(data:dict|list):
     """
     converts the data passed in into json format
 
