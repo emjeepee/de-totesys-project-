@@ -1,6 +1,8 @@
 import json
+from pg8000.native import Connection
+import datetime
 
-def read_table(table_name, conn, after_time):
+def read_table(table_name:str, conn:Connection, after_time:str):
     """
     selects all the data from the specified table after the last run time
 
@@ -9,26 +11,34 @@ def read_table(table_name, conn, after_time):
     the connection to the database,
     the time which to select records updated after (ie the last time the function was run)
 
-    returns a string to be converted into json
+    returns a dict in the format {table_name: <string to be converted into json>}
     """
-    # try:
     result = conn.run(
         f"""
-        SELECT * FROM :table_name
+        SELECT * FROM {table_name}
         WHERE last_updated > :after_time
         """,
-        table_name=table_name,
         after_time=after_time,
     )
 
-    return result
-    # except Exception:
-    #     raise ValueError
+    return {table_name: result}
 
 
-def convert_data(data):
+def convert_data(data: dict | list):
+    
+    """
+    converts the data passed in into json format
+
+    takes the argument for:
+    the data, in string form, ready to convert to json
+
+    returns a json object, ready to upload into the bucket as a json file
+    """
+    def serialize_datetime(obj):
+        if isinstance(obj, (datetime.datetime, datetime.date)):
+            return obj.isoformat()  # Convert datetime
+        return obj
     try:
-        return json.dumps(data)
+        return json.dumps(data, default=serialize_datetime)
     except (ValueError, TypeError) as error:
         raise ValueError(f"Data cannot be converted: {error}")
-
