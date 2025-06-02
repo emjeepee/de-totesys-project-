@@ -1,5 +1,5 @@
 import boto3
-from src.utils_write_to_ingestion_bucket import write_to_ingestion_bucket
+from src.utils_write_to_ingestion_bucket import write_to_ingestion_bucket,create_formatted_timestamp
 from src.utils import convert_data, read_table
 from datetime import datetime
 from botocore.exceptions import ClientError
@@ -18,17 +18,7 @@ def lambda_handler(event, context):
     get_data_from_db(tables, after_time, conn, read_table, convert_data)
 
 
-    #   try:
-    #      response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
-    #      if response["KeyCount"] > 0:
-    #         write_to_ingestion_bucket(json.loads(data), bucket_name, prefix)
-    #      else:
-    #         timestamped = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    #         s3_client.put_object(Bucket=bucket_name, Key=f"{prefix}/{timestamped}.json", Body=json.dumps(data))
-
-    #   except ClientError as e:
-    #      print(e)
-
+   
 
     close_db(conn)
 

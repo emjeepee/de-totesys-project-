@@ -38,6 +38,8 @@ def convert_data(data: dict | list):
         if isinstance(obj, (datetime.datetime, datetime.date)):
             return obj.isoformat()  # Convert datetime
         return obj
+
+        
     try:
         return json.dumps(data, default=serialize_datetime)
     except (ValueError, TypeError) as error:
