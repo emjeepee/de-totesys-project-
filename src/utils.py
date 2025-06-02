@@ -24,6 +24,14 @@ def read_table(table_name, conn, after_time):
 
 
 def convert_data(data):
+    """
+    converts the data passed in into json format
+
+    takes the argument for:
+    the data, in string form, ready to convert to json
+
+    returns a json object, ready to upload into the bucket as a json file
+    """
     try:
         return json.dumps(data)
     except (ValueError, TypeError) as error:
