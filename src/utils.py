@@ -1,5 +1,6 @@
 import json
 from pg8000.native import Connection
+import datetime
 
 def read_table(table_name:str, conn:Connection, after_time:str):
     """
@@ -23,7 +24,8 @@ def read_table(table_name:str, conn:Connection, after_time:str):
     return {table_name: result}
 
 
-def convert_data(data:dict|list):
+def convert_data(data: dict | list):
+    
     """
     converts the data passed in into json format
 
@@ -32,7 +34,11 @@ def convert_data(data:dict|list):
 
     returns a json object, ready to upload into the bucket as a json file
     """
+    def serialize_datetime(obj):
+        if isinstance(obj, (datetime.datetime, datetime.date)):
+            return obj.isoformat()  # Convert datetime
+        return obj
     try:
-        return json.dumps(data)
+        return json.dumps(data, default=serialize_datetime)
     except (ValueError, TypeError) as error:
         raise ValueError(f"Data cannot be converted: {error}")

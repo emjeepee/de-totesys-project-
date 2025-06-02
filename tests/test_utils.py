@@ -1,6 +1,7 @@
 from src.utils import read_table, convert_data
 from unittest.mock import Mock
 import pytest
+import datetime
 
 
 class TestReadTable:
@@ -55,3 +56,16 @@ class TestConvertToJson:
         with pytest.raises(ValueError) as error:
             convert_data(data)
         assert "ValueError" in str(error)
+
+    def test_convert_data_datetime_to_iso_format(self):
+        data = [
+            {"id": 1, "name": "Alice", "last_updated": datetime.datetime(2025, 6, 1, 14, 30)},
+            {"id": 2, "name": "Bob", "last_updated": datetime.datetime(2025, 6, 2, 10, 0)}
+        ]
+        
+        expected= '[{"id": 1, "name": "Alice", "last_updated": "2025-06-01T14:30:00"}, {"id": 2, "name": "Bob", "last_updated": "2025-06-02T10:00:00"}]'
+        
+        result = convert_data(data)
+        
+        assert result == expected
+        assert isinstance(result, str)
