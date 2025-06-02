@@ -4,7 +4,7 @@ import json
 
 
 # /src/utils.py
-def write_to_ingestion_bucket(data, bucket, file_location):
+def write_to_ingestion_bucket(data:dict|list|str, bucket:str, file_location:str):
     """
     This function:
     1. Searches the ingestion bucket for all jsonified table lists
@@ -67,8 +67,7 @@ def write_to_ingestion_bucket(data, bucket, file_location):
 
     return
 
-
-def get_most_recent_table_data(file_location: str, S3_client, bucket_name: str):
+def get_most_recent_table_data(file_location:str, S3_client:boto3.client, bucket_name:str):
     """
     This function:
         1) gets a list of every jsonified list of
@@ -128,7 +127,7 @@ def create_formatted_timestamp():
     return formatted_ts
 
 
-def update_rows_in_table(rows_list: list, table_list: list, file_location: str):
+def update_rows_in_table(rows_list:list[dict|list], table_list:list[dict[str:object]], file_location:str):
     """
     This function:
         1) updates the appropriate rows in a
@@ -145,7 +144,6 @@ def update_rows_in_table(rows_list: list, table_list: list, file_location: str):
 
     # file_location is eg 'design'
     key_to_search = file_location + "_id"
-
     for dct in rows_list:
         for row_dct in table_list:
             if dct[key_to_search] == row_dct[key_to_search]:
@@ -158,7 +156,7 @@ def update_rows_in_table(rows_list: list, table_list: list, file_location: str):
     return table_list
 
 
-def save_updated_table_to_S3(updated_table, S3_client, new_key, bucket):
+def save_updated_table_to_S3(updated_table:str, S3_client:boto3.client, new_key:str, bucket:str):
     """
     This function:
         1. takes the updated table and stores
