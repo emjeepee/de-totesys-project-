@@ -1,0 +1,4 @@
+dotenv
+pg8000
+pandas
+parquet
