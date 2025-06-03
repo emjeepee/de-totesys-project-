@@ -10,24 +10,46 @@ class TestReadTable:
         #   create connection to dummy db with a table with a last_updated column
         #   create an after time (could just be the start of time)
         test_conn = Mock()
-        test_conn.run.return_value = (
-            "{result: {id: 2, last_updated: '2010-01-01', value: 'row 2'}}"
-        )
+        test_conn.run.side_effect = [
+            [(1, 'abdul', 1), (2, 'neil', 1)],   # Rows from main query
+            [('design_id',), ('name',), ('team',)] # Column names
+        ]
         test_table_name = "test_table"
         test_time = "2005-01-01"
         # act
         result = read_table(test_table_name, test_conn, test_time)
         # assert
-        test_conn.run.assert_called_once_with(
-            f"""
-        SELECT * FROM {test_table_name}
-        WHERE last_updated > :after_time
-        """,
-            after_time=test_time,
-        )
-        assert result == {
-            "test_table": "{result: {id: 2, last_updated: '2010-01-01', value: 'row 2'}}"
+        calls = test_conn.run.call_args_list
+        assert calls[0][0][0].strip() == """
+        SELECT * FROM test_table
+        WHERE last_updated > :after_time LIMIT 20;
+        """.strip()
+        assert calls[0][1] == {'after_time': test_time}
+        
+        # Verify second call (metadata query)
+        assert calls[1][0][0] == f"SELECT column_name FROM information_schema.columns WHERE table_name = '{test_table_name}' ORDER BY ordinal_position"
+        
+        # Verify result
+        expected = {
+            "test_table": [
+                {"design_id": 1, "name": "abdul", "team": 1},
+                {"design_id": 2, "name": "neil", "team": 1}
+            ]
         }
+        assert result == expected
+
+
+
+        # test_conn.run.assert_called_once_with(
+        #     f"""
+        # SELECT * FROM {test_table_name}
+        # WHERE last_updated > :after_time
+        # """,
+        #     after_time=test_time,
+        # )
+        # assert result == {
+        #     "test_table": "{result: {id: 2, last_updated: '2010-01-01', value: 'row 2'}}"
+        # }
 
     # def test_raises_value_error(self):
     #     test_conn = Mock()
