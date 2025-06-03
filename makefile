@@ -66,7 +66,7 @@ endef
 ##	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest --cov=src tests/)
 
 .check-coverage: ## Run the coverage check with a 90% threshold for passing:
-	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest --cov=src --cov-fail-under=90 tests/)
+$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest --cov=src --cov-fail-under=90 tests/)
 
 ## Run all checks
 .run-checks: .security-test .run-black .unit-test #.check-coverage
