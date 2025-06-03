@@ -31,9 +31,9 @@ def write_to_ingestion_bucket(data:dict|list|str, bucket:str, file_location:str)
             function.
 
     args:
-        data: a jsonified list of dictionaries, each dictionary 
-            representing an updated row of a table in the ToteSys 
-            database.
+        data: a jsonified list of dictionaries that represents
+            rows of a table. Each dictionary contains the data 
+            of one updated row of the table in the ToteSys database.
         bucket_name: a string, the name of the ingestion S3 bucket.
         file_location: a string, the first part of the key under
             which this function will store in the bucket the json 
