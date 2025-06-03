@@ -1,6 +1,6 @@
 import boto3
 import json
-
+from datetime import datetime
 import boto3.exceptions
 
 
@@ -52,8 +52,55 @@ def convert_json_to_python(json_data):
         raise f"Error converting json to python: {error}"
 
 
-def transform_data():
-    pass
+def transform_to_star_schema_fact_table(table_name, table_data):
+    """
+    Takes table name
+    if table_name = sales_order
+    fact_sales_order
+    columnes for fact table
+    for row in data:
+        transformed = {
+        "table_id" get ...
+        }
+        append
+    return fact_sales_order
+    """
+    fact_sales_order = []
+    if table_name == "sales_order":
+        for row in table_data:
+            dt_created = row.get("created_at")
+            if dt_created:
+                dt_created = datetime.fromisoformat(dt_created)
+                created_date = dt_created.date().isoformat()
+                created_time = dt_created.time().isoformat()
+            else:
+                created_time = None
+                created_date = None
+
+            dt_updated = row.get("last_updated")
+            if dt_updated:
+                dt_updated = datetime.fromisoformat(dt_updated)
+                last_updated_date = dt_updated.date().isoformat()
+                last_updated_time = dt_updated.time().isoformat()
+
+            transformed_row = {
+                "sales_order_id": row.get("sales_order_id"),
+                "created_date": created_date,
+                "created_time": created_time,
+                "last_updated_date": last_updated_date,
+                "last_updated_time": last_updated_time,
+                "sales_staff_id": row.get("staff_id"),
+                "counterparty_id": row.get("counterparty_id"),
+                "units_sold": row.get("units_sold"),
+                "unit_price": row.get("unit_price"),
+                "currency_id": row.get("currency_id"),
+                "design_id": row.get("design_id"),
+                "agreed_payment_date": row.get("agreed_payment_date"),
+                "agreed_delivery_date": row.get("agreed_delivery_date"),
+                "agreed_delivery_location_id": row.get("agreed_delivery_location_id")
+            }
+            fact_sales_order.append(transformed_row)
+        return fact_sales_order
 
 
 def convert_into_parquet():

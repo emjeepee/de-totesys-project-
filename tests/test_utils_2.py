@@ -5,6 +5,7 @@ from moto import mock_aws
 import boto3
 import pytest
 import os
+import json
 
 
 @pytest.fixture(scope="class")
@@ -73,3 +74,41 @@ class TestJsonConverter:
         test_json = 3
         with pytest.raises(Exception) as error:
             convert_json_to_python(test_json)
+
+@mock_aws
+class TestTransformToStarSchema:
+    def test_transform_star_schema(self):
+        input = [
+            {   "sales_order_id": 1,
+                "created_at": "2025-05-03T12:00:00",
+                "last_updated":"2025-06-01T12:23:36",
+                "staff_id": 1,
+                "counterparty_id": 1,
+                "units_sold": 10,
+                "unit_price": 300.00,
+                "currency_id": 1,
+                "design_id": 5,
+                "agreed_payment_date": "2025-05-03",
+                "agreed_delivery_date": "2025-05-25",
+                "agreed_delivery_location_id": 14
+                }
+            ]
+        expected = [
+            {   "sales_order_id": 1,
+                "created_date": "2025-05-03",
+                "created_time": "12:00:00",
+                "last_updated_date": "2025-06-01",
+                "last_updated_time": "12:23:36",
+                "sales_staff_id": 1,
+                "counterparty_id": 1,
+                "units_sold": 10,
+                "unit_price": 300.00,
+                "currency_id": 1,
+                "design_id": 5,
+                "agreed_payment_date": "2025-05-03",
+                "agreed_delivery_date": "2025-05-25",
+                "agreed_delivery_location_id": 14
+                }
+            ]
+        result = transform_to_star_schema_fact_table("sales_order", input)
+        assert result == expected
