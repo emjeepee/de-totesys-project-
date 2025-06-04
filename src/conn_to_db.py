@@ -5,7 +5,7 @@ from pg8000.native import Connection
 from dotenv import load_dotenv
 
 
-def conn_to_db(DB_NAME:str="TESTDB"):
+def conn_to_db(DB_NAME: str = "TESTDB"):
     load_dotenv()
     username = os.environ[f"PG_{DB_NAME}_USERNAME"]
     password = os.environ[f"PG_{DB_NAME}_PASSWORD"]
