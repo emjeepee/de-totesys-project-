@@ -127,7 +127,7 @@ class TestTransformToStarSchema:
         expected = []
         result = transform_to_star_schema_fact_table("coders", input)
         assert result == expected
-        
+
     def test_transform_exception(self):
 
         input = [
@@ -150,66 +150,84 @@ class TestTransformToStarSchema:
         with pytest.raises(Exception) as error:
             transform_to_star_schema_fact_table("sales_order", input)
 
+
 class TestDimStaffTransform:
     def test_dim_staff(self):
-        input = [{"staff_id": "1", 
-                "first_name": "john", 
-                "last_name": "python", 
-                "email_address": "john@python.org", 
-                "department_id": "2"}]
-        department = [{"department_id": "2", 
-                       "department_name": "coding", 
-                       "location": "there"}]
-        
-        expected = [{"staff_id": "1", 
-                "first_name": "john", 
-                "last_name": "python", 
-                "email_address": "john@python.org", 
-                "department_name": "coding", 
-                "location": "there"}]
-        
+        input = [
+            {
+                "staff_id": "1",
+                "first_name": "john",
+                "last_name": "python",
+                "email_address": "john@python.org",
+                "department_id": "2",
+            }
+        ]
+        department = [
+            {"department_id": "2", "department_name": "coding", "location": "there"}
+        ]
+
+        expected = [
+            {
+                "staff_id": "1",
+                "first_name": "john",
+                "last_name": "python",
+                "email_address": "john@python.org",
+                "department_name": "coding",
+                "location": "there",
+            }
+        ]
+
         result = transform_to_dim_staff(input, department)
 
         assert expected == result
-    
+
     def test_dim_staff_exception(self):
-        input = [{"staff_id": "1", 
-                "first_name": "john", 
-                "last_name": "python", 
-                "email_address": "john@python.org", 
-                "department_id": "4"}]
-        department = [{"department_id": "2", 
-                       "department_name": "coding", 
-                       "location": "there"}]
-        
+        input = [
+            {
+                "staff_id": "1",
+                "first_name": "john",
+                "last_name": "python",
+                "email_address": "john@python.org",
+                "department_id": "4",
+            }
+        ]
+        department = [
+            {"department_id": "2", "department_name": "coding", "location": "there"}
+        ]
+
         with pytest.raises(Exception) as error:
             transform_to_dim_staff(input, department)
 
+
 class TestDimLocationTransform:
     def test_location_transforms_data(self):
-        input = [{
-            "address_id": "1",
-            "address_line_1": "42 Python Way",
-            "address_line_2": "Terraform",
-            "district": "System21",
-            "city": "windows",
-            "postal_code": "WIN 21",
-            "country": "SSD",
-            "phone": "07777777777",
-            "created_at": "2025-03-01T10:00:00",
-            "last_updated": "2025-04-02T11:00:00"
-        }]
+        input = [
+            {
+                "address_id": "1",
+                "address_line_1": "42 Python Way",
+                "address_line_2": "Terraform",
+                "district": "System21",
+                "city": "windows",
+                "postal_code": "WIN 21",
+                "country": "SSD",
+                "phone": "07777777777",
+                "created_at": "2025-03-01T10:00:00",
+                "last_updated": "2025-04-02T11:00:00",
+            }
+        ]
 
-        expected = [{
-            "location_id": "1",
-            "address_line_1": "42 Python Way",
-            "address_line_2": "Terraform",
-            "district": "System21",
-            "city": "windows",
-            "postal_code": "WIN 21",
-            "country": "SSD",
-            "phone": "07777777777",            
-        }]
+        expected = [
+            {
+                "location_id": "1",
+                "address_line_1": "42 Python Way",
+                "address_line_2": "Terraform",
+                "district": "System21",
+                "city": "windows",
+                "postal_code": "WIN 21",
+                "country": "SSD",
+                "phone": "07777777777",
+            }
+        ]
 
         result = transform_to_dim_location(input)
 
@@ -226,29 +244,34 @@ class TestDimLocationTransform:
             "country": "SSD",
             "phone": "07777777777",
             "created_at": "2025-03-01T10:00:00",
-            "last_updated": "2025-04-02T11:00:00"
+            "last_updated": "2025-04-02T11:00:00",
         }
 
         with pytest.raises(Exception) as error:
             transform_to_dim_location(input)
 
+
 class TestDimDesignTransform:
     def test_design_transforms_data(self):
-        input = [{
-            "design_id": "1",
-            "design_name": "Snake",
-            "file_location": "src/file",
-            "file_name": "System21",
-            "created_at": "2025-03-01T10:00:00",
-            "last_updated": "2025-04-02T11:00:00"
-        }]
+        input = [
+            {
+                "design_id": "1",
+                "design_name": "Snake",
+                "file_location": "src/file",
+                "file_name": "System21",
+                "created_at": "2025-03-01T10:00:00",
+                "last_updated": "2025-04-02T11:00:00",
+            }
+        ]
 
-        expected = [{
-            "design_id": "1",
-            "design_name": "Snake",
-            "file_location": "src/file",
-            "file_name": "System21"
-        }]
+        expected = [
+            {
+                "design_id": "1",
+                "design_name": "Snake",
+                "file_location": "src/file",
+                "file_name": "System21",
+            }
+        ]
 
         result = transform_to_dim_design(input)
 
@@ -261,90 +284,106 @@ class TestDimDesignTransform:
             "file_location": "src/file",
             "file_name": "System21",
             "created_at": "2025-03-01T10:00:00",
-            "last_updated": "2025-04-02T11:00:00"
+            "last_updated": "2025-04-02T11:00:00",
         }
 
         with pytest.raises(Exception) as error:
             transform_to_dim_design(input)
 
+
 class TestDimCounterpartyTransform:
     def test_counterparty_transforms_data(self):
-        counterparty = [{
-            "counterparty_id": 1,
-            "counterparty_legal_name": "legal name",
-            "legal_address_id": 3,
-            "commercial_contact": "person name",
-            "delivery_contact": "person name II",
-            "created_at": "2025-03-01T10:00:00",
-            "last_updated": "2025-04-02T11:00:00"
-        }]
+        counterparty = [
+            {
+                "counterparty_id": 1,
+                "counterparty_legal_name": "legal name",
+                "legal_address_id": 3,
+                "commercial_contact": "person name",
+                "delivery_contact": "person name II",
+                "created_at": "2025-03-01T10:00:00",
+                "last_updated": "2025-04-02T11:00:00",
+            }
+        ]
 
-        address =[{
-            "address_id": 3,
-            "address_line_1": "line 1",
-            "address_line_2": "line 2",
-            "district": "district",
-            "city": "city",
-            "postal_code": "postal_code",
-            "country": "country",
-            "phone": "phone"
-        }]
+        address = [
+            {
+                "address_id": 3,
+                "address_line_1": "line 1",
+                "address_line_2": "line 2",
+                "district": "district",
+                "city": "city",
+                "postal_code": "postal_code",
+                "country": "country",
+                "phone": "phone",
+            }
+        ]
 
-        expected = [{
-            "counterparty_id": 1,
-            "counterparty_legal_name": "legal name",
-            "counterparty_legal_address_line_1": "line 1",
-            "counterparty_legal_address_line_2": "line 2",
-            "counterparty_legal_district": "district",
-            "counterparty_legal_city": "city",
-            "counterparty_legal_postal_code": "postal_code",
-            "counterparty_legal_country": "country",
-            "counterparty_legal_phone_number": "phone"
-        }]
+        expected = [
+            {
+                "counterparty_id": 1,
+                "counterparty_legal_name": "legal name",
+                "counterparty_legal_address_line_1": "line 1",
+                "counterparty_legal_address_line_2": "line 2",
+                "counterparty_legal_district": "district",
+                "counterparty_legal_city": "city",
+                "counterparty_legal_postal_code": "postal_code",
+                "counterparty_legal_country": "country",
+                "counterparty_legal_phone_number": "phone",
+            }
+        ]
 
         result = transform_to_dim_counterparty(counterparty, address)
 
         assert result == expected
 
     def test_counterparty_raises_exception(self):
-        counterparty = [{
-            "counterparty_id": 1,
-            "counterparty_legal_name": "legal name",
-            "_legal_address_id": 3,
-            "commercial_contact": "person name",
-            "delivery_contact": "person name II",
-            "created_at": "2025-03-01T10:00:00",
-            "last_updated": "2025-04-02T11:00:00"
-        }]
+        counterparty = [
+            {
+                "counterparty_id": 1,
+                "counterparty_legal_name": "legal name",
+                "_legal_address_id": 3,
+                "commercial_contact": "person name",
+                "delivery_contact": "person name II",
+                "created_at": "2025-03-01T10:00:00",
+                "last_updated": "2025-04-02T11:00:00",
+            }
+        ]
 
-        address =[{
-            "address_id": 2,
-            "address_line_1": "line 1",
-            "address_line_2": "line 2",
-            "district": "district",
-            "city": "city",
-            "postal_code": "postal_code",
-            "country": "country",
-            "phone": "phone"
-        }]
+        address = [
+            {
+                "address_id": 2,
+                "address_line_1": "line 1",
+                "address_line_2": "line 2",
+                "district": "district",
+                "city": "city",
+                "postal_code": "postal_code",
+                "country": "country",
+                "phone": "phone",
+            }
+        ]
 
         with pytest.raises(Exception) as error:
             transform_to_dim_counterparty(counterparty, address)
 
+
 class TestDimCurrencyTransform:
     def test_transforms_data(self):
-        input = [{
-            "currency_id": "1",
-            "currency_code": "GBP",
-            "created_at": "2025-03-01T10:00:00",
-            "last_updated": "2025-04-02T11:00:00"
-        }]
+        input = [
+            {
+                "currency_id": "1",
+                "currency_code": "CAD",
+                "created_at": "2025-03-01T10:00:00",
+                "last_updated": "2025-04-02T11:00:00",
+            }
+        ]
 
-        expected = [{
-            "currency_id": "1",
-            "currency_code": "GBP",
-            "currency_name": "Pound"
-        }]
+        expected = [
+            {
+                "currency_id": "1",
+                "currency_code": "CAD",
+                "currency_name": "Canadian Dollar",
+            }
+        ]
 
         result = transform_to_dim_currency(input)
 
@@ -352,12 +391,10 @@ class TestDimCurrencyTransform:
 
     def test_raises_exception(self):
         input = {
-            "design_id": "1",
-            "design_name": "Snake",
-            "file_location": "src/file",
-            "file_name": "System21",
+            "currency_id": "1",
+            "currency_code": "CAD",
             "created_at": "2025-03-01T10:00:00",
-            "last_updated": "2025-04-02T11:00:00"
+            "last_updated": "2025-04-02T11:00:00",
         }
 
         with pytest.raises(Exception) as error:
