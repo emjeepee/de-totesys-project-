@@ -51,23 +51,16 @@ def convert_json_to_python(json_data):
     except Exception as error:
         raise f"Error converting json to python: {error}"
 
+def dt_created():
+    pass
 
 def transform_to_star_schema_fact_table(table_name, table_data):
-    """
-    Takes table name
-    if table_name = sales_order
-    fact_sales_order
-    columnes for fact table
-    for row in data:
-        transformed = {
-        "table_id" get ...
-        }
-        append
-    return fact_sales_order
-    """
     fact_sales_order = []
-    if table_name == "sales_order":
-        for row in table_data:
+    if table_name != "sales_order":
+        return fact_sales_order
+    
+    for row in table_data:
+        try:
             dt_created = row.get("created_at")
             if dt_created:
                 dt_created = datetime.fromisoformat(dt_created)
@@ -97,10 +90,22 @@ def transform_to_star_schema_fact_table(table_name, table_data):
                 "design_id": row.get("design_id"),
                 "agreed_payment_date": row.get("agreed_payment_date"),
                 "agreed_delivery_date": row.get("agreed_delivery_date"),
-                "agreed_delivery_location_id": row.get("agreed_delivery_location_id")
+                "agreed_delivery_location_id": row.get("agreed_delivery_location_id"),
             }
             fact_sales_order.append(transformed_row)
-        return fact_sales_order
+        except Exception as error:
+            raise Exception(f"Error processiong row{row.get("sales_order_id")}: {error}")
+    return fact_sales_order
+
+# def transform_to_dim_staff(table_name, table_data):
+#     dim_staff = []
+#     if table_name != "staff":
+#         return dim_staff
+    
+#     for row in table_data:
+#         try:
+            
+
 
 
 def convert_into_parquet():
