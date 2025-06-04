@@ -7,7 +7,7 @@ from datetime import datetime
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 load_dotenv()
-bucket_name = os.environ["bucket_name"]
+# bucket_name = os.environ["bucket_name"]
 
 def get_data_from_db(tables, after_time, conn, read_table, convert_data):
     """
@@ -58,17 +58,18 @@ def get_data_from_db(tables, after_time, conn, read_table, convert_data):
     for table in tables:
         result = read_table(table, conn, after_time) # {'design': [{<data from one row>}, {<data from one row>}, etc]}
         prefix = next(iter(result)) # "transactions"
-        data = result[prefix] 
+        # data = result[prefix] 
         jsonified_data = convert_data(result) # jsonified version of {'design': [{<data from one row>}, {<data from one row>}, etc]}
         data_list.append(jsonified_data)
-        # data_list is a python list each of whose members is a jsonified dictionary
+        # data_list is a python list each of whose members is a jsonified 
+        # version of this: {'design': [{<data from one row>}, {<data from one row>}, etc]}
     return data_list
 
 
 
 
 
-def write_to_s3(data_list,s3_client, write_to_ingestion_bucket):
+def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name):
     """
     This function:
         1) loops through the passed-in python list, 
@@ -113,22 +114,22 @@ def write_to_s3(data_list,s3_client, write_to_ingestion_bucket):
     
     """
 
-    for i in len(data_list):
-        # i below is a jsonified python list of dictionaries,
-        # so json.loads(i) is a python list of dictionaries, [{"sales": }, {}, {}, etc],
-        # so list(json.loads(i).keys()) is a list of the keys in that:
-        prefix = list(json.loads(i).keys())[data_list.index(i)] # the name of the table
-        print(prefix)
-        try:
-            response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
-            if response["KeyCount"] > 0:
-                write_to_ingestion_bucket(json.loads(data_list[i]), bucket_name, prefix)
-            else:
-                timestamped = create_formatted_timestamp()
-                s3_client.put_object(Bucket=bucket_name, Key=f"{prefix}/{timestamped}.json", Body=json.dumps(data_list[i]))
+    # for i in len(data_list):
+    #     # i below is a jsonified python list of dictionaries,
+    #     # so json.loads(i) is a python list of dictionaries, [{"sales": }, {}, {}, etc],
+    #     # so list(json.loads(i).keys()) is a list of the keys in that:
+    #     prefix = list(json.loads(i).keys())[data_list.index(i)] # the name of the table
+    #     print(prefix)
+    #     try:
+    #         response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+    #         if response["KeyCount"] > 0:
+    #             write_to_ingestion_bucket(json.loads(data_list[i]), bucket_name, prefix)
+    #         else:
+    #             timestamped = create_formatted_timestamp()
+    #             s3_client.put_object(Bucket=bucket_name, Key=f"{prefix}/{timestamped}.json", Body=json.dumps(data_list[i]))
 
-        except ClientError as e:
-            print(e)
+    #     except ClientError as e:
+    #         print(e)
 
 
 
