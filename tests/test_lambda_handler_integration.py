@@ -125,27 +125,65 @@ def S3_setup(aws_credentials):
         yield_list = [S3_client, test_bckt_1, test_bckt_2, timesstamp_1900, timesstamp_2025, timestamp_key, ]
         yield yield_list
 
-
+class MockConnection():
+    def __init__(self,tests:dict[int:dict[object]]):
+        """
+            test {count} example input:
+            {
+                {count}:{input:*,time:*,output:*},
+                {count}:{input:*,time:*,output:*},
+                {count}:{input:*,time:*,output:*}
+            }
+        """
+        self.tests=tests
+        self.counter = 0
+    def run(self,input:str,after_time=None):
+        self.counter+=1
+        if(self.counter in self.tests):
+            return self._run(input,after_time)
+        assert False
+    def _run(self,input:dict[str:object],after_time=None):
+        assert input == self.tests[self.counter]["input"]
+        if "time" in self.tests[self.counter]:
+            assert after_time == self.tests[self.counter]["time"]
+        return self.tests[self.counter]["output"]
+    
+@mock_aws
 def test_that_lambda_handler_of_first_lambda_function_integrates_all_utilities(S3_setup):
     yield_list = S3_setup
 
     # arrange:
     list_of_lists = [
-        [ 1, 'abdul', '2025-06-04T00:00:00',      ],
-        [ 2, 'Neill', '2025-06-04T00:00:00', ],
-                    ]
+        [ 1, 'abdul', '2025-06-04T00:00:00', "help"],
+        [ 2, 'neil', '2025-06-04T00:00:00', "help"],
+        [ 3, 'mukkund', '2025-06-04T00:00:00', "help"]
+    ]
 
     mock_dict = {
         "design": [
             {"design_id": 1, "name": "abdul", "team": 1},
             {"design_id": 2, "name": "neil", "team": 1},
             {"design_id": 3, "name": "mukund", "team": 1},
+            
         ]
     }
+    columnNames = ["id","name","time","helpme"]
     tables = ["design", "payment" ]
-    after_time = change_after_time_timestamp()
+    tables = ["design"]#, "payment" ]
+    #after_time = change_after_time_timestamp()
+    after_time = "2024-06-04T00:00:00"
 
-    data_for_s3 = get_data_from_db(tables, after_time, 'conn', read_table, convert_data)
+    mockConTest1Input = """
+        SELECT * FROM design
+        WHERE last_updated > :after_time LIMIT 20;
+        """
+    mockConTest1Time = after_time=after_time
+    mockTest1 = {"input": mockConTest1Input,"time":mockConTest1Time, "output":list_of_lists}
+    mockConTest2Input = "SELECT column_name FROM information_schema.columns WHERE table_name = 'design' ORDER BY ordinal_position"
+    mockTest2 = {"input": mockConTest2Input,"output":columnNames}
+    MockCon = MockConnection({1:mockTest1,2:mockTest2})
+
+    data_for_s3 = get_data_from_db(tables, after_time, MockCon, read_table, convert_data)
     
     write_to_s3(data_for_s3, yield_list[0], write_to_ingestion_bucket, yield_list[0])
 
