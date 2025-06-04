@@ -75,13 +75,15 @@ class TestJsonConverter:
         with pytest.raises(Exception) as error:
             convert_json_to_python(test_json)
 
+
 @mock_aws
 class TestTransformToStarSchema:
     def test_transform_star_schema(self):
         input = [
-            {   "sales_order_id": 1,
+            {
+                "sales_order_id": 1,
                 "created_at": "2025-05-03T12:00:00",
-                "last_updated":"2025-06-01T12:23:36",
+                "last_updated": "2025-06-01T12:23:36",
                 "staff_id": 1,
                 "counterparty_id": 1,
                 "units_sold": 10,
@@ -90,11 +92,12 @@ class TestTransformToStarSchema:
                 "design_id": 5,
                 "agreed_payment_date": "2025-05-03",
                 "agreed_delivery_date": "2025-05-25",
-                "agreed_delivery_location_id": 14
-                }
-            ]
+                "agreed_delivery_location_id": 14,
+            }
+        ]
         expected = [
-            {   "sales_order_id": 1,
+            {
+                "sales_order_id": 1,
                 "created_date": "2025-05-03",
                 "created_time": "12:00:00",
                 "last_updated_date": "2025-06-01",
@@ -107,8 +110,41 @@ class TestTransformToStarSchema:
                 "design_id": 5,
                 "agreed_payment_date": "2025-05-03",
                 "agreed_delivery_date": "2025-05-25",
-                "agreed_delivery_location_id": 14
-                }
-            ]
+                "agreed_delivery_location_id": 14,
+            }
+        ]
         result = transform_to_star_schema_fact_table("sales_order", input)
         assert result == expected
+
+    def test_transform_empty_list(self):
+        input = []
+        expected = []
+        result = transform_to_star_schema_fact_table("sales_order", input)
+        assert result == expected
+
+    def test_transform_wrong_table_name(self):
+        input = [{"id": "1", "first_name": "john", "surname": "python"}]
+        expected = []
+        result = transform_to_star_schema_fact_table("coders", input)
+        assert result == expected
+        
+    def test_transform_exception(self):
+        input = [
+            {
+                "sales_order_id": 1,
+                "created_at": "Yesterday",
+                "last_updated": "2025-06-01T12:23:36",
+                "staff_id": 1,
+                "counterparty_id": 1,
+                "units_sold": 10,
+                "unit_price": 300.00,
+                "currency_id": 1,
+                "design_id": 5,
+                "agreed_payment_date": "2025-05-03",
+                "agreed_delivery_date": "2025-05-25",
+                "agreed_delivery_location_id": 14,
+            }
+        ]
+
+        with pytest.raises(Exception) as error:
+            transform_to_star_schema_fact_table("sales_order", input)
