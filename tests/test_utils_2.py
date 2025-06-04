@@ -129,6 +129,7 @@ class TestTransformToStarSchema:
         assert result == expected
         
     def test_transform_exception(self):
+
         input = [
             {
                 "sales_order_id": 1,
@@ -148,3 +149,85 @@ class TestTransformToStarSchema:
 
         with pytest.raises(Exception) as error:
             transform_to_star_schema_fact_table("sales_order", input)
+
+class TestDimStaffTransform:
+    def test_dim_staff(self):
+        input = [{"staff_id": "1", 
+                "first_name": "john", 
+                "last_name": "python", 
+                "email_address": "john@python.org", 
+                "department_id": "2"}]
+        department = [{"department_id": "2", 
+                       "department_name": "coding", 
+                       "location": "there"}]
+        
+        expected = [{"staff_id": "1", 
+                "first_name": "john", 
+                "last_name": "python", 
+                "email_address": "john@python.org", 
+                "department_name": "coding", 
+                "location": "there"}]
+        
+        result = transform_to_dim_staff(input, department)
+
+        assert expected == result
+    
+    def test_dim_staff_exception(self):
+        input = [{"staff_id": "1", 
+                "first_name": "john", 
+                "last_name": "python", 
+                "email_address": "john@python.org", 
+                "department_id": "4"}]
+        department = [{"department_id": "2", 
+                       "department_name": "coding", 
+                       "location": "there"}]
+        
+        with pytest.raises(Exception) as error:
+            transform_to_dim_staff(input, department)
+
+class TestDimLocationTransform:
+    def test_location_transforms_data(self):
+        input = [{
+            "address_id": "1",
+            "address_line_1": "42 Python Way",
+            "address_line_2": "Terraform",
+            "district": "System21",
+            "city": "windows",
+            "postal_code": "WIN 21",
+            "country": "SSD",
+            "phone": "07777777777",
+            "created_at": "2025-03-01T10:00:00",
+            "last_updated": "2025-04-02T11:00:00"
+        }]
+
+        expected = [{
+            "location_id": "1",
+            "address_line_1": "42 Python Way",
+            "address_line_2": "Terraform",
+            "district": "System21",
+            "city": "windows",
+            "postal_code": "WIN 21",
+            "country": "SSD",
+            "phone": "07777777777",            
+        }]
+
+        result = transform_to_dim_location(input)
+
+        assert result == expected
+
+    def test_location_raises_exception(self):
+        input = {
+            "address_id": "1",
+            "address_line_1": "42 Python Way",
+            "address_line_2": "Terraform",
+            "district": "System21",
+            "city": "windows",
+            "postal_code": "WIN 21",
+            "country": "SSD",
+            "phone": "07777777777",
+            "created_at": "2025-03-01T10:00:00",
+            "last_updated": "2025-04-02T11:00:00"
+        }
+
+        with pytest.raises(Exception) as error:
+            transform_to_dim_location(input)

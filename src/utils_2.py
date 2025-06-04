@@ -100,19 +100,73 @@ def transform_to_star_schema_fact_table(table_name, table_data):
             fact_sales_order.append(transformed_row)
         except Exception as error:
             raise Exception(
-                f"Error processiong row{row.get("sales_order_id")}: {error}"
+                f"Error processing row{row.get("sales_order_id")}: {error}"
             )
     return fact_sales_order
 
 
-# def transform_to_dim_staff(table_name, table_data):
-#     dim_staff = []
-#     if table_name != "staff":
-#         return dim_staff
+def transform_to_dim_staff(staff_data, dept_data):
+    dim_staff = []
+    
+    department_lookup = { # Allows to look at department table
+        dept["department_id"]: {
+        "department_name": dept.get("department_name"),
+        "location": dept.get("location")
+        } for dept in dept_data
+    }
 
-#     for row in table_data:
-#         try:
+    for staff in staff_data:
+        try:
+            dept = department_lookup.get(staff.get("department_id")) # JOINS department table to staff at department ID
+            transformed_row = {
+                "staff_id": staff.get("staff_id"),
+                "first_name": staff.get("first_name"),
+                "last_name": staff.get("last_name"),
+                "email_address": staff.get("email_address"),
+                "department_name": dept.get("department_name"),
+                "location": dept.get("location")
+                }
+            dim_staff.append(transformed_row)
+        except Exception as error:
+            raise Exception(
+                f"Error processing row{staff.get("staff_id")}: {error}"
+            )
 
+    return dim_staff
+
+def transform_to_dim_location(location_data):
+    dim_location = []
+    
+    for location in location_data:
+        try:
+            transformed_row = {
+                "location_id": location.get("address_id"),
+                "address_line_1": location.get("address_line_1"),
+                "address_line_2": location.get("address_line_2"),
+                "district": location.get("district"),
+                "city": location.get("city"),
+                "postal_code": location.get("postal_code"),
+                "country": location.get("country"),
+                "phone": location.get("phone")
+            }
+            dim_location.append(transformed_row)
+        except Exception as error:
+            raise Exception(
+                f"Error processing row{location.get("location_id")}: {error}"
+            )
+    return dim_location
+
+def transform_to_dim_design(design_table):
+    pass
+
+def transform_to_dim_counterparty(counterparty_table):
+    pass
+
+def transform_to_dim_date(date_table):
+    pass
+
+def transform_to_dim_currency(currency_table):
+    pass
 
 def convert_into_parquet():
     pass
