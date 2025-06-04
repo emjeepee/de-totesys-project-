@@ -170,8 +170,8 @@ def test_that_lambda_handler_of_first_lambda_function_integrates_all_utilities(S
     columnNames = ["id","name","time","helpme"]
     tables = ["design", "payment" ]
     tables = ["design"]#, "payment" ]
-    #after_time = change_after_time_timestamp()
-    after_time = "2024-06-04T00:00:00"
+    after_time = change_after_time_timestamp(yield_list[1], yield_list[0], yield_list[5], yield_list[3])
+    #after_time = "2024-06-04T00:00:00"
 
     mockConTest1Input = """
         SELECT * FROM design
@@ -185,7 +185,7 @@ def test_that_lambda_handler_of_first_lambda_function_integrates_all_utilities(S
 
     data_for_s3 = get_data_from_db(tables, after_time, MockCon, read_table, convert_data)
     
-    write_to_s3(data_for_s3, yield_list[0], write_to_ingestion_bucket, yield_list[0])
+    write_to_s3(data_for_s3, yield_list[0], write_to_ingestion_bucket, yield_list[1])
 
 
 
