@@ -51,30 +51,35 @@ def convert_json_to_python(json_data):
     except Exception as error:
         raise f"Error converting json to python: {error}"
 
-def dt_created():
-    pass
+
+def dt_splitter(input_dt):
+    dt = datetime.fromisoformat(input_dt)
+    date = dt.date().isoformat()
+    time = dt.time().isoformat()
+    return {"date": date, "time": time}
+
 
 def transform_to_star_schema_fact_table(table_name, table_data):
     fact_sales_order = []
     if table_name != "sales_order":
         return fact_sales_order
-    
+
     for row in table_data:
         try:
             dt_created = row.get("created_at")
             if dt_created:
-                dt_created = datetime.fromisoformat(dt_created)
-                created_date = dt_created.date().isoformat()
-                created_time = dt_created.time().isoformat()
+                split_dt = dt_splitter(dt_created)
+                created_date = split_dt["date"]
+                created_time = split_dt["time"]
             else:
                 created_time = None
                 created_date = None
 
             dt_updated = row.get("last_updated")
             if dt_updated:
-                dt_updated = datetime.fromisoformat(dt_updated)
-                last_updated_date = dt_updated.date().isoformat()
-                last_updated_time = dt_updated.time().isoformat()
+                split_dt = dt_splitter(dt_updated)
+                last_updated_date = split_dt["date"]
+                last_updated_time = split_dt["time"]
 
             transformed_row = {
                 "sales_order_id": row.get("sales_order_id"),
@@ -94,18 +99,19 @@ def transform_to_star_schema_fact_table(table_name, table_data):
             }
             fact_sales_order.append(transformed_row)
         except Exception as error:
-            raise Exception(f"Error processiong row{row.get("sales_order_id")}: {error}")
+            raise Exception(
+                f"Error processiong row{row.get("sales_order_id")}: {error}"
+            )
     return fact_sales_order
+
 
 # def transform_to_dim_staff(table_name, table_data):
 #     dim_staff = []
 #     if table_name != "staff":
 #         return dim_staff
-    
+
 #     for row in table_data:
 #         try:
-            
-
 
 
 def convert_into_parquet():
