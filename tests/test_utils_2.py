@@ -231,3 +231,134 @@ class TestDimLocationTransform:
 
         with pytest.raises(Exception) as error:
             transform_to_dim_location(input)
+
+class TestDimDesignTransform:
+    def test_design_transforms_data(self):
+        input = [{
+            "design_id": "1",
+            "design_name": "Snake",
+            "file_location": "src/file",
+            "file_name": "System21",
+            "created_at": "2025-03-01T10:00:00",
+            "last_updated": "2025-04-02T11:00:00"
+        }]
+
+        expected = [{
+            "design_id": "1",
+            "design_name": "Snake",
+            "file_location": "src/file",
+            "file_name": "System21"
+        }]
+
+        result = transform_to_dim_design(input)
+
+        assert result == expected
+
+    def test_design_raises_exception(self):
+        input = {
+            "design_id": "1",
+            "design_name": "Snake",
+            "file_location": "src/file",
+            "file_name": "System21",
+            "created_at": "2025-03-01T10:00:00",
+            "last_updated": "2025-04-02T11:00:00"
+        }
+
+        with pytest.raises(Exception) as error:
+            transform_to_dim_design(input)
+
+class TestDimCounterpartyTransform:
+    def test_counterparty_transforms_data(self):
+        counterparty = [{
+            "counterparty_id": 1,
+            "counterparty_legal_name": "legal name",
+            "legal_address_id": 3,
+            "commercial_contact": "person name",
+            "delivery_contact": "person name II",
+            "created_at": "2025-03-01T10:00:00",
+            "last_updated": "2025-04-02T11:00:00"
+        }]
+
+        address =[{
+            "address_id": 3,
+            "address_line_1": "line 1",
+            "address_line_2": "line 2",
+            "district": "district",
+            "city": "city",
+            "postal_code": "postal_code",
+            "country": "country",
+            "phone": "phone"
+        }]
+
+        expected = [{
+            "counterparty_id": 1,
+            "counterparty_legal_name": "legal name",
+            "counterparty_legal_address_line_1": "line 1",
+            "counterparty_legal_address_line_2": "line 2",
+            "counterparty_legal_district": "district",
+            "counterparty_legal_city": "city",
+            "counterparty_legal_postal_code": "postal_code",
+            "counterparty_legal_country": "country",
+            "counterparty_legal_phone_number": "phone"
+        }]
+
+        result = transform_to_dim_counterparty(counterparty, address)
+
+        assert result == expected
+
+    def test_counterparty_raises_exception(self):
+        counterparty = [{
+            "counterparty_id": 1,
+            "counterparty_legal_name": "legal name",
+            "_legal_address_id": 3,
+            "commercial_contact": "person name",
+            "delivery_contact": "person name II",
+            "created_at": "2025-03-01T10:00:00",
+            "last_updated": "2025-04-02T11:00:00"
+        }]
+
+        address =[{
+            "address_id": 2,
+            "address_line_1": "line 1",
+            "address_line_2": "line 2",
+            "district": "district",
+            "city": "city",
+            "postal_code": "postal_code",
+            "country": "country",
+            "phone": "phone"
+        }]
+
+        with pytest.raises(Exception) as error:
+            transform_to_dim_counterparty(counterparty, address)
+
+class TestDimCurrencyTransform:
+    def test_transforms_data(self):
+        input = [{
+            "currency_id": "1",
+            "currency_code": "GBP",
+            "created_at": "2025-03-01T10:00:00",
+            "last_updated": "2025-04-02T11:00:00"
+        }]
+
+        expected = [{
+            "currency_id": "1",
+            "currency_code": "GBP",
+            "currency_name": "Pound"
+        }]
+
+        result = transform_to_dim_currency(input)
+
+        assert result == expected
+
+    def test_raises_exception(self):
+        input = {
+            "design_id": "1",
+            "design_name": "Snake",
+            "file_location": "src/file",
+            "file_name": "System21",
+            "created_at": "2025-03-01T10:00:00",
+            "last_updated": "2025-04-02T11:00:00"
+        }
+
+        with pytest.raises(Exception) as error:
+            transform_to_dim_currency(input)
