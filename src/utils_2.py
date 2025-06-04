@@ -2,6 +2,7 @@ import boto3
 import json
 from datetime import datetime
 import boto3.exceptions
+from currency_codes import get_currency_by_code, Currency
 
 
 def read_from_s3(client, bucket_name, key):
@@ -45,11 +46,11 @@ def upload_to_s3(client, bucket_name, key, body):
 
 
 def convert_json_to_python(json_data):
-    '''
+    """
     Converts Json data into a Python object
     Takes a json string as an argument
     Returns a Python list of dictionaries representing the rows of the data
-    '''
+    """
     try:
         python_data = json.loads(json_data)
         return python_data
@@ -58,11 +59,11 @@ def convert_json_to_python(json_data):
 
 
 def dt_splitter(input_dt):
-    '''
+    """
     Splits the date from the time of a datetime
     Takes a datetimestamp as an argument
     Returns a dictionary with the keys "date" and "time"
-    '''
+    """
     dt = datetime.fromisoformat(input_dt)
     date = dt.date().isoformat()
     time = dt.time().isoformat()
@@ -70,11 +71,11 @@ def dt_splitter(input_dt):
 
 
 def transform_to_star_schema_fact_table(table_name, table_data):
-    '''
+    """
     Transforms the sales order data into a fact table
     Takes the table name (should be "sales_order") and the table data (a list of dictionaries)
     Returns a list of dictionaries representing the transformed data
-    '''
+    """
     fact_sales_order = []
     if table_name != "sales_order":
         return fact_sales_order
@@ -114,54 +115,54 @@ def transform_to_star_schema_fact_table(table_name, table_data):
             }
             fact_sales_order.append(transformed_row)
         except Exception as error:
-            raise Exception(
-                f"Error processing row{row.get("sales_order_id")}: {error}"
-            )
+            raise Exception(f"Error processing row{row.get("sales_order_id")}: {error}")
     return fact_sales_order
 
 
 def transform_to_dim_staff(staff_data, dept_data):
-    '''
+    """
     Transforms the staff data into a dimension table
     Takes the staff data and the department data (both lists of dictionaries)
     Returns a list of dictionaries representing the transformed data
-    '''
+    """
     dim_staff = []
-    
-    department_lookup = { # Allows to look at department table
+
+    department_lookup = {  # Allows to look at department table
         dept["department_id"]: {
-        "department_name": dept.get("department_name"),
-        "location": dept.get("location")
-        } for dept in dept_data
+            "department_name": dept.get("department_name"),
+            "location": dept.get("location"),
+        }
+        for dept in dept_data
     }
 
     for staff in staff_data:
         try:
-            dept = department_lookup.get(staff.get("department_id")) # JOINS department table to staff at department ID
+            dept = department_lookup.get(
+                staff.get("department_id")
+            )  # JOINS department table to staff at department ID
             transformed_row = {
                 "staff_id": staff.get("staff_id"),
                 "first_name": staff.get("first_name"),
                 "last_name": staff.get("last_name"),
                 "email_address": staff.get("email_address"),
                 "department_name": dept.get("department_name"),
-                "location": dept.get("location")
-                }
+                "location": dept.get("location"),
+            }
             dim_staff.append(transformed_row)
         except Exception as error:
-            raise Exception(
-                f"Error processing row{staff.get("staff_id")}: {error}"
-            )
+            raise Exception(f"Error processing row{staff.get("staff_id")}: {error}")
 
     return dim_staff
 
+
 def transform_to_dim_location(location_data):
-    '''
+    """
     Transforms the location data into a dimension table
     Takes the location data (a lists of dictionaries)
     Returns a list of dictionaries representing the transformed data
-    '''
+    """
     dim_location = []
-    
+
     for location in location_data:
         try:
             transformed_row = {
@@ -172,7 +173,7 @@ def transform_to_dim_location(location_data):
                 "city": location.get("city"),
                 "postal_code": location.get("postal_code"),
                 "country": location.get("country"),
-                "phone": location.get("phone")
+                "phone": location.get("phone"),
             }
             dim_location.append(transformed_row)
         except Exception as error:
@@ -181,52 +182,55 @@ def transform_to_dim_location(location_data):
             )
     return dim_location
 
+
 def transform_to_dim_design(design_data):
-    '''
+    """
     Transforms the design data into a dimension table
     Takes the design data (a lists of dictionaries)
     Returns a list of dictionaries representing the transformed data
-    '''
+    """
     dim_design = []
-    
+
     for design in design_data:
         try:
             transformed_row = {
                 "design_id": design.get("design_id"),
                 "design_name": design.get("design_name"),
                 "file_location": design.get("file_location"),
-                "file_name": design.get("file_name")
+                "file_name": design.get("file_name"),
             }
             dim_design.append(transformed_row)
         except Exception as error:
-            raise Exception(
-                f"Error processing row{design.get("location_id")}: {error}"
-            )
+            raise Exception(f"Error processing row{design.get("location_id")}: {error}")
     return dim_design
 
+
 def transform_to_dim_counterparty(counterparty_data, address_data):
-    '''
+    """
     Transforms the counterparty data into a dimension table
     Takes the counterparty data and the address data (both lists of dictionaries)
     Returns a list of dictionaries representing the transformed data
-    '''
+    """
     dim_counterparty = []
-    
-    address_lookup = { # Allows to look at address table
+
+    address_lookup = {  # Allows to look at address table
         address["address_id"]: {
-        "address_line_1": address.get("address_line_1"),
-        "address_line_2": address.get("address_line_2"),
-        "district": address.get("district"),
-        "city": address.get("city"),
-        "postal_code": address.get("postal_code"),
-        "country": address.get("country"),
-        "phone": address.get("phone")
-        } for address in address_data
+            "address_line_1": address.get("address_line_1"),
+            "address_line_2": address.get("address_line_2"),
+            "district": address.get("district"),
+            "city": address.get("city"),
+            "postal_code": address.get("postal_code"),
+            "country": address.get("country"),
+            "phone": address.get("phone"),
+        }
+        for address in address_data
     }
 
     for counterparty in counterparty_data:
         try:
-            address = address_lookup.get(counterparty.get("legal_address_id")) # JOINS address table to counterparty at address ID
+            address = address_lookup.get(
+                counterparty.get("legal_address_id")
+            )  # JOINS address table to counterparty at address ID
             transformed_row = {
                 "counterparty_id": counterparty.get("counterparty_id"),
                 "counterparty_legal_name": counterparty.get("counterparty_legal_name"),
@@ -236,8 +240,8 @@ def transform_to_dim_counterparty(counterparty_data, address_data):
                 "counterparty_legal_city": address.get("city"),
                 "counterparty_legal_postal_code": address.get("postal_code"),
                 "counterparty_legal_country": address.get("country"),
-                "counterparty_legal_phone_number": address.get("phone")
-                }
+                "counterparty_legal_phone_number": address.get("phone"),
+            }
             dim_counterparty.append(transformed_row)
         except Exception as error:
             raise Exception(
@@ -246,35 +250,37 @@ def transform_to_dim_counterparty(counterparty_data, address_data):
 
     return dim_counterparty
 
+
 def transform_to_dim_date(start_date, end_date=None):
-    '''
+    """
     Transforms the date data into a dimension table
     Takes a start date (datetimestamp) and an optional end date
     Returns a list of dictionaries representing the data
-    '''
+    """
     pass
 
+
 def transform_to_dim_currency(currency_data):
-    '''
+    """
     Transforms the currency data into a dimension table
     Takes the currency data (a lists of dictionaries)
     Returns a list of dictionaries representing the transformed data
-    '''
+    """
     dim_currency = []
 
-    currency_names = { # Not complete, add to this (or replace it with some external thing at your peril)
-        'GBP': 'Pound',
-        'EUR': 'Euro',
-        'USD': 'Dollar'
-    }
-    
     for currency in currency_data:
         try:
-            currency_name = currency_names.get(currency.get("currency_code"))
+            currency_obj: Currency = get_currency_by_code(
+                currency.get("currency_code")
+            )  # Generates a currency object based on the code
+            currency_name = (
+                currency_obj.name
+            )  # Grab the name from the object made above
+            
             transformed_row = {
                 "currency_id": currency.get("currency_id"),
                 "currency_code": currency.get("currency_code"),
-                "currency_name": currency_name
+                "currency_name": currency_name,
             }
             dim_currency.append(transformed_row)
         except Exception as error:
@@ -282,6 +288,7 @@ def transform_to_dim_currency(currency_data):
                 f"Error processing row{currency.get("location_id")}: {error}"
             )
     return dim_currency
+
 
 def convert_into_parquet():
     pass
