@@ -117,24 +117,6 @@ def test_that_function_change_after_time_timestamp_saves_new_timestamp_to_bucket
     ts_key = yield_list[5]
 
     # act
-
-    # mock a datetime 
-    # object for now time:
-    # mock_now_dt_obj = Mock()
-    # mocked a timestamp 
-    # string for now time:
-    # mock_now_dt_obj.strftime.return_value = "2025-06-04_00-00-00"
-    # mock a datetime object
-    # for now time plus 5 minutes:
-    # mock_now_plus_5mins_dt_obj = Mock()
-    # mock the addition operation on 
-    # mock_now_dt_obj. 
-    # mock_now_dt_obj.__add__ = Mock(return_value=mock_now_plus_5mins_dt_obj)
-    # mock the timestamp for now plus 5 mins:
-    # mock_now_plus_5mins_dt_obj.strftime.return_value = "2025-06-04_00-05-00"
-    
-    # now patch the datetime and timedelta modules:
-    # with patch("src.change_after_time_timestamp.datetime.now().isoformat") as mock_isoformat_func:
     with patch("src.change_after_time_timestamp.datetime") as mock_datetime:        
         mock_now = Mock()
         mock_now.isoformat.return_value = '2025-06-04T08:28:12.301474+00:00'
@@ -149,66 +131,3 @@ def test_that_function_change_after_time_timestamp_saves_new_timestamp_to_bucket
 
         # Assert 
         assert result_time == expected_time
-
-
-
-
-
-
-
-
-
-@pytest.mark.skip
-def test_that_function_change_after_time_timestamp_saves_new_timestamp_to_bucket(S3_setup):
-    # arrange
-    yield_list = S3_setup
-    # expected_timestamp = yield_list[4]    
-    bucket = yield_list[2] # the bucket containing 2025 timestamp "2025-06-04_00-00-00"
-    s3_client = yield_list[0]
-    default_ts = yield_list[3]
-    ts_key = yield_list[5]
-
-    # act
-
-    # mock a datetime 
-    # object for now time:
-    mock_now_dt_obj = Mock()
-    # mocked a timestamp 
-    # string for now time:
-    # mock_now_dt_obj.strftime.return_value = "2025-06-04_00-00-00"
-    # mock a datetime object
-    # for now time plus 5 minutes:
-    mock_now_plus_5mins_dt_obj = Mock()
-    # mock the addition operation on 
-    # mock_now_dt_obj. 
-    mock_now_dt_obj.__add__ = Mock(return_value=mock_now_plus_5mins_dt_obj)
-    # mock the timestamp for now plus 5 mins:
-    mock_now_plus_5mins_dt_obj.strftime.return_value = "2025-06-04_00-05-00"
-    
-    # now patch the datetime and timedelta modules:
-    with patch("src.change_after_time_timestamp.datetime") as mock_dati_module, patch("src.change_after_time_timestamp.timedelta") as mock_tide_module:
-        # mocked datetime module is mock_dati_module 
-        # mocked timedelta module is mock_tide_module
-        mock_dati_module.strptime.return_value = mock_now_dt_obj
-
-        # mock the return value of timedelta:
-        mock_tide_module.return_value = "mock_tim_del"
-
-        # Act: 
-        # get the previous stored timestamp:
-        returned_value = change_after_time_timestamp(bucket, s3_client, ts_key, default_ts)
-
-        # get the current stored timestamp:
-        # response = s3_client.get_object(
-        #     Bucket=bucket,
-        #     Key=ts_key
-        #                     )
-        # current_timestamp = response['Body'].read().decode("utf-8")
-        # Assert 
-        assert returned_value == "2025-06-04_00-00-00"
-        # assert current_timestamp == "2025-06-04_00-05-00"
-
-
-
-
-
