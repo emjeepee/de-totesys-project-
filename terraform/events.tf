@@ -1,15 +1,15 @@
+#----------------------------------------
+#Event Bridge for first lambda function |
 #---------------------------------------
-#Event Bridge for first lambda function|
-#--------------------------------------
 
 resource "aws_cloudwatch_event_rule" "scheduler" {
-  name =  "extract-handler-5-minutes"
+  name                =  "extract-handler-5-minutes"
   schedule_expression = "rate(5 minutes)"
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target" {
   rule = aws_cloudwatch_event_rule.scheduler.name
-  arn = aws_lambda_function.extract_handler.arn
+  arn  = aws_lambda_function.extract_handler.arn
 }
 
 resource "aws_lambda_permission" "allow_scheduler" {

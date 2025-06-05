@@ -33,6 +33,20 @@ jobs:
     steps:
         - name: Checkout Repo
           uses: actions/checkout@v4
+          
+        - name: Set Up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.13'
+        
+        - name: Package Layer
+          run: pip install -r layer-requirements.txt -t layer/python/
+
+        - name: Make Layer Src Folder
+          run: mkdir layer/python/src
+
+        - name: Copy Local Source Files to Layer
+          run: cp src/change_after_time_timestamp.py src/conn_to_db.py src/lambda_utils.py src/utils_write_to_ingestion_bucket.py src/utils.py layer/python/src/ # add future src import files here (please don't make a new file for every function)
 
         - name: Configure AWS Credentials
           uses: aws-actions/configure-aws-credentials@v4.1.0

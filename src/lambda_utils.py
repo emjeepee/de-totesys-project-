@@ -6,6 +6,10 @@ import json
 from datetime import datetime
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
+import logging
+
+
+logger = logging.getLogger("MyLogger")
 
 load_dotenv()
 # bucket_name = os.environ["bucket_name"]
@@ -162,5 +166,5 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name):
                 )
 
         except ClientError as e:
-            print(e)
+            logger.error("Unable to write to S3")
             return e
