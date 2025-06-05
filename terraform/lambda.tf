@@ -22,7 +22,7 @@ resource "aws_s3_object" "first_lambda_deployment" {
   source = data.archive_file.first_lambda_archive.output_path
 }
 
-resource "aws_s3_object" "first_layer_deployment" {
+resource "aws_s3_object" "layer_deployment" {
   bucket = aws_s3_bucket.lambda-bucket.bucket
   key    = "first_lambda/layer.zip"
   source = data.archive_file.layer_archive.output_path
