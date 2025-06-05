@@ -39,6 +39,8 @@ coverage[toml]==7.8.2
     #   pytest-cov
 cryptography==45.0.3
     # via moto
+currency-codes==23.6.4
+    # via -r requirements.in
 cyclonedx-python-lib==9.1.0
     # via pip-audit
 cython==3.1.1
@@ -115,6 +117,8 @@ ply==3.11
     # via thriftpy2
 py-serializable==2.0.0
     # via cyclonedx-python-lib
+pyarrow==20.0.0
+    # via -r requirements.in
 pycodestyle==2.13.0
     # via flake8
 pycparser==2.22
