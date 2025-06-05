@@ -1,7 +1,11 @@
 import boto3
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import boto3.exceptions
+import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
+from io import BytesIO
 from currency_codes import get_currency_by_code, Currency
 
 
@@ -24,7 +28,6 @@ def read_from_s3(client, bucket_name, key):
     except boto3.exceptions.Boto3Error as error:
         raise f"Error reading from S3: {error}"
 
-
 def upload_to_s3(client, bucket_name, key, body):
     """
     This function puts a body into a bucket
@@ -44,7 +47,6 @@ def upload_to_s3(client, bucket_name, key, body):
     except boto3.exceptions.Boto3Error as error:
         raise f"Error putting to S3: {error}"
 
-
 def convert_json_to_python(json_data):
     """
     Converts Json data into a Python object
@@ -57,7 +59,6 @@ def convert_json_to_python(json_data):
     except Exception as error:
         raise f"Error converting json to python: {error}"
 
-
 def dt_splitter(input_dt):
     """
     Splits the date from the time of a datetime
@@ -68,7 +69,6 @@ def dt_splitter(input_dt):
     date = dt.date().isoformat()
     time = dt.time().isoformat()
     return {"date": date, "time": time}
-
 
 def transform_to_star_schema_fact_table(table_name, table_data):
     """
@@ -117,7 +117,6 @@ def transform_to_star_schema_fact_table(table_name, table_data):
         except Exception as error:
             raise Exception(f"Error processing row{row.get("sales_order_id")}: {error}")
     return fact_sales_order
-
 
 def transform_to_dim_staff(staff_data, dept_data):
     """
@@ -252,14 +251,45 @@ def transform_to_dim_counterparty(counterparty_data, address_data):
 
 
 def transform_to_dim_date(start_date, end_date=None):
-    """
+    '''
     Transforms the date data into a dimension table
     Takes a start date (datetimestamp) and an optional end date
     Returns a list of dictionaries representing the data
-    """
-    pass
+    '''
+    try:
+        if end_date is None:
+            end_date = datetime.today().date().isoformat()
 
+        start = datetime.fromisoformat(start_date).date()
+        end = datetime.fromisoformat(end_date).date()
 
+        if start > end:
+            raise ValueError("start_date cannot be after end_date")
+
+        dim_date = []
+        current_date = start
+        date_id = 1
+
+        while current_date <= end:
+            row = {
+                "date_id": date_id,
+                "year":current_date.year,
+                "month":current_date.month,
+                "day":current_date.day,
+                "day_of_week":current_date.isoweekday(),
+                "day_name":current_date.strftime("%A"),
+                "month_name":current_date.strftime("%B"),
+                "quarter": (current_date.month - 1) // 3 + 1
+            }
+            dim_date.append(row)
+            current_date += timedelta(days=1)
+            date_id += 1
+        return dim_date
+    except Exception as error:
+        raise Exception(
+            f"Please ensure start and end date are valid. Error: {error}"
+        )
+    
 def transform_to_dim_currency(currency_data):
     """
     Transforms the currency data into a dimension table
@@ -289,6 +319,20 @@ def transform_to_dim_currency(currency_data):
             )
     return dim_currency
 
+def convert_into_parquet(data):
+    try:
+        df = pd.DataFrame(data)
 
-def convert_into_parquet():
-    pass
+        buffer = BytesIO()
+
+        table = pa.Table.from_pandas(df)
+        pq.write_table(table, buffer)
+
+        buffer.seek(0)
+
+        return buffer
+    except Exception as error:
+        raise Exception(
+            f"Could not convert to parquet. Error: {error}"
+        )
+
