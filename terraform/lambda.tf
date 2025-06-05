@@ -45,7 +45,7 @@ resource "aws_lambda_function" "extract_handler" {
   role             = aws_iam_role.first_lambda_function_role.arn
   handler          = "main.lambda_handler" # change this to point to the handler
   runtime          = "python3.13"
-  source_code_hash = data.archive_file.lambda.output_base64sha256
+  source_code_hash = data.archive_file.first_lambda_archive.output_base64sha256
 
 #   environment {
 #     variables = {
