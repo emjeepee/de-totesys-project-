@@ -33,6 +33,14 @@ jobs:
     steps:
         - name: Checkout Repo
           uses: actions/checkout@v4
+          
+        - name: Set Up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.13'
+        
+        - name: Package Layer
+          run: pip install -r layer-requirements.txt -t layer/
 
         - name: Configure AWS Credentials
           uses: aws-actions/configure-aws-credentials@v4.1.0
