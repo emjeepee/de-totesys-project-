@@ -46,8 +46,7 @@ jobs:
           run: mkdir python/src
 
         - name: Copy Local Source Files to Layer
-          working-directory: src
-          run: cp change_after_time_timestamp.py conn_to_db.py lambda_utils.py utils_write_to_ingestion_bucket.py utils.py /python/src # add future src import files here (please don't make a new file for every function)
+          run: cp src/change_after_time_timestamp.py src/conn_to_db.py src/lambda_utils.py src/utils_write_to_ingestion_bucket.py src/utils.py python/src/ # add future src import files here (please don't make a new file for every function)
 
         - name: Configure AWS Credentials
           uses: aws-actions/configure-aws-credentials@v4.1.0
