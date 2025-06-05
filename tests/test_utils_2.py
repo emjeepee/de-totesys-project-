@@ -6,6 +6,10 @@ import boto3
 import pytest
 import os
 import json
+import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
+from io import BytesIO
 
 
 @pytest.fixture(scope="class")
@@ -362,3 +366,45 @@ class TestDimCurrencyTransform:
 
         with pytest.raises(Exception) as error:
             transform_to_dim_currency(input)
+
+class TestDimDateTransform:
+    def test_date_counts_rows(self):
+        result = transform_to_dim_date("2025-06-01", "2025-06-03")
+        assert len(result) == 3
+
+    def test_date_has_keys(self):
+        result = transform_to_dim_date("2025-06-01", "2025-06-03")
+        expected = {"date_id", "year", "month", "day", "day_of_week", "day_name",
+                    "month_name", "quarter"}      
+        
+        assert result[0].keys() == expected
+
+    def test_date_id_counts_up(self):
+        result = transform_to_dim_date("2025-06-01", "2025-06-03")
+        assert [row["date_id"] for row in result] == [1, 2, 3]
+    
+    def test_date_raises_error(self):
+        with pytest.raises(Exception):
+            transform_to_dim_date("2025-06-05", "2025-06-02")
+
+class TestConvertToParquet:
+    def test_converted_to_parquet(self):
+        data = [{
+            "design_id": "1",
+            "design_name": "Snake",
+            "file_location": "src/file",
+            "file_name": "System21"
+        }]
+        result = convert_into_parquet(data)
+
+        assert isinstance(pd.read_parquet(result, engine='pyarrow'), pd.core.frame.DataFrame)
+
+    def test_parquet_conversion_error(self):
+        data = "yes"
+        
+        with pytest.raises(Exception):
+            convert_into_parquet(data)
+
+
+
+
