@@ -6,8 +6,9 @@ from botocore.exceptions import ClientError
 
 # /src/utils.py
 
+
 # This is the main function:
-def write_to_ingestion_bucket(data:dict|list|str, bucket:str, file_location:str):
+def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_location: str):
     """
     This function:
     1. calls the following utility functions to carry out its role:
@@ -23,22 +24,22 @@ def write_to_ingestion_bucket(data:dict|list|str, bucket:str, file_location:str)
     5. creates a new json list to represent the updated table
     6. creates a timestamp string that will be part of the name of
             the key under which to store the jsonified list.
-    7. stores in the ingestion bucket the new jsonified list that 
-            represents the updated table. The key for this new json 
-            list looks like design/2025-05-28_15-45-03.json, where 
-            'design' is the value of arg file_location and 
-            '2025-05-28_15-45-03' is a timestamp created in this 
+    7. stores in the ingestion bucket the new jsonified list that
+            represents the updated table. The key for this new json
+            list looks like design/2025-05-28_15-45-03.json, where
+            'design' is the value of arg file_location and
+            '2025-05-28_15-45-03' is a timestamp created in this
             function.
 
     args:
         data: a jsonified list of dictionaries that represents
-            rows of a table. Each dictionary contains the data 
+            rows of a table. Each dictionary contains the data
             of one updated row of the table in the ToteSys database.
         bucket_name: a string, the name of the ingestion S3 bucket.
         file_location: a string, the first part of the key under
-            which this function will store in the bucket the json 
-            list that an updated table. It is also the name of the 
-            table that has been changed in the ToteSys database. 
+            which this function will store in the bucket the json
+            list that an updated table. It is also the name of the
+            table that has been changed in the ToteSys database.
             Examples: 'design' and 'sales'.
 
     returns:
@@ -58,11 +59,9 @@ def write_to_ingestion_bucket(data:dict|list|str, bucket:str, file_location:str)
         else:
             updated_rows = data
 
-        
-    except ClientError as e: 
+    except ClientError as e:
         # log error to CloudWatch here
         return e
-
 
     try:
         # 3) Insert those updated rows into the retrieved jsonified list of
@@ -80,26 +79,24 @@ def write_to_ingestion_bucket(data:dict|list|str, bucket:str, file_location:str)
         # that represents the updated table. Include the formatted
         # timestamp as part of the key:
         new_key = file_location + "/" + formatted_ts + ".json"
-    except ClientError as e: 
+    except ClientError as e:
         # log error to CloudWatch here
         return e
-
 
     try:
         # 6) Store the json list that represents the updated table into
         # in the ingestion bucket under the newly created key:
         save_updated_table_to_S3(updates_table_json, client, new_key, bucket)
-    except ClientError as e: 
+    except ClientError as e:
         # log error to CloudWatch here
         return e
 
     return
 
 
-
-
-
-def get_most_recent_table_data(file_location:str, S3_client:boto3.client, bucket_name:str):
+def get_most_recent_table_data(
+    file_location: str, S3_client: boto3.client, bucket_name: str
+):
     """
     This function:
         1) gets a list of every jsonified list of
@@ -121,9 +118,9 @@ def get_most_recent_table_data(file_location:str, S3_client:boto3.client, bucket
     """
     try:
         response = S3_client.list_objects_v2(Bucket=bucket_name, Prefix=file_location)
-    except ClientError as e: 
+    except ClientError as e:
         return e
-    
+
     # {
     # 'ResponseMetadata': { ...},
     #     ...
@@ -141,15 +138,15 @@ def get_most_recent_table_data(file_location:str, S3_client:boto3.client, bucket
     try:
         keys_list = [dict["Key"] for dict in response.get("Contents", [])]
         # ['design/2025-06-02_22-17-19-2513.json', 'design/2025-05-29_22-17-19-2513.json', etc]
-        latest_table_key = sorted(keys_list)[-1]  # 'design/2025-06-02_22-17-19-2513.json'
+        latest_table_key = sorted(keys_list)[
+            -1
+        ]  # 'design/2025-06-02_22-17-19-2513.json'
         response = S3_client.get_object(Bucket=bucket_name, Key=latest_table_key)
         data = response["Body"].read().decode("utf-8")
         data_as_py_list = json.loads(data)
         return data_as_py_list
-    except ClientError as e: 
-         return e
-    
-    
+    except ClientError as e:
+        return e
 
 
 def create_formatted_timestamp():
@@ -168,7 +165,9 @@ def create_formatted_timestamp():
     return formatted_ts
 
 
-def update_rows_in_table(rows_list:list[dict|list], table_list:list[dict[str:object]], file_location:str):
+def update_rows_in_table(
+    rows_list: list[dict | list], table_list: list[dict[str:object]], file_location: str
+):
     """
     This function:
         1) updates the appropriate rows in a
@@ -197,7 +196,9 @@ def update_rows_in_table(rows_list:list[dict|list], table_list:list[dict[str:obj
     return table_list
 
 
-def save_updated_table_to_S3(updated_table:str, S3_client:boto3.client, new_key:str, bucket:str):
+def save_updated_table_to_S3(
+    updated_table: str, S3_client: boto3.client, new_key: str, bucket: str
+):
     """
     This function:
         1. takes the updated table and stores
@@ -214,6 +215,5 @@ def save_updated_table_to_S3(updated_table:str, S3_client:boto3.client, new_key:
     """
     try:
         S3_client.put_object(Bucket=bucket, Key=new_key, Body=updated_table)
-    except ClientError as e: 
+    except ClientError as e:
         return e
-
