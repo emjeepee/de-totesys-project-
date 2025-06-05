@@ -43,8 +43,7 @@ jobs:
           run: pip install -r layer-requirements.txt -t python/
 
         - name: Make Layer Src Folder
-          working-directory: python
-          run: mkdir src
+          run: mkdir /python/src
 
         - name: Copy Local Source Files to Layer
           working-directory: src
