@@ -82,7 +82,7 @@ resource "aws_cloudwatch_event_target" "target_second_lambda" {
 # that will go onto the custom bus created above
 # when files in the ingestion bucket are added to it or
 # when files already in it are modified
-resource "aws_s3_bucket_notification" "bucket_notification" {
+resource "aws_s3_bucket_notification" "bucket_notification_from_event1" {
   bucket = aws_s3_bucket.ingestion-bucket.bucket
   
   eventbridge = {
