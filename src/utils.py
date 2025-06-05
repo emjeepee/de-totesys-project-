@@ -2,6 +2,10 @@ import json
 from pg8000.native import Connection
 import datetime
 import decimal
+import logging
+
+
+logger = logging.getLogger("MyLogger")
 
 
 def read_table(table_name: str, conn: Connection, after_time: str):
@@ -57,6 +61,7 @@ def convert_data(data: dict | list):
     try:
         return json.dumps(data, default=serialize_datetime)
     except (ValueError, TypeError) as error:
+        logger.error("Unable to dump the data")
         raise ValueError(f"Data cannot be converted: {error}")
 
 

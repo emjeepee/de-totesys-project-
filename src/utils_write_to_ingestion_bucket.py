@@ -2,6 +2,10 @@ from datetime import datetime, timezone
 import boto3
 import json
 from botocore.exceptions import ClientError
+import logging
+
+
+logger = logging.getLogger("Mylogger")
 
 
 # /src/utils.py
@@ -61,6 +65,8 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
 
     except ClientError as e:
         # log error to CloudWatch here
+        logger.error("Issue occured while retrieving the most recent table data")
+
         return e
 
     try:
@@ -81,6 +87,8 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
         new_key = file_location + "/" + formatted_ts + ".json"
     except ClientError as e:
         # log error to CloudWatch here
+        logger.error("Ubable to update the S3 bucket with updated rows")
+
         return e
 
     try:
@@ -89,6 +97,8 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
         save_updated_table_to_S3(updates_table_json, client, new_key, bucket)
     except ClientError as e:
         # log error to CloudWatch here
+        logger.error("Unable to save the data to the s3 bucket")
+
         return e
 
     return
@@ -118,7 +128,7 @@ def get_most_recent_table_data(
     """
     try:
         response = S3_client.list_objects_v2(Bucket=bucket_name, Prefix=file_location)
-    except ClientError as e:
+    except ClientError as e: 
         return e
 
     # {
@@ -145,8 +155,10 @@ def get_most_recent_table_data(
         data = response["Body"].read().decode("utf-8")
         data_as_py_list = json.loads(data)
         return data_as_py_list
-    except ClientError as e:
-        return e
+    except ClientError as e: 
+         return e
+    
+    
 
 
 def create_formatted_timestamp():
@@ -215,5 +227,5 @@ def save_updated_table_to_S3(
     """
     try:
         S3_client.put_object(Bucket=bucket, Key=new_key, Body=updated_table)
-    except ClientError as e:
+    except ClientError as e: 
         return e
