@@ -12,7 +12,7 @@ data "archive_file" "first_lambda_archive" {
 data "archive_file" "layer_archive" {
   type             = "zip"
   output_file_mode = "0666"
-  source_dir       = "${path.module}/../python/" # change this to the layer
+  source_dir       = "${path.module}/../layer/" # change this to the layer
   output_path      = "${path.module}/../layer.zip" # where to store the layer before uploading to s3
 }
 
