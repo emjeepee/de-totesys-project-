@@ -66,7 +66,7 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
     except ClientError as e:
         # log error to CloudWatch here
         logger.error("Issue occured while retrieving the most recent table data")
-        
+
         return e
 
     try:
@@ -88,7 +88,7 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
     except ClientError as e:
         # log error to CloudWatch here
         logger.error("Ubable to update the S3 bucket with updated rows")
-        
+
         return e
 
     try:
@@ -97,8 +97,8 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
         save_updated_table_to_S3(updates_table_json, client, new_key, bucket)
     except ClientError as e:
         # log error to CloudWatch here
-        logger("Unable to save the data to the s3 bucket")
-        
+        logger.error("Unable to save the data to the s3 bucket")
+
         return e
 
     return
@@ -129,8 +129,10 @@ def get_most_recent_table_data(
     try:
         response = S3_client.list_objects_v2(Bucket=bucket_name, Prefix=file_location)
     except ClientError as e:
-        logger.error(f"Unable to retrieve the most recent data for table {file_location} from the S3 bucket.")
-        
+        logger.error(
+            f"Unable to retrieve the most recent data for table {file_location} from the S3 bucket."
+        )
+
         return e
 
     # {
@@ -159,7 +161,7 @@ def get_most_recent_table_data(
         return data_as_py_list
     except ClientError as e:
         logger.error("Unable to retrieve the most recent file name from the s3 bucket")
-         
+
         return e
 
 
@@ -230,5 +232,5 @@ def save_updated_table_to_S3(
     try:
         S3_client.put_object(Bucket=bucket, Key=new_key, Body=updated_table)
     except ClientError as e:
-        logger.error("Unable to save the file to s3 bucket with the updated data") 
+        logger.error("Unable to save the file to s3 bucket with the updated data")
         return e

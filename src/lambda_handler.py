@@ -36,8 +36,10 @@ def lambda_handler(event=None, context=None):
     ]
     conn = conn_to_db("totesys")
 
-    after_time = change_after_time_timestamp(bucket_name, s3_client, "***timestamp***", "1900-01-01 00:00:00")
-    
+    after_time = change_after_time_timestamp(
+        bucket_name, s3_client, "***timestamp***", "1900-01-01 00:00:00"
+    )
+
     data_for_s3 = get_data_from_db(tables, after_time, conn, read_table, convert_data)
     write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name)
 
