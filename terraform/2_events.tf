@@ -5,15 +5,15 @@
 
 
 # # # Create a custom event bus
-resource "aws_cloudwatch_event_bus" "bus_for_events_from_processed_S3_bucket"{
-    name = "bus_for_events_from_processed_S3_bucket"
+resource "aws_cloudwatch_event_bus" "bus_for_events_from_ingestion_S3_bucket"{
+    name = "bus_for_events_from_ingestion_S3_bucket"
 }
 
 # # Create an event rule (to filter for events put on the event bus above
 # # by the ingestion S3 bucket)
-resource "aws_cloudwatch_event_rule" "filter_for_events_from_processed_bucket"{
+resource "aws_cloudwatch_event_rule" "filter_for_events_from_ingestion_bucket"{
     name = "s3PutObjectEvent"
-    event_bus_name = aws_cloudwatch_event_bus.bus_for_events_from_processed_S3_bucket.name
+    event_bus_name = aws_cloudwatch_event_bus.bus_for_events_from_ingestion_S3_bucket.name
     event_pattern = jsonencode({
     "source": ["aws.s3"],
     "detail-type": ["Object Created"],
@@ -34,7 +34,7 @@ resource "aws_cloudwatch_event_rule" "filter_for_events_from_processed_bucket"{
 
 # # Set the target (the second lambda) for the rule created above
 resource "aws_cloudwatch_event_target" "target_second_lambda" {
-  rule      = aws_cloudwatch_event_rule.filter_for_events_from_processed_bucket.name
+  rule      = aws_cloudwatch_event_rule.filter_for_events_from_ingestion_bucket.name
   arn       = resource.aws_lambda_function.transform_hanlder.arn
   target_id = "SecondLambda"
 }
