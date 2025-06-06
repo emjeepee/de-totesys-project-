@@ -255,15 +255,21 @@ def transform_to_dim_counterparty(counterparty_data, address_data):
     return dim_counterparty
 
 
-def transform_to_dim_date(start_date, end_date=None):
+def transform_to_dim_date(start_date=None, end_date=None):
     """
     Transforms the date data into a dimension table
     Takes a start date (datetimestamp) and an optional end date
     Returns a list of dictionaries representing the data
     """
     try:
+        if start_date is None:
+            # set to 2000
+            start_date = datetime.fromisoformat("2000-01-01")
+            pass
         if end_date is None:
-            end_date = datetime.today().date().isoformat()
+            # set to 2030
+            # end_date = datetime.today().date().isoformat()
+            end_date = datetime.fromisoformat("2030-12-31")
 
         start = datetime.fromisoformat(start_date).date()
         end = datetime.fromisoformat(end_date).date()
