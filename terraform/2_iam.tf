@@ -21,7 +21,7 @@
 # policy document same as the one in iam.tf file
 
 resource "aws_iam_role" "second_lambda_function_role" {
-    name = "role-${var.second_lambda_function}"
+    name = "role-${var.second_lambda_function}-name"
     assume_role_policy = data.aws_iam_policy_document.trust_policy.json
 }
 
@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "s3_access_policy_doc"{
 }
 
 resource "aws_iam_policy" "s3_access_policy_for_sec_lambda" {
-  name = "s3-policy-${var.second_lambda_function}-access"
+  name = "s3-policy-${var.second_lambda_function}s"
   policy = data.aws_iam_policy_document.s3_access_policy_doc.json
 }
 
@@ -95,7 +95,7 @@ data "aws_iam_policy_document" "second_cloudwatch_document"{
 }
 
 resource "aws_iam_policy" "second_cw_policy"{
-    name = "cw-policy-${var.second_lambda_function}"
+    name = "cw-policy-${var.second_lambda_function}-cloudwatch"
     description = "Cloudwatch logging policy for second lambda function"
     policy = data.aws_iam_policy_document.second_cloudwatch_document.json
 }
