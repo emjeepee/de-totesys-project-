@@ -6,9 +6,9 @@
 
 # # # Create a custom event bus
 
-# resource "aws_cloudwatch_event_bus" "bus_for_events_from_ingestion_S3_bucket"{
-#     name = "bus_for_events_from_ingestion_S3_bucket"
-# }
+resource "aws_cloudwatch_event_bus" "bus_for_events_from_ingestion_S3_bucket"{
+    name = "bus_for_events_from_ingestion_S3_bucket"
+}
 
 # # Create an event rule (to filter for events put on the event bus above
 # # by the ingestion S3 bucket)
