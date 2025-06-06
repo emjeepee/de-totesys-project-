@@ -128,7 +128,7 @@ def get_most_recent_table_data(
     """
     try:
         response = S3_client.list_objects_v2(Bucket=bucket_name, Prefix=file_location)
-    except ClientError as e: 
+    except ClientError as e:
         return e
 
     # {
@@ -155,10 +155,8 @@ def get_most_recent_table_data(
         data = response["Body"].read().decode("utf-8")
         data_as_py_list = json.loads(data)
         return data_as_py_list
-    except ClientError as e: 
-         return e
-    
-    
+    except ClientError as e:
+        return e
 
 
 def create_formatted_timestamp():
@@ -227,5 +225,5 @@ def save_updated_table_to_S3(
     """
     try:
         S3_client.put_object(Bucket=bucket, Key=new_key, Body=updated_table)
-    except ClientError as e: 
+    except ClientError as e:
         return e
