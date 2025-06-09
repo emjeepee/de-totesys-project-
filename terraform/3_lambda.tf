@@ -14,7 +14,7 @@ data "archive_file" "third_lambda_archive" {
 resource "aws_s3_object" "third_lambda_deployment" {
   bucket = aws_s3_bucket.lambda-bucket.bucket
   key    = "third_lambda/lambda.zip"
-  source = data.archive_file.second_lambda_archive.output_path
+  source = data.archive_file.third_lambda_archive.output_path
 }
 
 resource "aws_lambda_function" "load_handler" {   
