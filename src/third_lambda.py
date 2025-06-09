@@ -3,17 +3,15 @@ from src.First_util_for_3rd_lambda import get_pandas_dataFrames
 from src.second_util_for_3rd_lambda import make_SQL_queries_to_warehouse
 
 
-#***********#***********#***********#***********#***********#***********
+# ***********#***********#***********#***********#***********#***********
 # This lambda function employs two utility functions:
 # get_pandas_dataFrames() and make_SQL_queries_to_warehouse
-#***********#***********#***********#***********#***********#***********
-
-
+# ***********#***********#***********#***********#***********#***********
 
 
 # use context for logging, performance checks, or debugging.
 def lambda_handler(event, context):
-    s3_client = boto3.client('s3')
+    s3_client = boto3.client("s3")
 
     """
     This function:
@@ -45,31 +43,27 @@ def lambda_handler(event, context):
         None                            
     """
 
-    ingestion_bckt = '11-ingestion-bucket'
-    processed_bckt = event['detail']['name']
+    ingestion_bckt = "11-ingestion-bucket"
+    processed_bckt = event["detail"]["name"]
 
-    # create a dictionary that contains the 
+    # create a dictionary that contains the
     # pandas files relating to tables in
     # the warehouse dictionary:
-    dataFrames_dict = get_pandas_dataFrames(processed_bckt, ingestion_bckt, s3_client, '***timestamp***')
-    
-    # dataFrames_dict will look 
+    dataFrames_dict = get_pandas_dataFrames(
+        processed_bckt, ingestion_bckt, s3_client, "***timestamp***"
+    )
+
+    # dataFrames_dict will look
     # like this:
     # {
-    # 'dim_date': dim_table.parquet, 
-    # ... , 
+    # 'dim_date': dim_table.parquet,
+    # ... ,
     # 'facts_sales_order': facts_sales_order.parquet
     # }, where each key is the name of a table
     # in the warehouse database.
 
-
     # get the data out of each of the
-    # files in the dictionary above and 
-    # put the data in them into the 
+    # files in the dictionary above and
+    # put the data in them into the
     # warehouse database:
     make_SQL_queries_to_warehouse(dataFrames_dict)
-
-
-    
-
-        

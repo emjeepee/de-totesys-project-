@@ -29,13 +29,13 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
             'design' is the value of arg file_location and
             '2025-05-28_15-45-03' is a timestamp created in this
             function.
-    7. calls the following utility functions (all of which are in this file) 
+    7. calls the following utility functions (all of which are in this file)
         to carry out its role:
         i)   get_most_recent_table_data()
         ii)  create_formatted_timestamp()
         iii) update_rows_in_table()
         iv)  save_updated_table_to_S3()
-            
+
 
     args:
         data: a jsonified list of dictionaries that represents
