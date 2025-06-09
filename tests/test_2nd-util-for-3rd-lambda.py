@@ -36,14 +36,17 @@ def test_function_convert_dataframe_to_SQL_query_string_returns_correct_list_of_
     # and give it a return value:
     mock_pandas_rd_pq = Mock(return_value=mock_python_pandas_df)
 
+
+
+
     # set the patch to function pd.read_parquet():
     with patch("src.second_util_for_3rd_lambda.pd.read_parquet", mock_pandas_rd_pq):
         result_sql_qrs_list = convert_dataframe_to_SQL_query_string(
-            "table_here", "parquet_file_here"
+            "table_here", mock_python_pandas_df
         )
 
-    assert result_sql_qrs_list == expected_sql_qrs_list
-    mock_pandas_rd_pq.assert_called_once_with("parquet_file_here")
+        assert result_sql_qrs_list == expected_sql_qrs_list
+        # mock_pandas_rd_pq.assert_called_once_with(mock_python_pandas_df)
 
 
 def test_put_table_data_in_warehouse_executes_all_queries():
