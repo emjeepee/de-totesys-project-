@@ -69,10 +69,10 @@ def lambda_handler(event, context):
     boto_list_processed_objects = s3_client.list_objects_v2(
         Bucket=processed_bucket_name
     )
-    
+
     print(boto_list_processed_objects)
 
-    if boto_list_processed_objects['KeyCount'] == 0:
+    if boto_list_processed_objects["KeyCount"] == 0:
         logger.info("Detected empty processing bucket, creating date.parquet...")
         date_python = transform_to_dim_date()
         date_parquet = convert_into_parquet(date_python)

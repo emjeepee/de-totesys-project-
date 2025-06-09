@@ -265,10 +265,14 @@ def transform_to_dim_date(start_date=None, end_date=None):
         if start_date is None:
             # set to 2000
             start = datetime.fromisoformat("2000-01-01").date()
+        else:
+            start = datetime.fromisoformat(start_date).date()
         if end_date is None:
             # set to 2030
             # end_date = datetime.today().date().isoformat()
             end = datetime.fromisoformat("2030-12-31").date()
+        else:
+            end = datetime.fromisoformat(end_date).date()
 
         # start = datetime.fromisoformat(start_date).date()
         # end = datetime.fromisoformat(end_date).date()
