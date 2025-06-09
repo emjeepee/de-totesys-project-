@@ -23,6 +23,13 @@ variable "second_lambda_function"{
     default = "second_lambda_function"
 }
 
+
+variable "third_lambda_function"{
+    type = string
+    default = "third_lambda_function"
+}
+
+
 variable "processed-bucket"{
     type = string
     default = "11-processed-bucket"
