@@ -28,6 +28,10 @@ resource "aws_s3_bucket_versioning" "processed_versioning" {
   }
 }
 
+
+# this is the bucket that will contain each
+# zipped lambda file code for each lambda
+# function:
 resource "aws_s3_bucket" "lambda-bucket" {
   bucket = "11-lambda-bucket"
   tags = {
