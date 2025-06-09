@@ -32,7 +32,7 @@ resource "aws_cloudwatch_event_target" "target_third_lambda" {
 }
 
 
-resource "aws_s3_bucket_notification" "bucket_notification" {
+resource "aws_s3_bucket_notification" "processed_bucket_notification" {
   bucket = aws_s3_bucket.processed-bucket.id # maybe use the bucket
   
   eventbridge = true
