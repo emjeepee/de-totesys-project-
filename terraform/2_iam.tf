@@ -99,4 +99,3 @@ resource "aws_iam_policy" "second_cw_policy"{
     description = "Cloudwatch logging policy for second lambda function"
     policy = data.aws_iam_policy_document.second_cloudwatch_document.json
 }
-
