@@ -78,11 +78,11 @@ jobs:
 
         - name: Terraform Plan
           working-directory: terraform
-          run: terraform plan -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL_ADDRESS }}"
+          run: terraform plan -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}"
 
         - name: Terraform Apply
           working-directory: terraform
-          run: terraform apply -auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL_ADDRESS }}"
+          run: terraform apply -auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}"
 
 
 
