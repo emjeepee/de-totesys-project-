@@ -13,6 +13,11 @@ data "aws_iam_policy_document" "trust_policy" {
 
     actions = ["sts:AssumeRole"]
   }
+  statement {
+    effect    = "Allow"
+    actions   = ["lambda:GetLayerVersion"]
+    resources = ["arn:aws:lambda:*:*:layer:*:*"]
+  }
 }
 
 resource "aws_iam_role" "first_lambda_function_role" {
