@@ -24,7 +24,7 @@ resource "aws_lambda_function" "transform_hanlder" {
   function_name    = var.second_lambda_function
   role             = aws_iam_role.second_lambda_function_role.arn
   handler          = "main.lambda_handler" # change this to point to the handler
-  runtime          = "python3.13"
+  runtime          = var.python_runtime
   source_code_hash = data.archive_file.second_lambda_archive.output_base64sha256
 
 #   environment {
