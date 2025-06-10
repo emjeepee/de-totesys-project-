@@ -149,13 +149,6 @@ pyyaml==6.0.2
     # via
     #   bandit
     #   responses
-requests==2.32.3
-    # via
-    #   -r requirements.in
-    #   cachecontrol
-    #   moto
-    #   pip-audit
-    #   responses
 responses==0.25.7
     # via moto
 rich==14.0.0
