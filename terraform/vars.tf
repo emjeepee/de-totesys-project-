@@ -39,6 +39,7 @@ variable "alert_email_address"{
     type = string
     sensitive = true
     description = "email for alerts"
+    
 }
 
 
