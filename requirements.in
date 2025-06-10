@@ -10,7 +10,6 @@ dotenv
 flake8
 parquet
 pandas
-requests
 pytest-cov
 pyarrow
 currency-codes
