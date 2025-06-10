@@ -8,7 +8,7 @@ data "archive_file" "third_lambda_archive" {
   type             = "zip"
   output_file_mode = "0666"
   source_file      = "${path.module}/../src/third_lambda.py"
-  output_path      = "${path.module}/../function.zip" # place to store the zip before uploading to s3
+  output_path      = "${path.module}/../function_3.zip" # place to store the zip before uploading to s3
 }
 
 resource "aws_s3_object" "third_lambda_deployment" {

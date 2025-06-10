@@ -1,6 +1,7 @@
 dotenv
 pg8000
 pandas
+requests
 parquet
 pyarrow
 currency-codes
