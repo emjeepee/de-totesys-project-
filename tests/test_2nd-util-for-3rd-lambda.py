@@ -36,9 +36,6 @@ def test_function_convert_dataframe_to_SQL_query_string_returns_correct_list_of_
     # and give it a return value:
     mock_pandas_rd_pq = Mock(return_value=mock_python_pandas_df)
 
-
-
-
     # set the patch to function pd.read_parquet():
     with patch("src.second_util_for_3rd_lambda.pd.read_parquet", mock_pandas_rd_pq):
         result_sql_qrs_list = convert_dataframe_to_SQL_query_string(
