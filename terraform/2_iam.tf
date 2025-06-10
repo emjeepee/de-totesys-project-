@@ -59,6 +59,11 @@ data "aws_iam_policy_document" "s3_access_policy_doc"{
         "arn:aws:s3:::${var.ingestion-bucket}/*"
     ]
   }
+  statement {
+    effect    = "Allow"
+    actions   = ["lambda:GetLayerVersion"]
+    resources = ["arn:aws:lambda:*:*:layer:*:*"]
+  }
 }
 
 resource "aws_iam_policy" "s3_access_policy_for_sec_lambda" {

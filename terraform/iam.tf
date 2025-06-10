@@ -13,11 +13,6 @@ data "aws_iam_policy_document" "trust_policy" {
 
     actions = ["sts:AssumeRole"]
   }
-  statement {
-    effect    = "Allow"
-    actions   = ["lambda:GetLayerVersion"]
-    resources = ["arn:aws:lambda:*:*:layer:*:*"]
-  }
 }
 
 resource "aws_iam_role" "first_lambda_function_role" {
@@ -43,6 +38,11 @@ data "aws_iam_policy_document" "s3_ingestion_data_policy_doc"{
         "arn:aws:s3:::${var.ingestion-bucket}",
         "arn:aws:s3:::${var.ingestion-bucket}/*"
     ]
+  }
+  statement {
+    effect    = "Allow"
+    actions   = ["lambda:GetLayerVersion"]
+    resources = ["arn:aws:lambda:*:*:layer:*:*"]
   }
 }
 
