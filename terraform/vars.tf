@@ -153,14 +153,14 @@ variable "tf_aws_secret_key_id" {
 }
 
 
-# For the alert email address
-#*****************
-variable "alert_email_address" {
-#GHA: TF_ALERT_EMAIL_ADDRESS: "${{ secrets.TF_ALERT_EMAIL_ADDRESS }}"    
-  type      = string
-  sensitive = true
-  description = "GHA sets this. Holds string alert email address"
-}
+# # For the alert email address
+# #*****************
+# variable "alert_email_address" {
+# #GHA: TF_ALERT_EMAIL_ADDRESS: "${{ secrets.TF_ALERT_EMAIL_ADDRESS }}"    
+#   type      = string
+#   sensitive = true
+#   description = "GHA sets this. Holds string alert email address"
+# }
 
 
 
