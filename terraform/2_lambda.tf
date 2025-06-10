@@ -11,7 +11,7 @@ data "archive_file" "second_lambda_archive" {
 
 resource "aws_s3_object" "second_lambda_deployment" {
   bucket = aws_s3_bucket.lambda-bucket.bucket
-  key    = "second_lambda/lambda.zip"
+  key    = "second_lambda/function.zip"
   source = data.archive_file.second_lambda_archive.output_path
 }
 
