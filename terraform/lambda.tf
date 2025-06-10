@@ -5,7 +5,7 @@
 data "archive_file" "first_lambda_archive" {
   type             = "zip"
   output_file_mode = "0666"
-  source_dir      = "${path.module}/../src/" # change this to the file with the lambda handler in it
+  source_dir       = "${path.module}/../src" # change this to the file with the lambda handler in it
   output_path      = "${path.module}/../function_1.zip" # place to store the zip before uploading to s3
 }
 
