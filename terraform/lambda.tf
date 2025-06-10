@@ -62,7 +62,8 @@ resource "aws_lambda_function" "extract_handler" {
   s3_bucket        = aws_s3_bucket.lambda-bucket.bucket
   s3_key           = aws_s3_object.first_lambda_deployment.key
 
-  layers           = [aws_lambda_layer_version.layer.arn, aws_lambda_layer_version.src_layer.arn]
+  layers           = [aws_lambda_layer_version.layer.arn]
+  # layers           = [aws_lambda_layer_version.layer.arn, aws_lambda_layer_version.src_layer.arn]
 
   function_name    = var.first_lambda_function
   role             = aws_iam_role.first_lambda_function_role.arn
