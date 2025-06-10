@@ -18,7 +18,7 @@ data "archive_file" "layer_archive" {
 
 resource "aws_s3_object" "first_lambda_deployment" {
   bucket = aws_s3_bucket.lambda-bucket.bucket
-  key    = "first_lambda/lambda.zip"
+  key    = "first_lambda/function.zip"
   source = data.archive_file.first_lambda_archive.output_path
   source_hash = data.archive_file.first_lambda_archive.output_base64sha256
 }
