@@ -13,7 +13,8 @@ data "archive_file" "third_lambda_archive" {
 
 resource "aws_s3_object" "third_lambda_deployment" {
   bucket = aws_s3_bucket.lambda-bucket.bucket
-  key    = "third_lambda/lambda.zip"
+  # key    = "third_lambda/lambda.zip"
+  key    = "third_lambda/function.zip"
   source = data.archive_file.third_lambda_archive.output_path
 }
 
@@ -28,6 +29,17 @@ resource "aws_lambda_function" "load_handler" {
   handler          = "third_lambda.lambda_handler" # points to the handler function itself
   runtime          = var.python_runtime
   source_code_hash = data.archive_file.third_lambda_archive.output_base64sha256
+
+  # environment {
+  #   variables = {
+  #     TF_WAREHOUSE_DB_DB = var.tf_warehouse_db_db,
+  #     TF_WAREHOUSE_DB_HOST = var.tf_warehouse_db_host,
+  #     TF_WAREHOUSE_DB_PASSWORD = var.tf_warehouse_db_password,
+  #     TF_WAREHOUSE_DB_PORT = var.tf_warehouse_db_port,
+  #     TF_WAREHOUSE_DB_USER = var.tf_warehouse_db_user
+  #               }
+  #            }
+
 
 #   environment {
 #     variables = {
