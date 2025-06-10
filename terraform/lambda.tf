@@ -12,7 +12,7 @@ data "archive_file" "first_lambda_archive" {
 data "archive_file" "layer_archive" {
   type             = "zip"
   output_file_mode = "0666"
-  source_dir       = "${path.module}/../layer/" # change this to the layer
+  source_dir       = "${path.module}/../layer/python" # change this to the layer
   output_path      = "${path.module}/../layer.zip" # where to store the layer before uploading to s3
 }
 
@@ -45,7 +45,7 @@ resource "aws_lambda_function" "extract_handler" {
 
   function_name    = var.first_lambda_function
   role             = aws_iam_role.first_lambda_function_role.arn
-  handler          = "lambda_handler.lambda_handler" # change this to point to the handler
+  handler          = "src.lambda_handler.lambda_handler" # change this to point to the handler
   runtime          = var.python_runtime
   source_code_hash = data.archive_file.first_lambda_archive.output_base64sha256
 
