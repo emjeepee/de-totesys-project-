@@ -49,6 +49,17 @@ resource "aws_lambda_function" "extract_handler" {
   runtime          = var.python_runtime
   source_code_hash = data.archive_file.first_lambda_archive.output_base64sha256
 
+  # environment {
+  #   variables = {
+  #     TF_TOTESYS_DB_USER = var.tf_totesys_db_user,
+  #     TF_TOTESYS_DB_HOST = var.tf_totesys_db_host,
+  #     TF_TOTESYS_DB_DB = var.tf_totesys_db_db
+  #     TF_TOTESYS_DB_PASSWORD = var.tf_totesys_db_password,
+  #     TF_TOTESYS_DB_PORT = var.tf_totesys_db_port
+  #               }
+  #            }
+
+
 #   environment {
 #     variables = {
 #       S3_BUCKET_NAME=aws_s3_bucket.data_bucket.bucket
