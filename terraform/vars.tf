@@ -47,7 +47,9 @@ variable "alert_email_address"{
 # Variables that will contain 
 # credentials for accessing
 # the ToteSys and warehouse
-# databases, and AWS. 
+# databases, and AWS and for
+# accessing the alert email 
+# address. 
 # GitHub Actions (GHA)
 # will set these as they are
 # specified in workflow.yml:
@@ -149,3 +151,16 @@ variable "tf_aws_secret_key_id" {
   sensitive = true
   description = "GHA sets this. Holds string for AWS secret access key"
 }
+
+
+# For the alert email address
+#*****************
+variable "alert_email_address" {
+#GHA: TF_ALERT_EMAIL_ADDRESS: "${{ secrets.TF_ALERT_EMAIL_ADDRESS }}"    
+  type      = string
+  sensitive = true
+  description = "GHA sets this. Holds string alert email address"
+}
+
+
+

@@ -17,7 +17,8 @@ env:
   TF_WAREHOUSE_DB_HOST: '${{ secrets.TF_WAREHOUSE_DB_HOST }}'
   TF_WAREHOUSE_DB_PASSWORD: '${{ secrets.TF_WAREHOUSE_DB_PASSWORD }}'
   TF_WAREHOUSE_DB_PORT: '${{ secrets.TF_WAREHOUSE_DB_PORT }}'
-  TF_WAREHOUSE_DB_USER: '${{ secrets.TF_WAREHOUSE_DB_USER }}'      
+  TF_WAREHOUSE_DB_USER: '${{ secrets.TF_WAREHOUSE_DB_USER }}' 
+  TF_ALERT_EMAIL_ADDRESS: "${{ secrets.TF_ALERT_EMAIL_ADDRESS }}"     
 
 jobs:
   run-tests:
