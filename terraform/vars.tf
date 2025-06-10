@@ -1,6 +1,6 @@
 variable "first_lambda_function"{
     type = string
-    default = "extract_lambda_function"
+    default = "first_lambda_function"
 }
 
 variable "ingestion-bucket"{

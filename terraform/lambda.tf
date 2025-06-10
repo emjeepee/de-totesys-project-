@@ -5,8 +5,8 @@
 data "archive_file" "first_lambda_archive" {
   type             = "zip"
   output_file_mode = "0666"
-  source_dir       = "${path.module}/../src/" # change this to the file with the lambda handler in it
-  output_path      = "${path.module}/../function.zip" # place to store the zip before uploading to s3
+  source_file       = "${path.module}/../src/lambda_handler.py" # change this to the file with the lambda handler in it
+  output_path      = "${path.module}/../function_1.zip" # place to store the zip before uploading to s3
 }
 
 data "archive_file" "layer_archive" {
@@ -18,7 +18,7 @@ data "archive_file" "layer_archive" {
 
 resource "aws_s3_object" "first_lambda_deployment" {
   bucket = aws_s3_bucket.lambda-bucket.bucket
-  key    = "first_lambda/lambda.zip"
+  key    = "first_lambda/function.zip"
   source = data.archive_file.first_lambda_archive.output_path
   source_hash = data.archive_file.first_lambda_archive.output_base64sha256
 }
