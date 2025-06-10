@@ -5,20 +5,20 @@
 data "archive_file" "first_lambda_archive" {
   type             = "zip"
   output_file_mode = "0666"
-  source_dir       = "${path.module}/../src/" # change this to the file with the lambda handler in it
-  output_path      = "${path.module}/../function.zip" # place to store the zip before uploading to s3
+  source_dir       = "${path.module}/../src" # change this to the file with the lambda handler in it
+  output_path      = "${path.module}/../function_1.zip" # place to store the zip before uploading to s3
 }
 
 data "archive_file" "layer_archive" {
   type             = "zip"
   output_file_mode = "0666"
-  source_dir       = "${path.module}/../layer/" # change this to the layer
+  source_dir       = "${path.module}/../layer/python" # change this to the layer
   output_path      = "${path.module}/../layer.zip" # where to store the layer before uploading to s3
 }
 
 resource "aws_s3_object" "first_lambda_deployment" {
   bucket = aws_s3_bucket.lambda-bucket.bucket
-  key    = "first_lambda/lambda.zip"
+  key    = "first_lambda/function.zip"
   source = data.archive_file.first_lambda_archive.output_path
   source_hash = data.archive_file.first_lambda_archive.output_base64sha256
 }
@@ -48,6 +48,17 @@ resource "aws_lambda_function" "extract_handler" {
   handler          = "lambda_handler.lambda_handler" # change this to point to the handler
   runtime          = var.python_runtime
   source_code_hash = data.archive_file.first_lambda_archive.output_base64sha256
+
+  # environment {
+  #   variables = {
+  #     TF_TOTESYS_DB_USER = var.tf_totesys_db_user,
+  #     TF_TOTESYS_DB_HOST = var.tf_totesys_db_host,
+  #     TF_TOTESYS_DB_DB = var.tf_totesys_db_db
+  #     TF_TOTESYS_DB_PASSWORD = var.tf_totesys_db_password,
+  #     TF_TOTESYS_DB_PORT = var.tf_totesys_db_port
+  #               }
+  #            }
+
 
 #   environment {
 #     variables = {
