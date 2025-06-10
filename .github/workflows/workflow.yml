@@ -78,11 +78,11 @@ jobs:
 
         - name: Terraform Plan
           working-directory: terraform
-          run: terraform plan -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}" -var="tf_totesys_db_user=${{ secrets.TF_TOTESYS_DB_USER }}" -var="tf_totesys_db_host=${{ secrets.TF_TOTESYS_DB_HOST }}" -var="tf_totesys_db_db=${{ secrets.TF_TOTESYS_DB_DB }}" -var="tf_totesys_db_password=${{ secrets.TF_TOTESYS_DB_PASSWORD }}" -var="tf_totesys_db_port=${{ secrets.TF_TOTESYS_DB_PORT }}"
+          run: terraform plan -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }} tf_totesys_db_user=${{ secrets.TF_TOTESYS_DB_USER }}tf_totesys_db_host=${{ secrets.TF_TOTESYS_DB_HOST }} tf_totesys_db_db=${{ secrets.TF_TOTESYS_DB_DB }} tf_totesys_db_password=${{ secrets.TF_TOTESYS_DB_PASSWORD }} tf_totesys_db_port=${{ secrets.TF_TOTESYS_DB_PORT }} tf_warehouse_db_db=${{ secrets.TF_WAREHOUSE_DB_DB }} tf_warehouse_db_host=${{ secrets.TF_WAREHOUSE_DB_HOST }} tf_warehouse_db_password=${{ secrets.TF_WAREHOUSE_DB_PASSWORD }} tf_warehouse_db_port=${{ secrets.TF_WAREHOUSE_DB_PORT }} tf_warehouse_db_user=${{ secrets.TF_WAREHOUSE_DB_USER }}"
 
         - name: Terraform Apply
           working-directory: terraform
-          run: terraform apply -auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}" -var="tf_warehouse_db_db=${{ secrets.TF_WAREHOUSE_DB_DB }}" -var="tf_warehouse_db_host=${{ secrets.TF_WAREHOUSE_DB_HOST }}" -var="tf_warehouse_db_password=${{ secrets.TF_WAREHOUSE_DB_PASSWORD }}" -var="tf_warehouse_db_port=${{ secrets.TF_WAREHOUSE_DB_PORT }}" -var="tf_warehouse_db_user=${{ secrets.TF_WAREHOUSE_DB_USER }}"
+          run: terraform apply -auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }} tf_totesys_db_user=${{ secrets.TF_TOTESYS_DB_USER }}tf_totesys_db_host=${{ secrets.TF_TOTESYS_DB_HOST }} tf_totesys_db_db=${{ secrets.TF_TOTESYS_DB_DB }} tf_totesys_db_password=${{ secrets.TF_TOTESYS_DB_PASSWORD }} tf_totesys_db_port=${{ secrets.TF_TOTESYS_DB_PORT }} tf_warehouse_db_db=${{ secrets.TF_WAREHOUSE_DB_DB }} tf_warehouse_db_host=${{ secrets.TF_WAREHOUSE_DB_HOST }} tf_warehouse_db_password=${{ secrets.TF_WAREHOUSE_DB_PASSWORD }} tf_warehouse_db_port=${{ secrets.TF_WAREHOUSE_DB_PORT }} tf_warehouse_db_user=${{ secrets.TF_WAREHOUSE_DB_USER }}"
 
 
 
