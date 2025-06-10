@@ -52,6 +52,11 @@ data "aws_iam_policy_document" "s3_access_policy_doc_for_3rd_lambda"{
         "arn:aws:s3:::${var.processed-bucket}/*"
     ]
    }
+  statement {
+    effect    = "Allow"
+    actions   = ["lambda:GetLayerVersion"]
+    resources = ["arn:aws:lambda:*:*:layer:*:*"]
+  }
 }
 
 resource "aws_iam_policy" "s3_access_policy_for_3rd_lambda" {
