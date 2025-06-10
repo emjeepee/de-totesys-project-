@@ -145,8 +145,8 @@ variable "tf_aws_access_key_id" {
 }
 
 
-variable "tf_aws_secret_key_id" {
-#GHA:  TF_AWS_SECRET_KEY_ID: '${{ secrets.TF_AWS_SECRET_KEY_ID }}'    
+variable "tf_aws_secret_access_key" {
+#GHA:  TF_AWS_SECRET_ACCESS_KEY: '${{ secrets.TF_AWS_SECRET_ACCESS_KEY }}'    
   type      = string
   sensitive = true
   description = "GHA sets this. Holds string for AWS secret access key"

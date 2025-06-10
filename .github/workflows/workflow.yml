@@ -7,7 +7,7 @@ on:
 
 env:
   TF_AWS_ACCESS_KEY_ID: '${{ secrets.TF_AWS_ACCESS_KEY_ID }}'
-  TF_AWS_SECRET_KEY_ID: '${{ secrets.TF_AWS_SECRET_KEY_ID }}'
+  TF_AWS_SECRET_ACCESS_KEY: '${{ secrets.TF_AWS_SECRET_ACCESS_KEY }}'
   TF_TOTESYS_DB_USER: "${{ secrets.TF_TOTESYS_DB_USER }}"
   TF_TOTESYS_DB_HOST: '${{ secrets.TF_TOTESYS_DB_HOST }}'
   TF_TOTESYS_DB_DB: '${{ secrets.TF_TOTESYS_DB_DB }}'
@@ -78,11 +78,11 @@ jobs:
 
         - name: Terraform Plan
           working-directory: terraform
-          run: terraform plan -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}"
+          run: terraform plan -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL_ADDRESS }}"
 
         - name: Terraform Apply
           working-directory: terraform
-          run: terraform apply -auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}"
+          run: terraform apply -auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL_ADDRESS }}"
 
 
 
