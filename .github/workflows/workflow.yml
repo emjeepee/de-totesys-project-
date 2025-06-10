@@ -6,7 +6,7 @@ on:
       - '**'
 
 env:
-  TF_AWS_ACCESS_KEY_ID: '${{ secrets.TF_AWS_ACCESS_KEY_ID }}'
+  TF_AWS_ACCESS_KEY_ID: '${{ secrets. }}'
   TF_AWS_SECRET_ACCESS_KEY: '${{ secrets.TF_AWS_SECRET_ACCESS_KEY }}'
   TF_TOTESYS_DB_USER: "${{ secrets.TF_TOTESYS_DB_USER }}"
   TF_TOTESYS_DB_HOST: '${{ secrets.TF_TOTESYS_DB_HOST }}'
