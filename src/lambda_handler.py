@@ -33,7 +33,7 @@ def lambda_handler(event=None, context=None):
         "currency",
         "payment_type",
     ]
-    conn = conn_to_db("totesys")
+    conn = conn_to_db("TOTESYS")
 
     after_time = change_after_time_timestamp(
         bucket_name, s3_client, "***timestamp***", "1900-01-01 00:00:00"
