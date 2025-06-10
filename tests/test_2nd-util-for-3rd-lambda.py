@@ -83,6 +83,6 @@ def test_put_table_data_in_warehouse_executes_all_queries():
         put_table_data_in_warehouse(query_list)
 
         # Assert
-        mock_conn_to_db.assert_called_once_with("xxwarehouse name herexxx")
+        mock_conn_to_db.assert_called_once_with("WAREHOUSE")
         assert mock_conn.run.call_count == len(query_list)
         mock_close_db.assert_called_once()
