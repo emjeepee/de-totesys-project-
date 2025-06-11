@@ -35,8 +35,14 @@ jobs:
           run: sudo apt install make -y
         - name: Install Application Requirements & Run Tests
           run: make all
+        - name: Clean up old ZIP archives
+          run: |
+              rm -f function_1.zip
+              rm -f layer.zip          
         - name: Destroy the venv
           run: make clean  
+
+          
 
 
   deploy-project:
