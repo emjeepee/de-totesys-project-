@@ -1,2 +1,6 @@
 dotenv
 pg8000
+pandas
+parquet
+pyarrow
+currency-codes
