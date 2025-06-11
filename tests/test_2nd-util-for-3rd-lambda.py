@@ -13,7 +13,7 @@ from src.second_util_for_3rd_lambda import (
 def test_function_convert_dataframe_to_SQL_query_string_returns_correct_list_of_query_strings():
     # arrange:
     # make a pythonised pandas DataFrame
-    # of the kind passed in to the 
+    # of the kind passed in to the
     # function under test as second arg:
     test_df = pd.DataFrame(
         [
@@ -21,7 +21,7 @@ def test_function_convert_dataframe_to_SQL_query_string_returns_correct_list_of_
             {"id": 2, "name": "Neill", "team": 1},
             {"id": 3, "name": "Mukund", "team": 1},
         ]
-                                        )
+    )
 
     # the query string list that the
     # function under test is expected
@@ -30,41 +30,33 @@ def test_function_convert_dataframe_to_SQL_query_string_returns_correct_list_of_
         "INSERT INTO table_here (id, name, team) VALUES ('1', 'Abdul', '1');",
         "INSERT INTO table_here (id, name, team) VALUES ('2', 'Neill', '1');",
         "INSERT INTO table_here (id, name, team) VALUES ('3', 'Mukund', '1');",
-                            ]
-
+    ]
 
     # act:
-    result_sql_qrs_list = convert_dataframe_to_SQL_query_string(
-            "table_here", test_df
-                                                                )
+    result_sql_qrs_list = convert_dataframe_to_SQL_query_string("table_here", test_df)
     # assert:
     assert result_sql_qrs_list == expected_sql_qrs_list
 
 
-
 def test_convert_dataframe_to_SQL_query_string_calls_iterrows_once():
     # arrange:
-    # make a mock to represent 
+    # make a mock to represent
     # the dataFrame:
     mock_df = Mock()
     # give the mock sataFrame columns:
-    mock_df.columns = ['id', 'name']
-    
+    mock_df.columns = ["id", "name"]
+
     # make a mock for iterrows(),
-    # which convert_dataframe_to_SQL_query_string() 
+    # which convert_dataframe_to_SQL_query_string()
     # calls once on the dataFrame.
     # Maake mock_iterrows return an iterable:
-    mock_iterrows = Mock(return_value=[(0, {'id': 3, 'name': 'Abdul'})])
+    mock_iterrows = Mock(return_value=[(0, {"id": 3, "name": "Abdul"})])
     mock_df.iterrows = mock_iterrows
 
     convert_dataframe_to_SQL_query_string("table_here", mock_df)
 
-    # assert: 
+    # assert:
     mock_iterrows.assert_called_once()
-
-
-
-
 
 
 def test_put_table_data_in_warehouse_executes_all_queries():
@@ -91,6 +83,6 @@ def test_put_table_data_in_warehouse_executes_all_queries():
         put_table_data_in_warehouse(query_list)
 
         # Assert
-        mock_conn_to_db.assert_called_once_with("xxwarehouse name herexxx")
+        mock_conn_to_db.assert_called_once_with("WAREHOUSE")
         assert mock_conn.run.call_count == len(query_list)
         mock_close_db.assert_called_once()

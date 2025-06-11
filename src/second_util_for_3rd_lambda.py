@@ -106,7 +106,7 @@ def put_table_data_in_warehouse(query_list):
 
     # make the connection to the warehouse
     # (a posgresql database):
-    conn = conn_to_db("xxwarehouse name herexxx")
+    conn = conn_to_db("WAREHOUSE")
 
     # send sql queries to the warehouse
     # database:

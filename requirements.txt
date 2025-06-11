@@ -149,9 +149,8 @@ pyyaml==6.0.2
     # via
     #   bandit
     #   responses
-requests==2.32.3
+requests==2.32.4
     # via
-    #   -r requirements.in
     #   cachecontrol
     #   moto
     #   pip-audit

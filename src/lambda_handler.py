@@ -1,14 +1,7 @@
 import boto3
-from src.utils_write_to_ingestion_bucket import (
-    write_to_ingestion_bucket,
-    create_formatted_timestamp,
-)
+from src.utils_write_to_ingestion_bucket import write_to_ingestion_bucket
 from src.utils import convert_data, read_table
-from datetime import datetime
-from botocore.exceptions import ClientError
 from src.conn_to_db import conn_to_db, close_db
-import json
-from pg8000.native import Connection
 from src.lambda_utils import get_data_from_db, write_to_s3
 from src.utils_write_to_ingestion_bucket import write_to_ingestion_bucket
 from src.change_after_time_timestamp import change_after_time_timestamp
@@ -40,7 +33,7 @@ def lambda_handler(event=None, context=None):
         "currency",
         "payment_type",
     ]
-    conn = conn_to_db("totesys")
+    conn = conn_to_db("TOTESYS")
 
     after_time = change_after_time_timestamp(
         bucket_name, s3_client, "***timestamp***", "1900-01-01 00:00:00"
