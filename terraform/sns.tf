@@ -6,6 +6,7 @@ resource "aws_sns_topic_subscription" "email_alerts"{
     topic_arn = aws_sns_topic.lambda_alerts.arn
     protocol  = "email"
     endpoint  = var.alert_email_address
+    # endpoint  = TF_ALERT_EMAIL
 }
 
 resource "aws_cloudwatch_metric_alarm" "fatal_error"{
