@@ -5,19 +5,19 @@ on:
     branches:
       - '**'
 
-env:
-  TF_AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
-  TF_AWS_SECRET_ACCESS_KEY: '${{ secrets.TF_AWS_SECRET_ACCESS_KEY }}'
-  TF_TOTESYS_DB_USER: "${{ secrets.TF_TOTESYS_DB_USER }}"
-  TF_TOTESYS_DB_HOST: '${{ secrets.TF_TOTESYS_DB_HOST }}'
-  TF_TOTESYS_DB_DB: '${{ secrets.TF_TOTESYS_DB_DB }}'
-  TF_TOTESYS_DB_PASSWORD: '${{ secrets.TF_TOTESYS_DB_PASSWORD }}'
-  TF_TOTESYS_DB_PORT: '${{ secrets.TF_TOTESYS_DB_PORT }}'
-  TF_WAREHOUSE_DB_DB: '${{ secrets.TF_WAREHOUSE_DB_DB }}'
-  TF_WAREHOUSE_DB_HOST: '${{ secrets.TF_WAREHOUSE_DB_HOST }}'
-  TF_WAREHOUSE_DB_PASSWORD: '${{ secrets.TF_WAREHOUSE_DB_PASSWORD }}'
-  TF_WAREHOUSE_DB_PORT: '${{ secrets.TF_WAREHOUSE_DB_PORT }}'
-  TF_WAREHOUSE_DB_USER: '${{ secrets.TF_WAREHOUSE_DB_USER }}' 
+# env:
+#   TF_AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+#   TF_AWS_SECRET_ACCESS_KEY: '${{ secrets.TF_AWS_SECRET_ACCESS_KEY }}'
+#   TF_TOTESYS_DB_USER: "${{ secrets.TF_TOTESYS_DB_USER }}"
+#   TF_TOTESYS_DB_HOST: '${{ secrets.TF_TOTESYS_DB_HOST }}'
+#   TF_TOTESYS_DB_DB: '${{ secrets.TF_TOTESYS_DB_DB }}'
+#   TF_TOTESYS_DB_PASSWORD: '${{ secrets.TF_TOTESYS_DB_PASSWORD }}'
+#   TF_TOTESYS_DB_PORT: '${{ secrets.TF_TOTESYS_DB_PORT }}'
+#   TF_WAREHOUSE_DB_DB: '${{ secrets.TF_WAREHOUSE_DB_DB }}'
+#   TF_WAREHOUSE_DB_HOST: '${{ secrets.TF_WAREHOUSE_DB_HOST }}'
+#   TF_WAREHOUSE_DB_PASSWORD: '${{ secrets.TF_WAREHOUSE_DB_PASSWORD }}'
+#   TF_WAREHOUSE_DB_PORT: '${{ secrets.TF_WAREHOUSE_DB_PORT }}'
+#   TF_WAREHOUSE_DB_USER: '${{ secrets.TF_WAREHOUSE_DB_USER }}' 
   
 
 jobs:
@@ -35,8 +35,14 @@ jobs:
           run: sudo apt install make -y
         - name: Install Application Requirements & Run Tests
           run: make all
+        - name: Clean up old ZIP archives
+          run: |
+              rm -f function_1.zip
+              rm -f layer.zip          
         - name: Destroy the venv
           run: make clean  
+
+          
 
 
   deploy-project:
@@ -76,13 +82,19 @@ jobs:
           working-directory: terraform
           run: terraform init
 
+        # - name: Terraform destroy
+        #   working-directory: terraform
+        #   run: terraform destroy --auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}"  -var="tf_totesys_db_user=${{ secrets.TOTESYS_DB_USER }}" -var="tf_totesys_db_host=${{ secrets.TOTESYS_DB_HOST }}" -var="tf_totesys_db_db=${{ secrets.TOTESYS_DB_DB }}" -var="tf_totesys_db_password=${{ secrets.TOTESYS_DB_PASSWORD }}" -var="tf_totesys_db_port=${{ secrets.TOTESYS_DB_PORT }}" -var="tf_warehouse_db_db=${{ secrets.WAREHOUSE_DB_DB }}" -var="tf_warehouse_db_host=${{ secrets.WAREHOUSE_DB_HOST }}" -var="tf_warehouse_db_password=${{ secrets.WAREHOUSE_DB_PASSWORD }}" -var="tf_warehouse_db_port=${{ secrets.WAREHOUSE_DB_PORT }}" -var="tf_warehouse_db_user=${{ secrets.WAREHOUSE_DB_USER }}"
+
+
+
         - name: Terraform Plan
           working-directory: terraform
-          run: terraform plan -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }} tf_totesys_db_user=${{ secrets.TF_TOTESYS_DB_USER }}tf_totesys_db_host=${{ secrets.TF_TOTESYS_DB_HOST }} tf_totesys_db_db=${{ secrets.TF_TOTESYS_DB_DB }} tf_totesys_db_password=${{ secrets.TF_TOTESYS_DB_PASSWORD }} tf_totesys_db_port=${{ secrets.TF_TOTESYS_DB_PORT }} tf_warehouse_db_db=${{ secrets.TF_WAREHOUSE_DB_DB }} tf_warehouse_db_host=${{ secrets.TF_WAREHOUSE_DB_HOST }} tf_warehouse_db_password=${{ secrets.TF_WAREHOUSE_DB_PASSWORD }} tf_warehouse_db_port=${{ secrets.TF_WAREHOUSE_DB_PORT }} tf_warehouse_db_user=${{ secrets.TF_WAREHOUSE_DB_USER }}"
+          run: terraform plan -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}"  -var="tf_totesys_db_user=${{ secrets.TOTESYS_DB_USER }}" -var="tf_totesys_db_host=${{ secrets.TOTESYS_DB_HOST }}" -var="tf_totesys_db_db=${{ secrets.TOTESYS_DB_DB }}" -var="tf_totesys_db_password=${{ secrets.TOTESYS_DB_PASSWORD }}" -var="tf_totesys_db_port=${{ secrets.TOTESYS_DB_PORT }}" -var="tf_warehouse_db_db=${{ secrets.WAREHOUSE_DB_DB }}" -var="tf_warehouse_db_host=${{ secrets.WAREHOUSE_DB_HOST }}" -var="tf_warehouse_db_password=${{ secrets.WAREHOUSE_DB_PASSWORD }}" -var="tf_warehouse_db_port=${{ secrets.WAREHOUSE_DB_PORT }}" -var="tf_warehouse_db_user=${{ secrets.WAREHOUSE_DB_USER }}"
 
         - name: Terraform Apply
           working-directory: terraform
-          run: terraform apply -auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }} tf_totesys_db_user=${{ secrets.TF_TOTESYS_DB_USER }}tf_totesys_db_host=${{ secrets.TF_TOTESYS_DB_HOST }} tf_totesys_db_db=${{ secrets.TF_TOTESYS_DB_DB }} tf_totesys_db_password=${{ secrets.TF_TOTESYS_DB_PASSWORD }} tf_totesys_db_port=${{ secrets.TF_TOTESYS_DB_PORT }} tf_warehouse_db_db=${{ secrets.TF_WAREHOUSE_DB_DB }} tf_warehouse_db_host=${{ secrets.TF_WAREHOUSE_DB_HOST }} tf_warehouse_db_password=${{ secrets.TF_WAREHOUSE_DB_PASSWORD }} tf_warehouse_db_port=${{ secrets.TF_WAREHOUSE_DB_PORT }} tf_warehouse_db_user=${{ secrets.TF_WAREHOUSE_DB_USER }}"
+          run: terraform apply -auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}"  -var="tf_totesys_db_user=${{ secrets.TOTESYS_DB_USER }}" -var="tf_totesys_db_host=${{ secrets.TOTESYS_DB_HOST }}" -var="tf_totesys_db_db=${{ secrets.TOTESYS_DB_DB }}" -var="tf_totesys_db_password=${{ secrets.TOTESYS_DB_PASSWORD }}" -var="tf_totesys_db_port=${{ secrets.TOTESYS_DB_PORT }}" -var="tf_warehouse_db_db=${{ secrets.WAREHOUSE_DB_DB }}" -var="tf_warehouse_db_host=${{ secrets.WAREHOUSE_DB_HOST }}" -var="tf_warehouse_db_password=${{ secrets.WAREHOUSE_DB_PASSWORD }}" -var="tf_warehouse_db_port=${{ secrets.WAREHOUSE_DB_PORT }}" -var="tf_warehouse_db_user=${{ secrets.WAREHOUSE_DB_USER }}"
 
 
 
