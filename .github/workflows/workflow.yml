@@ -84,7 +84,7 @@ jobs:
 
         - name: Terraform destroy
           working-directory: terraform
-          run: terraform destroy --auto-approve
+          run: terraform destroy --auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}"
 
 
 
