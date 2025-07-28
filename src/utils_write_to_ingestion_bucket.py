@@ -8,11 +8,11 @@ import logging
 logger = logging.getLogger("Mylogger")
 
 
-# /src/utils.py
+
 
 
 # This is the main function:
-def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_location: str):
+def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_location: str, s3_client: boto3.client):
     """
     This function:
     1. searches the ingestion bucket for all jsonified table lists
@@ -38,55 +38,45 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
 
 
     args:
-        data: a jsonified list of dictionaries that represents
-            rows of a table. Each dictionary contains the data
-            of one updated row of the table in the ToteSys database.
-        bucket_name: a string, the name of the ingestion S3 bucket.
-        file_location: a string, the first part of the key under
-            which this function will store in the bucket the json
-            list that an updated table. It is also the name of the
-            table that has been changed in the ToteSys database.
+        1) data: a jsonified list of dictionaries. The 
+            dictionaries represent those rows of a 
+            table from the ToteSys database that have
+            been updated.
+        2) bucket_name: name of the ingestion S3 bucket.
+        3) file_location: this is the name of the table that has been 
+            updated in the ToteSys database. It's the first part
+            of the key under which this function will store the 
+            json list that contains updated rows of a table
+            (the second part being a timestamp for the current 
+            time).
             Examples: 'design' and 'sales'.
 
     returns:
         None
-
     """
 
-    # 1) Get the most recent object that holds a json list that
-    # represents a table:
+    # 1) Get the object that holds the most recently 
+    # updated table data:
     try:
-        client = boto3.client("s3")
-        latest_table = get_most_recent_table_data(file_location, client, bucket)
-        # latest_table is a jsonified python list of dictionaries
-        # 2) Convert json to python:
-        if isinstance(data, str):
-            updated_rows = json.loads(data)  # python list like [ {}, {}, {}, etc ]
-        else:
-            updated_rows = data
+        latest_table = get_most_recent_table_data(file_location, s3_client, bucket)
+        # latest_table is a jsonified python list of dictionaries.
+        # Convert the passed-in updated rows to python:
+        updated_rows = json.loads(data)  # python list like [ {}, {}, {}, etc ]
 
     except ClientError as e:
         # log error to CloudWatch here
         logger.error("Issue occured while retrieving the most recent table data")
-
         return e
 
     try:
-        # 3) Insert those updated rows into the retrieved jsonified list of
-        # dictionaries that represents the table.
+        # 3) Insert the updated rows into the retrieved 
+        # table.
         # updated_table below is a python list of dictionaries:
         updated_table = update_rows_in_table(updated_rows, latest_table, file_location)
 
         # convert updated_table into json:
-        updates_table_json = json.dumps(updated_table)
+        updated_table_json = json.dumps(updated_table)
 
-        # 4) Create a formatted timestamp:
-        formatted_ts = create_formatted_timestamp()
-
-        # 5) Make a string for the key under which to store the json list
-        # that represents the updated table. Include the formatted
-        # timestamp as part of the key:
-        new_key = file_location + "/" + formatted_ts + ".json"
     except ClientError as e:
         # log error to CloudWatch here
         logger.error("Ubable to update the S3 bucket with updated rows")
@@ -94,9 +84,17 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
         return e
 
     try:
+        # 4) Create a formatted timestamp:
+        formatted_ts = create_formatted_timestamp()
+
+        # 5) Make a string for the key under which to store the json list
+        # that represents the updated table. Include the formatted
+        # timestamp as part of the key:
+        new_key = file_location + "/" + formatted_ts + ".json"
+
         # 6) Store the json list that represents the updated table into
         # in the ingestion bucket under the newly created key:
-        save_updated_table_to_S3(updates_table_json, client, new_key, bucket)
+        save_updated_table_to_S3(updated_table_json, s3_client, new_key, bucket)
     except ClientError as e:
         # log error to CloudWatch here
         logger.error("Unable to save the data to the s3 bucket")
@@ -106,59 +104,75 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
     return
 
 
+
+
+
+
 def get_most_recent_table_data(
     file_location: str, S3_client: boto3.client, bucket_name: str
-):
+                              ):
     """
     This function:
-        1) gets a list of every jsonified list of
-                dictionaries in the bucket if their
-                keys begin with file_location. The
-                list will be a python list
+        1) gets a list of every jsonified dictionary
+            in the bucket if their
+            keys begin with file_location. The
+            list will be a python list
         2) sorts the list according to time,
-                descending
+            descending
         3) gets the most recent list
 
-    Returns:
-        The most recent python list
-
     Args:
-        file_location: a string that looks like
-        'design'
-        S3_client: the boto3 S3 bucket client
-    bucket_name: a string for the bucket name
+        1) file_location: the name of a table, eg
+            'design'
+        2) S3_client: the boto3 S3 bucket client
+        3) bucket_name: the bucket name
+
+    Returns:
+        The most recent python dictionary
+
+
     """
     try:
         response = S3_client.list_objects_v2(Bucket=bucket_name, Prefix=file_location)
     except ClientError as e:
         return e
 
-    # {
-    # 'ResponseMetadata': { ...},
-    #     ...
-    # 'Contents': [
-    #     {
-    #     'Key': 'design/xxx.json',
-    #     [{...}, {...}, {...}, etc]
-    #     },
-    #     {
-    #     'Key': 'design/yyy.json',
-    #     ...
-    #     }
-    #             ]
-    # }
     try:
-        keys_list = [dict["Key"] for dict in response.get("Contents", [])]
-        # ['design/2025-06-02_22-17-19-2513.json', 'design/2025-05-29_22-17-19-2513.json', etc]
-        latest_table_key = sorted(keys_list)[
-            -1
-        ]  # 'design/2025-06-02_22-17-19-2513.json'
-        response = S3_client.get_object(Bucket=bucket_name, Key=latest_table_key)
-        data = response["Body"].read().decode("utf-8")
-        data_as_py_list = json.loads(data)
-        return data_as_py_list
+        return get_latest_table(response, S3_client, bucket_name)
+
     except ClientError as e:
         return e
+    
+
+def get_latest_table(resp_obj, S3_client: boto3.client, bucket_name: str):
+    """
+    This function:
+        1) Gets the key of the most recent version of a table
+            in the S3 ingestion bucket.
+        2) Gets the data in the bucket saved under that key
+        3) gets called by get_most_recent_table_data()
+
+    Args:
+        1) resp_obj: a response object from boto3 method 
+            S3_client.list_objects_v2()        
+        2) S3_client: a boto3 S3 client
+        3) bucket_name: the name of the S3 ingestion bucket
+        
+    Returns:
+        A python list of dictionaries. The list represents 
+         a whole table. Each dictionary represents a row 
+         of the table.        
+
+    """
+    keys_list = [dict["Key"] for dict in resp_obj.get("Contents", [])]
+    # ['design/2025-06-02_22-17-19-2513.json', 'design/2025-05-29_22-17-19-2513.json', etc]
+    latest_table_key = sorted(keys_list)[ -1 ]  # 'design/2025-06-02_22-17-19-2513.json'
+    response = S3_client.get_object(Bucket=bucket_name, Key=latest_table_key)
+    data = response["Body"].read().decode("utf-8")
+    return json.loads(data)
+    
+
+
 
 
 def create_formatted_timestamp():
@@ -177,35 +191,107 @@ def create_formatted_timestamp():
     return formatted_ts
 
 
-def update_rows_in_table(
-    rows_list: list[dict | list], table_list: list[dict[str:object]], file_location: str
-):
+
+
+
+
+def update_rows_in_table( rows_list: list, json_table_list, file_location: str ):
+    
     """
     This function:
-        1) updates the appropriate rows in a
-                python list that represesnts a table
-    Returns:
-        a python list that represents the updated table
+        1) updates the appropriate rows in a table
+            with data in a passed-in list of updated
+            rows. The table is passed in as a 
+            jsonified python list.
     Args:
-        rows_list: a python list of dictionaries, each
-        dictionary representing a row that contains
-        updated data.
-        table_list: a python list of dictionaries that
-        represents a table
+        1) rows_list: a python list of dictionaries, each
+         dictionary representing a row that contains
+         updated data. The number of dictionaries can be 
+         from 1 to the number of rows in a table.
+        2) json_table_list: the table that has to have  
+         outdated rows replaced. This is a jsonified 
+         python list of dictionaries, each dictionary
+         representing a row. The number of dictionaries
+         matches the number of rows of the corresponding
+         table in the ToteSys database.
+        3) file_location: the name of the table. this is
+         also the first part of the key under which 
+         the S3 bucket stores the table. The second part 
+         is a timestamp. The key looks like this,
+         for example: design/<timestamp-here>) 
+
+    Returns:
+        a python list of dictionaries each of which 
+         represents a row of a table that has been 
+         updated. The number of dictionaries is 
+         equal to the number of rows in the 
+         corresponding table in the ToteSys database.
+        
     """
 
-    # file_location is eg 'design'
-    key_to_search = file_location + "_id"
-    for dct in rows_list:
-        for row_dct in table_list:
-            if dct[key_to_search] == row_dct[key_to_search]:
-                # dict['design_id'] is a dictionary
-                # table_list['design_id'] is a dictionary
+    # convert json_table_list to a python list:
+    table_list = json.load(json_table_list)
 
-                # replace the row in table_list
-                ind = table_list.index(row_dct)
-                table_list[ind] = dct
-    return table_list
+    # file_location is, eg, 'design'.
+    # update_row and table_row are dictionaries
+    # with keys that are column names and the 
+    # values of those keys are row-cell values:
+    id_col_name = file_location + "_id"
+    ind = get_row_index(rows_list, table_list, id_col_name)
+    table_list[ind] = update_row
+
+    return json_table_list
+
+
+
+
+def get_indexes_of_rows(row_list: list, table_list: list , key_to_find: str):
+    """
+    This function:
+        1) looks for the member dictionary of 
+            list table_list whose key
+            key_to_find has a value that is 
+            the same as the value of the same 
+            key in a member dictionary of 
+            row_list. 
+
+    Args:
+        1) row_list: a list of dictionaries 
+            each of which has the key (among
+            others) key_to_find.
+        2) table_list: a list of dictionaries each
+            of which has the key (among others) 
+            key_to_find.
+        3) key_to_find: a key whose value you want to  
+            be the same in one member of row_list and 
+            one member of table_list
+
+    Returns:
+        A list whose first member is the index of
+         the matching dictionary in row_list and 
+         whose second member is the index of the 
+         matching dictionary in table_list.
+    """
+    # for update_row in row_list:
+    #     for table_row in table_list:
+    #         if update_row[key_to_find] == table_row[key_to_find]:
+    #             ind = table_list.index(table_row)
+    #             table_list[ind] = update_row
+    #             return
+
+    return [ table_row     
+            if update_row[key_to_find] != table_row[key_to_find] else update_row
+            for update_row in row_list    for table_row in table_list    
+           ]
+
+
+
+
+
+
+
+
+
 
 
 def save_updated_table_to_S3(
