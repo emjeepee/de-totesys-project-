@@ -7,18 +7,31 @@ from src.utils_write_to_ingestion_bucket import write_to_ingestion_bucket
 from src.change_after_time_timestamp import change_after_time_timestamp
 
 
-# write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name)
-
 
 def lambda_handler(event=None, context=None):
+    """
+    This function:
+        1)
+
+    Args:
+        1) event: set to None
+        2) context: set to None
+    
+    Returns:
+        None
+    """
+
+
     if event is None:
         event = {"time": "1900-01-01 00:00:00"}
 
     s3_client = boto3.client("s3")
     bucket_name = "11-ingestion-bucket"
-
-    #
     after_time = event["time"]
+
+    # Make a list that contains the 
+    # names of the tables of interest
+    # in the ToteSys database: 
     tables = [
         "design",
         "payment",
@@ -33,15 +46,30 @@ def lambda_handler(event=None, context=None):
         "currency",
         "payment_type",
     ]
+
+    # Create an instance of a 
+    #  pg8000.native Connection
+    # object:
     conn = conn_to_db("TOTESYS")
 
+
+    # Get the timestamp saved in 
+    # in the S3 ingestion bucket
+    # (which is for 5 minutes ago)
+    # and replace that timestamp 
+    # with one for the current time:
     after_time = change_after_time_timestamp(
         bucket_name, s3_client, "***timestamp***", "1900-01-01 00:00:00"
-    )
+                                            )
 
+
+    # Get updated data from each table:
     data_for_s3 = get_data_from_db(tables, after_time, conn, read_table, convert_data)
+
+    # Write data to the bucket. 
     write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name)
 
+    # Close connection to the ToteSys database:
     close_db(conn)
 
 
