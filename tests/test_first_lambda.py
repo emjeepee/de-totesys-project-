@@ -56,17 +56,11 @@ def S3_setup(aws_credentials):
         yield S3_client
 
 
-# conn = conn_to_db("totesys")
-# conn = conn_to_db("")
-
-
-# @patch("src.conn_to_db.conn_to_db")
-def test_get_data_from_db_returns_python_list_each_of_whose_members_is_jsonified_python_list_of_dicts():
+def test_get_data_from_db_returns_python_list_of_dicts():
     # arrange
-    # get_data_from_db returns a python list each of whose members is a jsonified
-    # version of this: {'design': [{<data from one row>}, {<data from one row>}, etc]}
+    # get_data_from_db() returns a list like this:
+    # [{'design': [{<data from one row>}, {<data from one row>}, etc]}, {'sales': [{<data from one row>}, {<data from one row>}, etc]}, etc]
 
-    # patch("src.lambda_handler.tables", return_value=["design"])
     mock_dict = {
         "design": [
             {"design_id": 1, "name": "abdul", "team": 1},
@@ -88,6 +82,13 @@ def test_get_data_from_db_returns_python_list_each_of_whose_members_is_jsonified
     # print(f'response is >>> {response}')
     assert json.loads(response[0]) == mock_dict
     # assert json.loads(response[1])["payment"] == mock_dict
+
+
+
+
+
+
+
 
 
 # @pytest.mark.skip

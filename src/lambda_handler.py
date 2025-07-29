@@ -63,14 +63,20 @@ def lambda_handler(event=None, context=None):
                                             )
 
 
-    # Get updated data from each table:
-    data_for_s3 = get_data_from_db(tables, after_time, conn, read_table, convert_data)
+    # Get updated data from each table
+    # in the ToteSys database.
+    # data_for_s3 below is a list of 
+    # jsonified dictionaries, each 
+    # dictionary containing a table 
+    # name and the updated rows of that 
+    # table:
+    data_for_s3 = get_data_from_db(tables, after_time, conn, read_table)
 
     # Write data to the bucket. 
-    write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name)
+    write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name, convert_data)
 
     # Close connection to the ToteSys database:
     close_db(conn)
 
 
-# print(lambda_handler("event","context"))
+

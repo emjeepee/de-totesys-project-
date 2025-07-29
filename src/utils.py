@@ -105,7 +105,7 @@ def read_table(table_name: str, conn: Connection, after_time: str):
 
 
 
-def convert_data(data: dict | list):
+def convert_data(data: dict):
     """
     This function:
         converts the data passed in into json format.
@@ -124,11 +124,7 @@ def convert_data(data: dict | list):
     # uses the helper function to convert 
     # the value to a string or float, 
     # respectively:
-    try:
-        return json.dumps(data, default=serialize_datetime)
-    except (ValueError, TypeError) as error:
-        logger.error("Unable to dump the data")
-        raise ValueError(f"Data cannot be converted: {error}")
+    return json.dumps(data, default=serialize_datetime)
 
 
 
@@ -138,9 +134,8 @@ def convert_data(data: dict | list):
 def serialize_datetime(obj):
     """
     This function:
-        1) is used by json.dumps(), which 
-           function convert_data() 
-           employs.
+        1) gets called by json.dumps() inside 
+           convert_data().
         2) converts the passed-in object
            to an ISO date string if it is
            a datetime.datetime object.    
@@ -158,6 +153,6 @@ def serialize_datetime(obj):
         a string.
     """
     if isinstance(obj, (datetime.datetime, decimal.Decimal)):
-        return obj.isoformat()  # Convert datetime
+        return obj.isoformat()  # Convert to format '2025-07-01T15:33:47'
     if isinstance(obj, decimal.Decimal):
         return str(obj)
