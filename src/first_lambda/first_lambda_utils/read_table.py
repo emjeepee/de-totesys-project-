@@ -41,12 +41,12 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     # previous run of the first
     # lambda function. Each table has a 
     # column labelled 'last_updated'.
-    # variable result will contain a 
-    # list of tuples, each of which 
-    # represents a row, eg:
-    # [('xx', "aaa", 3.14, etc)
-    #  ('yy', "bbb", 3.15, etc)
-    #  ('zz', "ccc", 3.16, etc) ]
+    # result will contain a list of 
+    # member lists, each member
+    # representing a row, eg:
+    # [ [20496, 'SALE', 14504, None, datetime.datetime(2025, 6, 4, 8, 58, 10, 6000), datetime.datetime(2025, 6, 4, 8, 58, 10, 6000)],
+    # [20497, 'SALE', 14505, None, datetime.datetime(2025, 6, 4, 9, 26, 9, 972000), datetime.datetime(2025, 6, 4, 9, 26, 9, 972000)],
+    # [20498, 'SALE', 14506, None, datetime.datetime(2025, 6, 4, 9, 29, 10, 166000), datetime.datetime(2025, 6, 4, 9, 29, 10, 166000)], etc  ]
     result = conn.run(
         f"""
         SELECT * FROM {table_name}
@@ -59,10 +59,19 @@ def read_table(table_name: str, conn: Connection, after_time: str):
 
     # Make a list of the column names of the
     # table in question. 
-    # query_result below will be a list
-    # of tuples, each tuple containing a
-    # a string for the name of a column
-    # of the table in question:
+    # query_result below will be a list 
+    # of lists, like this (because that is what 
+    # pg8000.native.Connection returns – other 
+    # versions of pg8000 return tuples and can be 
+    # made to return dictionaries):
+    # [
+    #     ['design_id'],
+    #     ['created_at'],
+    #     ['design_name'],
+    #     ['file_location'],
+    #     ['file_name'],
+    #     ['last_updated'],
+    # ] 
     query_result = conn.run(
         f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}' ORDER BY ordinal_position"
                            )
