@@ -1,8 +1,8 @@
-from src.conn_to_db import conn_to_db
+from first_lambda_utils.conn_to_db import conn_to_db
 from unittest.mock import Mock, patch, ANY
 import pytest
 import os
-from src.conn_to_db import conn_to_db
+from first_lambda_utils.conn_to_db import conn_to_db
 
 
 def test_conn_to_db_connects_to_the_database():

@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.conn_to_db import conn_to_db, close_db
+from first_lambda_utils.conn_to_db import conn_to_db, close_db
 
 
 # ************************************************************************
