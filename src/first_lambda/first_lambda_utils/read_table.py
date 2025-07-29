@@ -1,7 +1,6 @@
-import json
+
 from pg8000.native import Connection
 import datetime
-import decimal
 import logging
 
 
@@ -98,61 +97,3 @@ def read_table(table_name: str, conn: Connection, after_time: str):
 
     return {table_name: dict_data}
 
-
-
-
-
-
-
-
-def convert_data(data: dict):
-    """
-    This function:
-        converts the data passed in into json format.
-
-    Args:
-        data, a dict 
-        
-    Returns:
-        A json string, ready to upload into the 
-        ingestion S3 bucket as a json file
-    """
-
-    # If the value of a key in dict data is 
-    # a datetime.datetime object or a 
-    # datetime.date object then this function
-    # uses the helper function to convert 
-    # the value to a string or float, 
-    # respectively:
-    return json.dumps(data, default=serialize_datetime)
-
-
-
-
-
-
-def serialize_datetime(obj):
-    """
-    This function:
-        1) gets called by json.dumps() inside 
-           convert_data().
-        2) converts the passed-in object
-           to an ISO date string if it is
-           a datetime.datetime object.    
-        3) converts the passed-in object
-           to a string if it is a
-           decimal.Decimal object.    
-
-
-    Args:
-        an object that is either a 
-        datetime.datetime object or 
-        a decimal.Decimal object.
-
-    Returns:
-        a string.
-    """
-    if isinstance(obj, (datetime.datetime, decimal.Decimal)):
-        return obj.isoformat()  # Convert to format '2025-07-01T15:33:47'
-    if isinstance(obj, decimal.Decimal):
-        return str(obj)

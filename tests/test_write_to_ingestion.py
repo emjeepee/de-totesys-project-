@@ -7,7 +7,7 @@ from datetime import datetime
 import os
 import re
 from botocore.exceptions import ClientError
-from src.utils_write_to_ingestion_bucket import (
+from first_lambda_utils.write_to_ingestion_bucket import (
     write_to_ingestion_bucket,
     get_most_recent_table_data,
     create_formatted_timestamp,

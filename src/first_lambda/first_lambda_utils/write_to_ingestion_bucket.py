@@ -3,6 +3,7 @@ import boto3
 import json
 from botocore.exceptions import ClientError
 import logging
+from first_lambda_utils.update_rows_in_table import update_rows_in_table
 
 
 logger = logging.getLogger("Mylogger")
@@ -140,6 +141,13 @@ def get_most_recent_table_data(
     except ClientError as e:
         return e
     
+
+
+
+
+
+
+
 
 def get_latest_table(resp_obj, S3_client: boto3.client, bucket_name: str):
     """

@@ -2,11 +2,9 @@ from unittest.mock import Mock
 import pytest
 from unittest.mock import Mock, patch, ANY
 from moto import mock_aws
-from src.change_after_time_timestamp import change_after_time_timestamp
+from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
 
 import os
-import datetime
-import json
 import boto3
 
 

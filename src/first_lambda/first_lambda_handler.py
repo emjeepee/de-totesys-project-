@@ -1,14 +1,14 @@
 import boto3
-from src.utils_write_to_ingestion_bucket import write_to_ingestion_bucket
-from src.utils import convert_data, read_table
-from src.conn_to_db import conn_to_db, close_db
-from src.lambda_utils import get_data_from_db, write_to_s3
-from src.utils_write_to_ingestion_bucket import write_to_ingestion_bucket
-from src.change_after_time_timestamp import change_after_time_timestamp
+from first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
+from first_lambda_utils import convert_data, read_table
+from first_lambda_utils.conn_to_db import conn_to_db, close_db
+from first_lambda_utils import get_data_from_db, write_to_s3
+from first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
+from first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
 
 
 
-def lambda_handler(event=None, context=None):
+def first_lambda_handler(event=None, context=None):
     """
     This function:
         1)

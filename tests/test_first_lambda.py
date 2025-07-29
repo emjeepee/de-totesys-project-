@@ -6,10 +6,10 @@ import json
 import boto3
 import os
 from src.utils import read_table, convert_data
-from src.lambda_utils import get_data_from_db, write_to_s3
-from src.conn_to_db import conn_to_db
+from first_lambda_utils.lambda_utils import get_data_from_db, write_to_s3
+from first_lambda_utils.conn_to_db import conn_to_db
 from pg8000.native import Connection
-from src.utils_write_to_ingestion_bucket import (
+from first_lambda_utils.write_to_ingestion_bucket import (
     write_to_ingestion_bucket,
     save_updated_table_to_S3,
     get_most_recent_table_data,
