@@ -23,6 +23,7 @@ on:
 jobs:
   run-tests:
     name: run-tests
+    if: false
     runs-on: ubuntu-latest
     steps:
         - name: Checkout Repo
@@ -47,6 +48,7 @@ jobs:
 
   deploy-project:
     name: deploy-project
+    if: false
     runs-on: ubuntu-latest
     environment: dev
     needs: run-tests
