@@ -41,7 +41,7 @@ tables = [
     "payment_type",
 ]
 
-tables_1 = ["design", "payment"]
+tables_names = ["design", "payment"]
 
 
 @pytest.fixture(scope="function")
@@ -73,9 +73,9 @@ def test_get_data_from_db_returns_python_list_of_dicts():
 
     mock_read_table = Mock()
     mock_read_table.return_value = mock_dict
-    # response = get_data_from_db(tables_1, "1960-01-01 00:00:00", conn, mock_read_table, convert_data)
+    # response = get_data_from_db(tables_names, "1960-01-01 00:00:00", conn, mock_read_table, convert_data)
     response = get_data_from_db(
-        tables_1, "1960-01-01 00:00:00", "xxx", mock_read_table, convert_data
+        tables_names, "1960-01-01 00:00:00", "xxx", mock_read_table, convert_data
     )
     # response should be mock_dict
 
@@ -121,7 +121,7 @@ def test_write_to_s3_saves_a_whole_table_to_the_bucket_when_no_key_in_bucket_equ
     mock_read_table.return_value = mock_dict
 
     data_list = get_data_from_db(
-        tables_1, "1900-01-01 00:00:00", "xxx", mock_read_table, convert_data
+        tables_names, "1900-01-01 00:00:00", "xxx", mock_read_table, convert_data
     )
 
     # data_list should be a list of these kinds of objects jsonified:
@@ -173,7 +173,7 @@ def test_write_to_s3_saves_a_whole_table_to_the_bucket_when_no_key_in_bucket_equ
     mock_read_table.return_value = {"design": modified_rows}
 
     data_list = get_data_from_db(
-        tables_1, "1900-01-01 00:00:00", "xxx", mock_read_table, convert_data
+        tables_names, "1900-01-01 00:00:00", "xxx", mock_read_table, convert_data
     )
 
     # data_list should be a list of these kinds of objects jsonified:
