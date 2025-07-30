@@ -1,3 +1,5 @@
+from src.first_lambda.first_lambda_utils.serialise_datetime import convert_dt_values_to_iso
+from src.first_lambda.first_lambda_utils.make_row_dicts import make_row_dicts
 
 from pg8000.native import Connection
 import datetime
@@ -81,28 +83,21 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     column_names = [col[0] for col in query_result] # ['name', 'location', etc]
 
 
+    # convert those values in the member lists of result
+    # that are datetime.datetime objects into ISO time 
+    # strings and convert those values that are 
+    # decimal.Decimal values to floats:
+    result_washed = convert_dt_values_to_iso(result) 
 
-    dict_data = []
+    row_data = make_row_dicts(column_names, result_washed)
+    # row_data ends up looking like 
+    # [ {"id": 6,  "name": "aaa",  "value": 3.14,  "date": '2024-05-01T10:30:00', etc},         
+    #   {"id": 7,  "name": "bbb",  "value": 3.15,  "date": '2024-05-01T10:30:00', etc},
+    #    etc ]
+    # ie it's a list that contains dicts. each dict
+    # represents a row of updated data and each 
+    # key-value pair in a dict represents <column name>:<cell value>.
 
-    for i in result:
-        if isinstance(i, tuple):
-            i = list(i) # eg [7, "bbb", 3.15, etc]
-        if isinstance(i, list):
-            dic_to_append = {}
-            for j in range(len(i)):
-                if isinstance(i[j], datetime.datetime):
-                    dic_to_append[column_names[j]] = i[j].isoformat()
-                else:
-                    dic_to_append[column_names[j]] = i[j]
-            # dict_to_append now looks like {"id": 6,  "name": "aaa",  "value": 3.14,  "date": '2024-05-01T10:30:00', etc},         
-            # ie contains columns names and row-cell values for one row of the table in question.
-            dict_data.append(dic_to_append)
-            # dict_data ends up looking like [ {"id": 6,  "name": "aaa",  "value": 3.14,  "date": '2024-05-01T10:30:00', etc},         
-            #                           {"id": 7,  "name": "bbb",  "value": 3.15,  "date": '2024-05-01T10:30:00', etc},
-            #                           etc ]
-            # ie it's a list that contains dicts. each dict
-            # represents a row of updated data and each 
-            # key-value pair in a dict represents <column name>:<cell value>.
 
-    return {table_name: dict_data}
+    return {table_name: row_data}
 
