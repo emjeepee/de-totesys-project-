@@ -1,4 +1,4 @@
-from src.first_lambda.first_lambda_utils.serialise_datetime import convert_dt_values_to_iso
+from src.first_lambda.first_lambda_utils.convert_dt_values_to_iso import convert_dt_values_to_iso
 from src.first_lambda.first_lambda_utils.make_row_dicts import make_row_dicts
 
 from pg8000.native import Connection
