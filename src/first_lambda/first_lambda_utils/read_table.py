@@ -86,7 +86,7 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     # convert those values in the member lists of result
     # that are datetime.datetime objects into ISO time 
     # strings and convert those values that are 
-    # decimal.Decimal values to floats:
+    # decimal.Decimal values into floats:
     result_washed = convert_dt_values_to_iso(result) 
 
     row_data = make_row_dicts(column_names, result_washed)
