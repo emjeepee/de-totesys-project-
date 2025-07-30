@@ -1,6 +1,5 @@
-from first_lambda_utils.conn_to_db import conn_to_db
+from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db
 from unittest.mock import Mock, patch, ANY
-import pytest
 import os
 from first_lambda_utils.conn_to_db import conn_to_db
 
