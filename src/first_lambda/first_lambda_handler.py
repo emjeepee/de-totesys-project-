@@ -11,7 +11,11 @@ from first_lambda_utils.change_after_time_timestamp import change_after_time_tim
 def first_lambda_handler(event=None, context=None):
     """
     This function:
-        1)
+        1) runs every five minutes.
+        2) gets updated row data for every
+         table.
+        3) updates the tables.
+        4) saves the tables to the S3 ingestion bucket. 
 
     Args:
         1) event: set to None
@@ -29,9 +33,8 @@ def first_lambda_handler(event=None, context=None):
     bucket_name = "11-ingestion-bucket"
     after_time = event["time"]
 
-    # Make a list that contains the 
-    # names of the tables of interest
-    # in the ToteSys database: 
+    # Make a list of names of the 
+    # tables in the ToteSys database: 
     tables = [
         "design",
         "payment",
@@ -48,14 +51,13 @@ def first_lambda_handler(event=None, context=None):
     ]
 
     # Create an instance of a 
-    #  pg8000.native Connection
+    # pg8000.native.Connection
     # object:
     conn = conn_to_db("TOTESYS")
 
 
     # Get the timestamp saved in 
     # in the S3 ingestion bucket
-    # (which is for 5 minutes ago)
     # and replace that timestamp 
     # with one for the current time:
     after_time = change_after_time_timestamp(
@@ -69,13 +71,17 @@ def first_lambda_handler(event=None, context=None):
     # jsonified dictionaries, each 
     # dictionary containing a table 
     # name and the updated rows of that 
-    # table:
-    data_for_s3 = get_data_from_db(tables, after_time, conn, read_table)
+    # table.
+    # Also write data to the bucket:
+    try:
+        data_for_s3 = get_data_from_db(tables, after_time, conn, read_table)
+        write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name, convert_data)
+    
+    except RuntimeError as e:
+        # CloudWatch will log the following error:
+        raise RuntimeError("Something went wrong!") from e 
 
-    # Write data to the bucket. 
-    write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name, convert_data)
-
-    # Close connection to the ToteSys database:
+    # Close connection to ToteSys database:
     close_db(conn)
 
 

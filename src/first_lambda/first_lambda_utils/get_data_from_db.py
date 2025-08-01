@@ -45,8 +45,11 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
 
     data_list = []
     for table in table_names:
-        result = read_table(table, conn, after_time)  # {'design': [{<data from one row>}, {<data from one row>}, etc]}
-        data_list.append(result)
+        try:
+            result = read_table(table, conn, after_time)  # {'design': [{<data from one row>}, {<data from one row>}, etc]}
+            data_list.append(result)
+        except RuntimeError as e:
+            raise RuntimeError from e
         # data_list is a python list. Each member of that list is 
         # this type of dictionary: 
         # {'<table_name_here>': [{<data from one row>}, {<data from one row>}, etc]}.

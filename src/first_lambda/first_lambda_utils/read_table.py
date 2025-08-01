@@ -1,8 +1,8 @@
 from src.first_lambda.first_lambda_utils.convert_dt_values_to_iso import convert_dt_values_to_iso
 from src.first_lambda.first_lambda_utils.make_row_dicts import make_row_dicts
+from src.first_lambda.first_lambda_utils.contact_tote_sys_db import contact_tote_sys_db
 
 from pg8000.native import Connection
-import datetime
 import logging
 
 
@@ -49,15 +49,16 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     # [ [20496, 'SALE', 14504, None, datetime.datetime(2025, 6, 4, 8, 58, 10, 6000), datetime.datetime(2025, 6, 4, 8, 58, 10, 6000)],
     # [20497, 'SALE', 14505, None, datetime.datetime(2025, 6, 4, 9, 26, 9, 972000), datetime.datetime(2025, 6, 4, 9, 26, 9, 972000)],
     # [20498, 'SALE', 14506, None, datetime.datetime(2025, 6, 4, 9, 29, 10, 166000), datetime.datetime(2025, 6, 4, 9, 29, 10, 166000)], etc  ]
-    result = conn.run(
-        f"""
-        SELECT * FROM {table_name}
-        WHERE last_updated > :after_time LIMIT 20;
-        """,
-        after_time=after_time,
-                    )
-
-
+    # OLD CODE (delete eventually):
+    # result = conn.run(
+    #     f"""
+    #     SELECT * FROM {table_name}
+    #     WHERE last_updated > :after_time LIMIT 20;
+    #     """,
+    #     after_time=after_time,
+    #                 )
+       
+    
 
     # Make a list of the column names of the
     # table in question. 
@@ -74,20 +75,27 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     #     ['file_name'],
     #     ['last_updated'],
     # ] 
-    query_result = conn.run(
-        f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}' ORDER BY ordinal_position"
-                           )
+    # OLD CODE (delete eventually):
+    # query_result = conn.run(
+    #     f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}' ORDER BY ordinal_position"
+    #                        )
+    try:
+        query_result_2 = contact_tote_sys_db(conn, 2, 'not-relevant', table_name)
+        query_result_1 = contact_tote_sys_db(conn, 1, after_time, table_name)
+    except RuntimeError as e:
+        raise RuntimeError from e
+    
 
-    # Convert query_result to a list 
+    # Convert query_result to list 
     # of column-name strings: 
-    column_names = [col[0] for col in query_result] # ['name', 'location', etc]
+    column_names = [col[0] for col in query_result_2] # ['name', 'location', etc]
 
 
     # convert those values in the member lists of result
     # that are datetime.datetime objects into ISO time 
     # strings and convert those values that are 
     # decimal.Decimal values into floats:
-    result_washed = convert_dt_values_to_iso(result) 
+    result_washed = convert_dt_values_to_iso(query_result_1) 
 
     row_data = make_row_dicts(column_names, result_washed)
     # row_data ends up looking like 
