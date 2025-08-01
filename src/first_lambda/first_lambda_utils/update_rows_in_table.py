@@ -1,3 +1,5 @@
+import json
+
 def update_rows_in_table( rows_list: list, json_table_list, file_location: str ):
     
     """
