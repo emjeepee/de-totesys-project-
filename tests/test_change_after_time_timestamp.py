@@ -7,7 +7,10 @@ from src.first_lambda.first_lambda_utils.change_after_time_timestamp import chan
 import os
 import boto3
 
-
+# scope="function" ensures this setup runs 
+# before every test function that uses it.
+# 'aws_credentials' is the name of the 
+# fixture:
 @pytest.fixture(scope="function")
 def aws_credentials():
     """Mocked AWS Credentials for moto."""
