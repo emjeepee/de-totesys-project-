@@ -1,6 +1,5 @@
-from unittest.mock import Mock
 import pytest
-from unittest.mock import Mock, patch, ANY
+from unittest.mock import Mock, patch
 from moto import mock_aws
 from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
 
@@ -48,17 +47,24 @@ def S3_setup(aws_credentials):
             CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
         )
 
-        timesstamp_1900 = "1900-01-01_00-00-00"  # change_after_time_timestamp_stamp()
-        # returns this on first ever run of
-        # the first lambda, ie this is
-        # returned by the 'except:' code (of
-        # the function being tested).
 
-        timesstamp_2025 = "2025-06-04_00-00-00"  # change_after_time_timestamp_stamp()
-        # returns this when the first lambda
-        # runs for the 2nd-plus time, ie this
-        # is returned by the 'try:' code (of
-        # the function being tested).
+        # change_after_time_timestamp()
+        # returns timesstamp_1900 on the 
+        # first ever run of the first lambda, 
+        # ie this is returned by the 
+        # 'except:' code of the function 
+        # under test.
+        timesstamp_1900 = "1900-01-01_00-00-00"  
+
+
+        # change_after_time_timestamp()
+        # returns timesstamp_2025 when the 
+        # first lambda runs for the 
+        # 2nd-plus time, ie this is 
+        # returned by the 'try:' code of
+        # the function being tested.
+        timesstamp_2025 = "2025-06-04_00-00-00"  
+        
 
         timestamp_key = "***current_timestamp***"
 
@@ -81,7 +87,7 @@ def S3_setup(aws_credentials):
 
 def test_that_function_change_after_time_timestamp_returns_default_timestamp_on_appropriate_occasion(
     S3_setup,
-):
+                                                                                    ):
     # arrange
     yield_list = S3_setup
     expected_timestamp = yield_list[3]
@@ -131,7 +137,7 @@ def test_that_function_change_after_time_timestamp_saves_new_timestamp_to_bucket
     ts_key = yield_list[5]
 
     # act
-    with patch("src.change_after_time_timestamp.datetime") as mock_datetime:
+    with patch("src.first_lambda.first_lambda_utils.change_after_time_timestamp.datetime") as mock_datetime:
         mock_now = Mock()
         mock_now.isoformat.return_value = "2025-06-04T08:28:12.301474+00:00"
         mock_datetime.now.return_value = mock_now
