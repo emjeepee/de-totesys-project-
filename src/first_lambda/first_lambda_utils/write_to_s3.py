@@ -92,5 +92,4 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
                 )
 
         except ClientError as e:
-            logger.error("Unable to write to S3")
-            return e
+            raise RuntimeError("write_to_s3() tried to read the ingestion bucket but an error occurred") from e
