@@ -43,26 +43,18 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     # previous run of the first
     # lambda function. Each table has a 
     # column labelled 'last_updated'.
-    # result will contain a list of 
+    # query_result_1 will contain a list of 
     # member lists, each member
     # representing a row, eg:
     # [ [20496, 'SALE', 14504, None, datetime.datetime(2025, 6, 4, 8, 58, 10, 6000), datetime.datetime(2025, 6, 4, 8, 58, 10, 6000)],
     # [20497, 'SALE', 14505, None, datetime.datetime(2025, 6, 4, 9, 26, 9, 972000), datetime.datetime(2025, 6, 4, 9, 26, 9, 972000)],
     # [20498, 'SALE', 14506, None, datetime.datetime(2025, 6, 4, 9, 29, 10, 166000), datetime.datetime(2025, 6, 4, 9, 29, 10, 166000)], etc  ]
-    # OLD CODE (delete eventually):
-    # result = conn.run(
-    #     f"""
-    #     SELECT * FROM {table_name}
-    #     WHERE last_updated > :after_time LIMIT 20;
-    #     """,
-    #     after_time=after_time,
-    #                 )
-       
+    
     
 
     # Make a list of the column names of the
     # table in question. 
-    # query_result below will be a list 
+    # query_result_2 below will be a list 
     # of lists, like this (because that is what 
     # pg8000.native.Connection returns – other 
     # versions of pg8000 return tuples and can be 
@@ -75,16 +67,28 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     #     ['file_name'],
     #     ['last_updated'],
     # ] 
-    # OLD CODE (delete eventually):
-    # query_result = conn.run(
-    #     f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}' ORDER BY ordinal_position"
-    #                        )
+
     try:
         query_result_2 = contact_tote_sys_db(conn, 2, 'not-relevant', table_name)
         query_result_1 = contact_tote_sys_db(conn, 1, after_time, table_name)
     except RuntimeError as e:
         raise RuntimeError from e
     
+
+    # OLD CODE (delete eventually):
+    # query_result_1 = conn.run(
+    #     f"""
+    #     SELECT * FROM {table_name}
+    #     WHERE last_updated > :after_time LIMIT 20;
+    #     """,
+    #     after_time=after_time,
+    #                 )
+    # query_result = conn.run(
+    #     f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}' ORDER BY ordinal_position"
+    #                        )
+
+
+
 
     # Convert query_result to list 
     # of column-name strings: 
