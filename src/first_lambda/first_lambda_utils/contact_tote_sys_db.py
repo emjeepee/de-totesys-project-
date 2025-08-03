@@ -1,4 +1,4 @@
-from pg8000.native import ProgrammingError
+from pg8000 import ProgrammingError
 
 def contact_tote_sys_db(conn_obj, opt: int, after_time: str, table_name: str):
     """
@@ -31,9 +31,11 @@ def contact_tote_sys_db(conn_obj, opt: int, after_time: str, table_name: str):
     query = f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}' ORDER BY ordinal_position" if opt == 2 else f"SELECT * FROM {table_name} WHERE last_updated > :after_time LIMIT 20;"
 
     try: 
-        return conn_obj.run(query, after_time=after_time)
+        response = conn_obj.run(query, after_time=after_time)
+        return response
+        
     
     except ProgrammingError as e:
         raise RuntimeError("Error occurred in attempt to read ToteSys database") from e
-
+        
     
