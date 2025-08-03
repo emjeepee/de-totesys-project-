@@ -31,7 +31,7 @@ def first_lambda_handler(event=None, context=None):
 
     s3_client = boto3.client("s3")
     bucket_name = "11-ingestion-bucket"
-    after_time = event["time"]
+    # after_time = event["time"]
 
     # Make a list of names of the 
     # tables in the ToteSys database: 

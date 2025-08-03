@@ -37,7 +37,7 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
         Either --
             1) the previous timestamp if reading the 
                 bucket is a success. The first time ever
-                that the lambda function runs this 
+                that the first lambda function runs this 
                 timestamp will be "1900-01-01T00-00-00".
             2) timestamp "1900-01-01T00-00-00" if  
                 reading the bucket fails.
@@ -48,6 +48,7 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
     # First create a timestamp string for the current time,
     # like this: "2025-06-04T08:28:12":
     now_ts_with_ms = datetime.now(UTC).isoformat()
+    # Get rid of the milliseconds:
     now_ts = now_ts_with_ms[:-13]
 
 
@@ -62,7 +63,7 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
         # Return the previous timestamp:
         return response["Body"].read().decode("utf-8")
     
-    except ClientError:
+    except ClientError as e:
         # If there is an error in reading the 
         # S3 ingestion bucket return the 
         # default timestamp (which represents 
