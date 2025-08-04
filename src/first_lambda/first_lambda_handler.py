@@ -79,7 +79,7 @@ def first_lambda_handler(event=None, context=None):
     
     except RuntimeError as e:
         # CloudWatch will log the following error:
-        raise RuntimeError("Something went wrong!") from e 
+        raise RuntimeError from e 
 
     # Close connection to ToteSys database:
     close_db(conn)

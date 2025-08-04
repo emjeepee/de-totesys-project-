@@ -24,4 +24,4 @@ def save_updated_table_to_S3(
     try:
         S3_client.put_object(Bucket=bucket, Key=new_key, Body=updated_table)
     except ClientError as e:
-        return e
+        raise RuntimeError('Error occurred in attempt to write data to the ingestion bucket') from e

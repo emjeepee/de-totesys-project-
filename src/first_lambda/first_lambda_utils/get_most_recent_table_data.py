@@ -40,10 +40,10 @@ def get_most_recent_table_data(
     try:
         response = S3_client.list_objects_v2(Bucket=bucket_name, Prefix=file_location)
     except ClientError as e:
-        return e
+        raise RuntimeError('Error occurred in reading the ingestion bucket') from e
+
 
     try:
         return get_latest_table(response, S3_client, bucket_name)
-
-    except ClientError as e:
-        return e
+    except RuntimeError as e:
+        raise RuntimeError from e

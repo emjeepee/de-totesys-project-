@@ -1,5 +1,6 @@
 import json
 import boto3
+from botocore.exceptions import ClientError
 
 
 def get_latest_table(resp_obj, S3_client: boto3.client, bucket_name: str):
@@ -22,9 +23,15 @@ def get_latest_table(resp_obj, S3_client: boto3.client, bucket_name: str):
          of the table.        
 
     """
-    keys_list = [dict["Key"] for dict in resp_obj.get("Contents", [])]
-    # ['design/2025-06-02_22-17-19-2513.json', 'design/2025-05-29_22-17-19-2513.json', etc]
-    latest_table_key = sorted(keys_list)[ -1 ]  # 'design/2025-06-02_22-17-19-2513.json'
-    response = S3_client.get_object(Bucket=bucket_name, Key=latest_table_key)
-    data = response["Body"].read().decode("utf-8")
-    return json.loads(data)
+    try:
+        keys_list = [dict["Key"] for dict in resp_obj.get("Contents", [])]
+        # ['design/2025-06-02_22-17-19-2513.json', 'design/2025-05-29_22-17-19-2513.json', etc]
+        latest_table_key = sorted(keys_list)[ -1 ]  # 'design/2025-06-02_22-17-19-2513.json'
+        response = S3_client.get_object(Bucket=bucket_name, Key=latest_table_key)
+        data = response["Body"].read().decode("utf-8")
+        return json.loads(data)
+
+    except ClientError as e:
+        raise RuntimeError('Error occurred in reading the ingestion bucket') from e
+
+        
