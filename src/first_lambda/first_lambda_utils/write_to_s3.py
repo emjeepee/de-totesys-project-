@@ -67,29 +67,41 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
 
     """
 
+    # Make timestamp that code will  employ if 
+    # 
+    timestamp = create_formatted_timestamp()
+
     for member in data_list:  # member looks like this: {'design': [{<data from one row>}, {<data from one row>}, etc]}
-        # OLD CODE: table_data = json.loads( member )  # {'design': [{<data from one row>}, {<data from one row>}, etc]}
         table_name = list(member.keys())[0]  # 'design'
-        # OLD CODE: json_data = json.dumps(member[table_name]) # jsonified version of [{<data from one row>}, {<data from one row>}, etc]
         json_data = convert_data(member[table_name])
 
         try:
             # find out whether S3 bucket contains any objects 
             # under key table_name:
             response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=table_name)
-            # if yes, write the table data to S3
-            if response["KeyCount"] > 0:
+
+        except ClientError as e:
+            raise RuntimeError("Error occurred in attempt to read data from the ingestion bucket") from e
+
+        # if yes, write the table data to S3:    
+        if response["KeyCount"] > 0:
+            try:
                 write_to_ingestion_bucket(json_data, bucket_name, table_name, s3_client)
+            except RuntimeError as e:
+                raise RuntimeError from e
+            
             # if no, make a new timestamp, make the 
             # timestamp part of a key and write the 
-            # table data to S3 bucket under that key:
-            else:
-                timestamp = create_formatted_timestamp()
+            # table data to S3 bucket under that key
+            # (this happens on very first run of 
+            # first_lambda_handler(), the first 
+            # lambda function):
+        else:
+            try: 
                 s3_client.put_object(
                     Bucket=bucket_name,
                     Key=f"{table_name}/{timestamp}.json",
                     Body=json_data,
                 )
-
-        except ClientError as e:
-            raise RuntimeError("write_to_s3() tried to read the ingestion bucket but an error occurred") from e
+            except ClientError as e:
+                raise RuntimeError("Error occurred in attempt to write a table to the ingestion bucket.") from e

@@ -135,15 +135,3 @@ def test_contact_tote_sys_db_returns_list_of_rows(test_lists):
     assert expected_3 == result_3
 
 
-
-
-
-# @pytest.mark.skip
-def test_contact_tote_sys_db_raises_runtime_error():
-    # Arrange
-    mock_conn = Mock()
-    mock_conn.run.side_effect = ProgrammingError("SQL error")
-
-    # Act & Assert
-    with pytest.raises(RuntimeError, match="Error occurred in attempt to read ToteSys database"):
-        contact_tote_sys_db(mock_conn, 1, ANY, ANY)

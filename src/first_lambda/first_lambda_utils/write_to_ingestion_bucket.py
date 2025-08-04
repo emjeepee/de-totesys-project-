@@ -72,42 +72,32 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
         # Convert the passed-in updated rows to python:
         updated_rows = json.loads(data)  # python list like [ {<updated row>}, {<updated row>}, etc ]
 
-    except ClientError as e:
-        # log error to CloudWatch here
-        logger.error("Issue occured while retrieving the most recent table data")
-        return e
+    except RuntimeError as e:
+        raise RuntimeError from e
 
-    try:
-        # 3) Insert the updated rows into the retrieved 
-        # table.
-        # updated_table below is a python list of dictionaries:
-        updated_table = update_rows_in_table(updated_rows, latest_table, file_location)
+
+
+    # Insert the updated rows into the retrieved 
+    # table.
+    # updated_table below is a python list of dictionaries:
+    updated_table = update_rows_in_table(updated_rows, latest_table, file_location)
 
         # convert updated_table into json:
-        updated_table_json = json.dumps(updated_table)
+    updated_table_json = json.dumps(updated_table)
 
-    except ClientError as e:
-        # log error to CloudWatch here
-        logger.error("Ubable to update the S3 bucket with updated rows")
-        return e
-
-    # 4) Create a formatted timestamp:
+    # Create a formatted timestamp:
     formatted_ts = create_formatted_timestamp()
-    # 5) Make a string for the key under which to store the json list
+
+    # Make a string for the key under which to store the json list
     # that represents the updated table. Include the formatted
     # timestamp as part of the key:
     new_key = file_location + "/" + formatted_ts + ".json"
     
     try:
-        # 6) Store the json list that represents the updated table in
+        # Store the json list that represents the updated table in
         # the bucket under the newly created key:
         save_updated_table_to_S3(updated_table_json, s3_client, new_key, bucket)
 
-    except ClientError as e:
-        # log error to CloudWatch here
-        logger.error("Unable to save the data to the s3 bucket")
-
-        return e
-
-    return
+    except RuntimeError as e:
+        raise RuntimeError from e
 
