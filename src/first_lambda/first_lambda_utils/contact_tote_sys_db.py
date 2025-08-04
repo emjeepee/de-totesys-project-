@@ -28,6 +28,15 @@ def contact_tote_sys_db(conn_obj, opt: int, after_time: str, table_name: str):
     
     """
     
+
+    err_Msg = "Error in function contact_tote_sys_db()." \
+              "\nFailed to read ToteSys database" \
+              "\neither when:" \
+              "\n  1) trying to get a list of column " \
+              "\n      names of a table or" \
+              "\n  2) trying to get a list of updated" \
+              "\n     rows for a table."
+
     query = f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}' ORDER BY ordinal_position" if opt == 2 else f"SELECT * FROM {table_name} WHERE last_updated > :after_time LIMIT 20;"
 
     try: 
@@ -36,6 +45,6 @@ def contact_tote_sys_db(conn_obj, opt: int, after_time: str, table_name: str):
         
     
     except ProgrammingError as e:
-        raise RuntimeError("Error occurred in attempt to read ToteSys database") from e
+        raise RuntimeError(err_Msg) from e
         
     

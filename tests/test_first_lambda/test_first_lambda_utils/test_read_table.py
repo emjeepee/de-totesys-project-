@@ -1,9 +1,12 @@
 import decimal
 import datetime
-from unittest.mock import Mock
+from unittest.mock import Mock, patch, ANY
 import pytest
 
 from src.first_lambda.first_lambda_utils.read_table import read_table
+
+
+
 
 
 
@@ -49,5 +52,3 @@ def test_read_table_returns_expected_dict():
     # Assert
     assert result == expected
     assert mock_conn.run.call_count == 2
-
-

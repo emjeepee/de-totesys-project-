@@ -2,6 +2,7 @@ from src.first_lambda.first_lambda_utils.convert_dt_values_to_iso import convert
 from src.first_lambda.first_lambda_utils.make_row_dicts import make_row_dicts
 from src.first_lambda.first_lambda_utils.contact_tote_sys_db import contact_tote_sys_db
 
+
 from pg8000.native import Connection
 import logging
 
