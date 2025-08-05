@@ -37,7 +37,7 @@ def lambda_handler(event, context):
                 "s3SchemaVersion": "1.0",
                 "configurationId": "testConfigRule",
                 "bucket": {
-                    "name": "example-bucket",
+                    "name": "ingestion-bucket",
                     "ownerIdentity": {
                         "principalId": "EXAMPLE"
                     },
