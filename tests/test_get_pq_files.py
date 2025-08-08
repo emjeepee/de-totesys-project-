@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 from moto import mock_aws
 import json
 import boto3
-from src.First_util_for_3rd_lambda import get_pq_files
+from third_lambda.First_util_for_3rd_lambda import get_pq_files
 
 
 @pytest.fixture(scope="function")

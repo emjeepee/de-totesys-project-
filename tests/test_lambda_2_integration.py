@@ -2,7 +2,7 @@ import json
 import pytest
 from moto import mock_aws
 import boto3
-from second_lambda.lambda_2 import lambda_handler
+from second_lambda.second_lambda_handler import lambda_handler
 from datetime import datetime
 from unittest.mock import patch
 
