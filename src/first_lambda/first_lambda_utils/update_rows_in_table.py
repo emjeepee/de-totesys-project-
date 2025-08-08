@@ -1,6 +1,6 @@
 import json
 
-def update_rows_in_table( rows_list: list, json_table_list, file_location: str ):
+def update_rows_in_table( rows_list: list, table_list, file_location: str ):
     
     """
     This function:
@@ -13,8 +13,8 @@ def update_rows_in_table( rows_list: list, json_table_list, file_location: str )
          dictionary representing a row that contains
          updated data. The number of dictionaries can be 
          from 1 to the number of rows in a whole table.
-        2) json_table_list: the table that has to have  
-         its outdated rows replaced. This is a jsonified 
+        2) table_list: the table that has to have  
+         its outdated rows replaced. This is a 
          python list of dictionaries, each dictionary
          representing a row. The number of dictionaries
          matches the number of rows of the corresponding
@@ -34,8 +34,6 @@ def update_rows_in_table( rows_list: list, json_table_list, file_location: str )
         
     """
 
-    # convert json_table_list to a python list:
-    table_list = json.load(json_table_list)
 
     # file_location is, eg, 'design'.
     # update_row and table_row are dictionaries

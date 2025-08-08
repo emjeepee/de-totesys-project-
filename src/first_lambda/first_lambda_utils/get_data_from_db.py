@@ -14,8 +14,8 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
             time after_time.
             read_table() returns a dictionary.
         3) appends each dictionary to
-            a separate list.
-        4) returns that list.            
+            a list.
+        4) returns that list of dictionaries.            
 
     Args:
         table_names: a list of strings, each string
@@ -31,11 +31,17 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
                 and get a table's updated rows from it.
 
     Returns:
-        a python list each of whose members is a jsonified
-                python dictionary that represents a table 
-                and that contains a list of the table's 
-                updated rows. Each row is in the form of 
-                a dictionary.
+        a python list. Each member of the list is a 
+         python dictionary that represents a table
+         and only its updated rows. 
+         Each dictionary has one key, the name of a table.
+         The value of the key is a list of dictionaries,
+         each of which is an updated row of that table 
+         (so the number of those dictionaries is not 
+         necessarily the same as the total number of rows 
+         in the table in the ToteSys database and is 
+         likely to be less). 
+
 
 
     """

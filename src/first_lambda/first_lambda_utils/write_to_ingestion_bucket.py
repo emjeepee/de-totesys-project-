@@ -26,8 +26,8 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
         most recent of those tables (remember that 
         the bucket stores each table as a jsonified
         lists of dictionaries).
-    2. converts the most recent table to a python 
-        list (of dictionaries).
+    2. reasds the most recent table in the ingestion 
+        bucket to a python list (of dictionaries).
     3. replaces the appropriate rows in the python 
         table list.
     4. creates a new jsonified list to represent 
@@ -45,9 +45,9 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
 
 
     args:
-        1) data: a jsonified version of Python list
+        1) data: a Python list that looks like this:
             [{<data from a row>}, {<data from a row>}, etc].
-            Each dictionary in the list represents and
+            Each dictionary in the list represents an
             updated row of a table. The name of the table is 
             passed in as file_location. 
         2) bucket_name: name of the ingestion S3 bucket.
@@ -68,9 +68,7 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
     # whose name is given by file_location:
     try:
         latest_table = get_most_recent_table_data(file_location, s3_client, bucket)
-        # latest_table is a jsonified python list of dictionaries.
-        # Convert the passed-in updated rows to python:
-        updated_rows = json.loads(data)  # python list like [ {<updated row>}, {<updated row>}, etc ]
+        # latest_table is a python list of dictionaries.
 
     except RuntimeError as e:
         raise RuntimeError from e
@@ -79,8 +77,10 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
 
     # Insert the updated rows into the retrieved 
     # table.
-    # updated_table below is a python list of dictionaries:
-    updated_table = update_rows_in_table(updated_rows, latest_table, file_location)
+    # updated_table below is a python list of dictionaries.
+    # The list represents a whole table, now with updated 
+    # rows:
+    updated_table = update_rows_in_table(data, latest_table, file_location)
 
         # convert updated_table into json:
     updated_table_json = json.dumps(updated_table)

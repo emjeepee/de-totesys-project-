@@ -67,11 +67,13 @@ def first_lambda_handler(event=None, context=None):
 
     # Get updated data from each table
     # in the ToteSys database.
-    # data_for_s3 below is a list of 
-    # jsonified dictionaries, each 
-    # dictionary containing a table 
-    # name and the updated rows of that 
-    # table.
+    # data_for_s3 below looks like this:
+    # [ 
+    #   {'sales_orders'>: [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
+    #   {'design': [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
+    #   {'transactions': [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
+    #   etc        
+    # ] 
     # Also write data to the bucket:
     try:
         data_for_s3 = get_data_from_db(tables, after_time, conn, read_table)

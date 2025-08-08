@@ -107,9 +107,10 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     # [ {"id": 6,  "name": "aaa",  "value": 3.14,  "date": '2024-05-01T10:30:00', etc},         
     #   {"id": 7,  "name": "bbb",  "value": 3.15,  "date": '2024-05-01T10:30:00', etc},
     #    etc ]
-    # ie it's a list that contains dicts. each dict
+    # ie it's a python list of dicts. each dict
     # represents a row of updated data and each 
-    # key-value pair in a dict represents <column name>:<cell value>.
+    # key-value pair in a dict represents 
+    # <column name>:<cell value>.
 
 
     return {table_name: row_data}

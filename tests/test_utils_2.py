@@ -1,5 +1,5 @@
 import boto3.exceptions
-from src.utils_2 import *
+from second_lambda.second_lambda_utils.toDump import *
 from unittest.mock import Mock
 from moto import mock_aws
 import boto3

@@ -2,7 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 def save_updated_table_to_S3(
-    updated_table: str, S3_client: boto3.client, new_key: str, bucket: str
+    updated_table, S3_client: boto3.client, new_key: str, bucket: str
                             ):
     """
     This function:

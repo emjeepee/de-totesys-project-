@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, Mock
-from src.First_util_for_3rd_lambda import return_long_table_name
+from third_lambda.First_util_for_3rd_lambda import return_long_table_name
 
 
 def test_return_long_table_name_returns_sales_order():
