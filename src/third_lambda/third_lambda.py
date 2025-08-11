@@ -1,69 +1,109 @@
-import boto3
-from third_lambda.First_util_for_3rd_lambda import get_pandas_dataFrames
-from third_lambda.second_util_for_3rd_lambda import make_SQL_queries_to_warehouse
+from third_lambda.third_lambda_utils.third_lambda_init import third_lambda_init
+from third_lambda.third_lambda_utils.make_pandas_dataframe import make_pandas_dataframe
+from third_lambda.third_lambda_utils.make_SQL_queries import make_SQL_queries
+from third_lambda.third_lambda_utils.make_SQL_queries_to_warehouse import make_SQL_queries_to_warehouse
+from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
 
 
-# ***********#***********#***********#***********#***********#***********
-# This lambda function employs two utility functions:
-# get_pandas_dataFrames() and make_SQL_queries_to_warehouse
-# ***********#***********#***********#***********#***********#***********
-
-
-# use context for logging, performance checks, or debugging.
 def lambda_handler(event, context):
-    s3_client = boto3.client("s3")
-
     """
-    This function:
-        1) has the overall task of 
-            i) reading Parquet files in the processed 
-            bucket that were put there at a time 
-            indicated by the latest time stamp 
-            string held in the ingestion bucket, 
-            ii) creating SQL query strings that will 
-            insert updated table data into tables in 
-            the data warehouse (all the rows of a 
-            table will be inserted, some or all of
-            the rows of a table having been updated),
-            iii) connecting to the warehouse,
-            iv) making the SQL queries actually  
-            put those data in the warehouse and
-            v) closing the connection to the warehouse
+    This function will:
+        1) receive an event object from the processed
+            bucket when the second lambda function 
+            stores a dimension or the fact table 
+            there as a Parquet file.
+        2) respond to the event by first getting the 
+            Parquet file from the processed bucket 
+            and converting it to a Pandas dataframe.
+        3) then extract data for a row from the 
+            Pandas dataframe and convert that data 
+            into an SQL query string. The query string
+            will write the row to the appropriate 
+            table in the warehouse. this function 
+            will then append each query string  to a 
+            list. The query strings will be of the 
+            same type for all dimension tables as 
+            updated row data from a dimension table 
+            must replace outdated row data in the 
+            warehouse. The fact table will require a 
+            list of SQL query strings that add updated 
+            rows to a table in the warehouse, keeping 
+            the outdated rows.
+        4) connect to the data warehouse and loop
+            through the list to make the queries
+            to the data warehouse.
+        5) Close the connection to the warehouse.            
 
-        2) integrates the following utility functions
-            to carry out its task:
-                get_parquet_files()
-                make_SQL_queries_to_warehouse()
-    
     Args:
         event: the event that triggers this lambda
-        context: metadata
+         function.
+        context: metadata about the environment in 
+         which this lambda runs.
 
     Returns:
         None                            
     """
 
-    ingestion_bckt = "11-ingestion-bucket"
-    processed_bckt = event["detail"]["name"]
+    # Get lookup table that contains 
+    # values this lambda handler requires:
+    lookup = third_lambda_init(event)    
+    proc_bucket = lookup['proc_bucket']
+    s3_client = lookup['s3_client']
+    object_key = lookup['object_key']
+    table_name = lookup['table_name']
 
-    # create a dictionary that contains the
-    # pandas files relating to tables in
-    # the warehouse dictionary:
-    dataFrames_dict = get_pandas_dataFrames(
-        processed_bckt, ingestion_bckt, s3_client, "***timestamp***"
-    )
+    # Get the Parquet file and convert
+    # it to a pandas dataframe:
+    df = make_pandas_dataframe(proc_bucket, s3_client, object_key)
 
-    # dataFrames_dict will look
-    # like this:
-    # {
-    # 'dim_date': dim_table.parquet,
-    # ... ,
-    # 'facts_sales_order': facts_sales_order.parquet
-    # }, where each key is the name of a table
-    # in the warehouse database.
+    # make the SQL queries from the 
+    # data in the dataFrame:
+    queries_list = make_SQL_queries(df, table_name)
 
-    # get the data out of each of the
-    # files in the dictionary above and
-    # put the data in them into the
-    # warehouse database:
-    make_SQL_queries_to_warehouse(dataFrames_dict)
+    # Connnect to data warehouse:
+    conn = conn_to_db("WAREHOUSE")
+
+    # Make SQL queries to the data 
+    # warehouse:
+    make_SQL_queries_to_warehouse(queries_list, conn)
+
+    # Close connection to warehouse:
+    close_db(conn)
+
+
+    return 
+
+
+
+
+
+
+
+
+# OLD CODE:
+# ingestion_bckt = "11-ingestion-bucket"
+#     processed_bckt = event["detail"]["name"]
+
+#     # create a dictionary that contains the
+#     # pandas files relating to tables in
+#     # the warehouse dictionary:
+#     dataFrames_dict = get_pandas_dataFrames(
+#         processed_bckt, ingestion_bckt, s3_client, "***timestamp***"
+#     )
+
+#     # dataFrames_dict will look
+#     # like this:
+#     # {
+#     # 'dim_date': dim_table.parquet,
+#     # ... ,
+#     # 'facts_sales_order': facts_sales_order.parquet
+#     # }, where each key is the name of a table
+#     # in the warehouse database.
+
+#     # get the data out of each of the
+#     # files in the dictionary above and
+#     # put the data in them into the
+#     # warehouse database:
+#     make_SQL_queries_to_warehouse(dataFrames_dict)
+
+

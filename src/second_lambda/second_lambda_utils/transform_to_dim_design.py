@@ -1,4 +1,3 @@
-from src.second_lambda.second_lambda_utils.dicts_for_dim_tables import design_dict
 from src.second_lambda.second_lambda_utils.preprocess_dim_tables import preprocess_dim_tables
 
 
@@ -41,8 +40,8 @@ def transform_to_dim_design(design_data):
         #     except Exception as error:
         #         raise Exception(f"Error processing row{design.get("location_id")}: {error}")
         # return dim_design
+    design_dim_table = preprocess_dim_tables(design_data, ['created_at', 'last_updated'])
 
-    design_dim_table = preprocess_dim_tables(design_data, design_dict)        
 
     # design_dim_table is 
     # now the finished design

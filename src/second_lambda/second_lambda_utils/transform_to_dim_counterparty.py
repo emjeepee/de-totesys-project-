@@ -1,4 +1,3 @@
-from src.second_lambda.second_lambda_utils.dicts_for_dim_tables import counterparty_dict
 from src.second_lambda.second_lambda_utils.preprocess_dim_tables import preprocess_dim_tables
 
 
@@ -10,43 +9,52 @@ from src.second_lambda.second_lambda_utils.preprocess_dim_tables import preproce
 def transform_to_dim_counterparty(counterparty_data, address_data):
     """
     This function: 
-        transforms the counterpary table data as read from the 
-        ingestion bucket (and converted into a python list) 
-        into a counterparty dimension table.
-
-
+        1) transforms the counterpary table data that
+            came from the ingestion bucket (and is 
+            now unjsonified) into a counterparty 
+            dimension table.
+        2) uses address_data to create a lookup table 
+            in the form of a dictionary.
+        3) uses the lookup table to get the address 
+            details of a counterparty to be able to 
+            create the counterparty dimension table.
 
     Args:
         counterparty_data: a list of dicts. This is the 
-         counterparty table as held in the ingestion bucket 
-         (but unjsonified). Each dict is a row of the 
-         counterparty table. The number of dicts equals the
-         number of rows in the counterparty table in the 
-         ToteSys database (or ingestion bucket).
-        address_data: a list of dicts. This is the address table
-         table as held in the ingestion bucket (but unjsonified).
-         Each dict is a row of the address table. The number of 
-         dicts equals the number of rows in the address table in
-         the ToteSys database (or ingestion bucket).
-         This function uses this data to create a lookup table 
-         (actually a lookup dictionary) from which to get 
-         the address details of a counterparty as required by
-         the counterparty dimension table.
+         unjsonified version of the counterparty table 
+         from the ingestion bucket. Each dict is a row. 
+        address_data: a list of dicts. This is the 
+         unjsonified version of the address table from
+         the ingestion bucket. Each dict is a row. 
+         
 
     Returns:
         A python list of dictionaries that is the counterparty
         dimension table.         
 
     """
+    # the unjsonified counterparty table from the ingestion 
+    # bucket looks like this: 
+    # ['counterparty_id': 'xxx', 
+    # 'counterparty_legal_name': 'xxx', 
+    # 'legal_address_id': 'xxx',           DON"T NEED
+    # 'commercial_contact': 'xxx',         DON"T NEED
+    # 'delivery_contact': 'xxx',           DON"T NEED
+    # 'created_at': 'xxx',                 DON"T NEED
+    # 'last_updated': 'xxx']               DON"T NEED
+
+# DO NEED:
+# "counterparty_legal_address_line_1"   COMES FROM LOOKUP
+# "counterparty_legal_address_line_2"   COMES FROM LOOKUP
+# "counterparty_legal_district"         COMES FROM LOOKUP
+# "counterparty_legal_city"             COMES FROM LOOKUP
+# "counterparty_legal_postal_code"      COMES FROM LOOKUP   
+# "counterparty_legal_country"          COMES FROM LOOKUP
+# "counterparty_legal_phone_number"     COMES FROM LOOKUP
 
 
-    # preproc_cp_dim_table looks like this:
-    # [  {"counterparty_id": 1,  "counterparty_legal_name": 'aaaa aaaaa'},
-    #  {"counterparty_id": 2,  "counterparty_legal_name": 'bbbbb bbbbb'},
-    #  {"counterparty_id": 3,  "counterparty_legal_name": 'ccc ccccccc'},
-    #   etc
-    #]
-    preproc_cp_dim_table = preprocess_dim_tables(counterparty_data, counterparty_dict)
+
+    pp_cp_dim_table = preprocess_dim_tables(counterparty_data, ['legal_address_id', 'commercial_contact', 'delivery_contact', 'created_at', 'last_updated'])
 
     # make a look-up dictionary that contains data from the
     # address table. the dictionary will look like this:
@@ -70,28 +78,27 @@ def transform_to_dim_counterparty(counterparty_data, address_data):
     }
 
 
-
     # For every dictionary in list preproc_cp_dim_table
     # add the appropriate key value pairs: 
-    for i in range(len(preproc_cp_dim_table)):
+    for i in range(len(pp_cp_dim_table)):
         address = address_lookup.get(
                 counterparty_data[i].get("legal_address_id")
                                     )  # JOINS address table to counterparty at address ID
         
-        preproc_cp_dim_table[i]["counterparty_legal_address_line_1"] = address.get("address_line_1"),
-        preproc_cp_dim_table[i]["counterparty_legal_address_line_2"] = address.get("address_line_2"),
-        preproc_cp_dim_table[i]["counterparty_legal_district"] = address.get("district"),
-        preproc_cp_dim_table[i]["counterparty_legal_city"] = address.get("city"),
-        preproc_cp_dim_table[i]["counterparty_legal_postal_code"] = address.get("postal_code"),
-        preproc_cp_dim_table[i]["counterparty_legal_country"] = address.get("country"),
-        preproc_cp_dim_table[i]["counterparty_legal_phone_number"] = address.get("phone"),
+        pp_cp_dim_table[i]["counterparty_legal_address_line_1"] = address.get("address_line_1"),
+        pp_cp_dim_table[i]["counterparty_legal_address_line_2"] = address.get("address_line_2"),
+        pp_cp_dim_table[i]["counterparty_legal_district"] = address.get("district"),
+        pp_cp_dim_table[i]["counterparty_legal_city"] = address.get("city"),
+        pp_cp_dim_table[i]["counterparty_legal_postal_code"] = address.get("postal_code"),
+        pp_cp_dim_table[i]["counterparty_legal_country"] = address.get("country"),
+        pp_cp_dim_table[i]["counterparty_legal_phone_number"] = address.get("phone"),
 
 
-    # preproc_cp_dim_table is 
+    # pp_cp_dim_table is 
     # now the finished 
     # counterparty dimension 
     # table. Return it:
-    return preproc_cp_dim_table
+    return pp_cp_dim_table
 
 
 

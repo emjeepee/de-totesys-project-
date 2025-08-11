@@ -1,4 +1,3 @@
-from src.second_lambda.second_lambda_utils.dicts_for_dim_tables import dict_location
 from src.second_lambda.second_lambda_utils.preprocess_dim_tables import preprocess_dim_tables
 
 
@@ -42,7 +41,14 @@ def transform_to_dim_location(address_data: list):
 
     # create the final location 
     # dimension table:
-    location_dim_table = preprocess_dim_tables(address_data, dict_location)
+    location_dim_table = preprocess_dim_tables(address_data, ['created_at', 'last_updated'])
+        # In each dict in the list 
+        # change the name of key  
+        # "address_id" to
+        # "location_id":
+    for dict in location_dim_table:
+        dict["location_id"] = dict.pop("address_id")
+
     return location_dim_table
     
 

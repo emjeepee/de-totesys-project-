@@ -10,16 +10,16 @@ from src.second_lambda.second_lambda_utils.transform_to_dim_location import tran
 
 
 # This dictionary acts as a look up table for functions.
-# The keys of of the dictionary are the names of 
-# tables. A key is also the first half of the key under 
-# which the ingestion bucket stores tables.
+# Each key of the dictionary is the name of a table
+# in the ToteSys database and the first half of the key 
+# under which the ingestion bucket stores tables.
 # For example if a key for a table in the ingestion bucket
 # is 'design/20255-06-13_13:13:13' then the corresponding
 # key in the dictionary below is 'design'
 
-# The values of each key is a functions that creates 
-# either the facts table (in the case of key 'sales_order')
-# or a dimension table.
+# The value of each key is a function that creates 
+# either the facts table (in the case of key 
+# 'sales_order') or a dimension table.
 
 
 function_lookup_table = {

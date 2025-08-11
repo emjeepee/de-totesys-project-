@@ -1,6 +1,6 @@
 import pandas as pd
 
-from first_lambda_utils.conn_to_db import conn_to_db, close_db
+from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
 
 
 # ************************************************************************
@@ -18,15 +18,15 @@ def make_SQL_queries_to_warehouse(parq_dict: dict[str : pd.DataFrame]):
         1) receives several pandas DataFrames in a python dictionary
         2) converts each DataFrame into an SQL query
         3) uses the query to put the table data into the posgresql warehouse
-        4) employs these two function:
+        4) employs these two utility functions:
             a) convert_dataframe_to_SQL_query_string()
             b) put_table_data_in_warehouse()
 
     Args:
-        parq_dict: this will be a python dictionary of pandas DataFrames
-                that looks like this: {sales_fact: <pandas DataFrame>, etc}
-        conn_util: the utility function that returns an instance of
-                a pg8000 Connection object
+        parq_dict: a python dictionary of pandas DataFrames that looks like
+         this: {sales_fact: <pandas DataFrame>, etc}
+        conn_util: the utility function that returns an instance of a
+         pg8000 Connection object
 
     return:
         None
@@ -41,6 +41,9 @@ def make_SQL_queries_to_warehouse(parq_dict: dict[str : pd.DataFrame]):
             # value = pandas dataframe
 
     put_table_data_in_warehouse(list_of_queries)
+
+
+
 
 
 def convert_dataframe_to_SQL_query_string(table_name, dataFrame):
@@ -85,12 +88,15 @@ def convert_dataframe_to_SQL_query_string(table_name, dataFrame):
     return sql_query_strs_list
 
 
+
+
+
 def put_table_data_in_warehouse(query_list):
     """
     This function:
         1) opens a connection to the warehouse database
         2) loops through a list of SQL query strings and makes
-                the query to the warehouse database
+            the query to the warehouse database
         2) closes the connection to the warehouse database
 
     Args:
@@ -104,8 +110,8 @@ def put_table_data_in_warehouse(query_list):
         None
     """
 
-    # make the connection to the warehouse
-    # (a posgresql database):
+    # make the connection to the 
+    # postgresql warehouse database:
     conn = conn_to_db("WAREHOUSE")
 
     # send sql queries to the warehouse
