@@ -14,23 +14,25 @@ from currency_codes import get_currency_by_code, Currency
 def transform_to_dim_date(start_date=None, end_date=None):
     """
     This function:
-        Creates a list of dictionaries that looks like this:
-        [ {"date_id": 1, "year": 2025, "month": 'July', ... 'quarter': 3},
-          {"date_id": 2, "year": 2025, "month": 'August', ... 'quarter': 3},
-          ...
-          {"date_id": <n>, "year": 2025, "month": 'March', ... 'quarter': 1}  
-        ]
+        Creates a list of dictionaries. This list is 
+         the date dimension table. 
 
     Args:
         None.
 
     Returns:
-        The list this function creates, which represents
-        the date dimensions table.        
+        A list of dictionaries that represents the 
+         date dimensions table and that looks like 
+         this:
+        [ {"date_id": 1, "year": 2025, "month": 'July', ... 'quarter': 3},
+          {"date_id": 2, "year": 2025, "month": 'August', ... 'quarter': 3},
+          ...
+          {"date_id": <n>, "year": 2025, "month": 'March', ... 'quarter': 1}  
+        ].        
 
     """
 
-        # Mukund: The two if-else block below look like data cleaning:
+        # Mukund: The two if-else block below look like data cleansing:
     if start_date is None:
             # set to 2000
             start = datetime.fromisoformat("2000-01-01").date()

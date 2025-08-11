@@ -6,17 +6,26 @@ from src.second_lambda.second_lambda_utils.preprocess_dim_tables import preproce
 def transform_to_dim_staff(staff_data, dept_data):
     """
     This function:
-        transforms the staff table data as read from the 
-         ingestion bucket (and converted into a python list) 
-         into a staff dimension table.
+        transforms the staff table data that came from the 
+         ingestion bucket and that code earlier converted 
+         into a python list into a staff dimension table.
+         In doing so this function creates a lookup table
+         for department data. This is in the form of a
+         dictionary.
 
     Args:
         staff_data: a list of dictionaries that represents 
-         the staff table and each dictionary represents a row
-         (and its key-value pairs represent columnName-cellValue
-         pairs). This list is the unjsonified staff table 
-         that the ingestion bucket stored.
-        dept_data: the department table.
+         the staff table and that came from the ingestion 
+         bucket (and is now unjsonified). Each dictionary 
+         in the list represents a row. Each key-value pair 
+         in the dictionary represents a 
+         columnName-cellValue pair.
+        dept_data: a list of dictionaries that represents 
+         the department table and that came from the ingestion 
+         bucket (and is now unjsonified). Each dictionary 
+         in the list represents a row. Each key-value pair 
+         in the dictionary represents a 
+         columnName-cellValue pair.
 
     Returns:
         A list of dictionaries that is the staff dimension 
@@ -39,11 +48,11 @@ def transform_to_dim_staff(staff_data, dept_data):
                         }
     
     # create a preprocessed staff dimension table:
-    preproc_staff_dim_table = preprocess_dim_tables(staff_data, staff_dict)
+    pp_staff_dim_table = preprocess_dim_tables(staff_data, ['created_at', 'last_updated'])
 
     # add keys to the preprocessed staff dimension table
     # to make the final staff dimension table:
-    for i in range(len(preproc_staff_dim_table)):
+    for i in range(len(pp_staff_dim_table)):
         # department_lookup is a dictionary that looks like this:
             # {
             #  1: {"department_name": 'aaaa aaa', "location": 'bbbbb'},
@@ -56,14 +65,23 @@ def transform_to_dim_staff(staff_data, dept_data):
         
         # dept is a dictionary that looks like this:
         # {"department_name": 'cccc ccc', "location": 'ddddd'}
-        preproc_staff_dim_table[i]["department_name"] = dept.get("department_name")
-        preproc_staff_dim_table[i]["location"] = dept.get("location")
+        pp_staff_dim_table[i]["department_name"] = dept.get("department_name")
+        pp_staff_dim_table[i]["location"] = dept.get("location")
           
 
     # preproc_staff_dim_table is now the 
     # finished staff dimension table. 
     # Return it:          
-    return preproc_staff_dim_table
+    return pp_staff_dim_table
+
+
+
+
+
+
+
+
+
 
 
 

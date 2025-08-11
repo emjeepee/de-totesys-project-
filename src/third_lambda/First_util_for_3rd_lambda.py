@@ -27,9 +27,17 @@ import pyarrow
 
 def get_pandas_dataFrames(proc_bucket, ing_bucket, S3_client, current_ts_key):
     """This function will:
-        1) read the process S3 bucket for the latest Parquet files
-        2) returns a dictionary containing pandas dataframes
-            created from those Parquet files
+        1) be the first function that the third lambda 
+            function calls. The third lambda function 
+            runs in response to an event sent from the 
+            processed bucket that tells it that a table
+            has been stored there (as a Parquet file)
+        2) get the Parquet file just stored in the 
+            processed bucket.
+        3) create a Pandas dataframe from the Paruet 
+            file.                             
+        4)             
+
         3) achieve 1) and 2) above by calling the following
             utility functions (all declared bellow):
             i)   get_latest_timestamp()
@@ -49,8 +57,8 @@ def get_pandas_dataFrames(proc_bucket, ing_bucket, S3_client, current_ts_key):
             'dim_date': <pandas dataFrame here>,
             . . . ,
             'facts_sales_order': <pandas dataFrame here>
-            }, where each key is the name of a table in the
-            warehouse database
+            }, where each key is the name of either the facts table 
+            or a dimension table.
     """
 
     # get latest timestamp string
@@ -221,3 +229,38 @@ def get_latest_timestamp(S3_client, bckt, key):
     """
     response = S3_client.get_object(Bucket=bckt, Key=key)
     return response["Body"].read().decode("utf-8")
+
+
+
+
+
+
+
+
+# OLD CODE:
+    # """This function will:
+    #     1) read the processed S3 bucket for the latest Parquet files
+    #     2) creates a dictionary containing pandas dataframes
+    #         created from those Parquet files
+    #     3) achieve 1) and 2) above by calling the following
+    #         utility functions (all declared bellow):
+    #         i)   get_latest_timestamp()
+    #         ii)  get_keys_of_latest_tables()
+    #         iii) get_pq_files() (which employs utility function
+    #             return_long_table_name())
+    # Args:
+    #     proc_bucket: a string for the name of the processed S3 bucket
+    #     ing_bucket:  a string for the name of the ingestion S3 bucket
+    #     S3_client: the boto3 S3 client
+    #     current_ts_y: a string for the key of the current timestamp
+    #         in the ingestion bucket (will be '***timestamp***')
+
+    # Returns:
+    #     A python dictionary that looks like this:
+    #         {
+    #         'dim_date': <pandas dataFrame here>,
+    #         . . . ,
+    #         'facts_sales_order': <pandas dataFrame here>
+    #         }, where each key is the name of either the facts table 
+    #         or a dimension table.
+    # """
