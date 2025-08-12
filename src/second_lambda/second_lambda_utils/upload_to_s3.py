@@ -5,7 +5,8 @@ def upload_to_s3(S3_client, bucket_name: str, key: str, body):
     """
     This function:
         puts the given data (body) into the 
-        S3 bucket of name bucket_name.
+        S3 bucket of name bucket_name under the
+        key key.
 
     Args:
         1) S3_client: The boto3 S3 client.

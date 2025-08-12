@@ -50,9 +50,33 @@ def make_SQL_qry_for_one_row(table_name: str, pk_col, cols, vals, row):
 # 1) dim_date 
 # has a date_id column whose value must be an SQL date
 # (the rest are ints or varchars)
+
+# So somewhere do this:
+# from datetime import date
+
+# date_dimensions_list = [
+#     {
+#         "date_id": date(2025, 8, 11),
+#         "year": 2025,
+#         "month": 8,
+#         "day": 11
+#     },
+#     {
+#         "date_id": date(2025, 8, 12),
+#         "year": 2025,
+#         "month": 8,
+#         "day": 12
+#     }
+# ]
+
+
+
 # 2) dim_staff 
-# has a column  whose value must be an SQL email address
+# has a column  whose value must be an SQL email_address
+# NOTE: this must be a mistake!!! apparently postgreSQL dbs
+# have no email_address SQL types, so just make it a string!!!
 # (the rest are ints or varchars)
+
 # 3) fact_sales_order 
 # has a created_date column whose values must be SQL dates
 # has a created_time column whose values must be SQL times
@@ -62,6 +86,43 @@ def make_SQL_qry_for_one_row(table_name: str, pk_col, cols, vals, row):
 # has a agreement_payment_date column whose values must be SQL dates
 # has a agreement_delivery_date column whose values must be SQL dates
 # (the rest are ints or varchars)
+
+# So somewhere do this for times:
+# from datetime import time
+
+# fact_sales_order_list = [
+#     {
+#         "order_id": 1,
+#         "created_time": time(14, 30, 45),  # 14:30:45
+#         "amount": 100.50
+#     },
+#     {
+#         "order_id": 2,
+#         "created_time": time(9, 15, 0),    # 09:15:00
+#         "amount": 250.75
+#     }
+# ]
+
+# and this for unit_price numeric(10,2):
+# from decimal import Decimal
+
+# fact_sales_order_list = [
+#     {
+#         "order_id": 1,
+#         "unit_price": Decimal("19.99"),  # Exactly 19.99, no float errors
+#         "quantity": 2
+#     },
+#     {
+#         "order_id": 2,
+#         "unit_price": Decimal("2500.00"),  # Exactly 2500.00
+#         "quantity": 1
+#     }
+# ]
+
+
+
+
+
 
 
 # These tables have columns whose values are 

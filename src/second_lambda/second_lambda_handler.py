@@ -1,16 +1,12 @@
-import boto3
-import datetime
 import json
 
-
-from src.second_lambda.second_lambda_utils.create_and_save_dim_date import create_and_save_dim_date
-from src.second_lambda.second_lambda_utils.read_from_s3 import read_from_s3
-from src.second_lambda.second_lambda_utils.function_lookup_table import function_lookup_table
-from src.second_lambda.second_lambda_utils.convert_to_parquet import convert_to_parquet
-from src.second_lambda.second_lambda_utils.upload_to_s3 import upload_to_s3
-from src.second_lambda.second_lambda_utils.second_lambda_init import second_lambda_init
-from src.second_lambda.second_lambda_utils.make_dim_or_fact_table import make_dim_or_fact_table
-
+from src.second_lambda.second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
+from src.second_lambda.second_lambda_utils.read_from_s3             import read_from_s3
+from src.second_lambda.second_lambda_utils.convert_to_parquet       import convert_to_parquet
+from src.second_lambda.second_lambda_utils.upload_to_s3             import upload_to_s3
+from src.second_lambda.second_lambda_utils.second_lambda_init       import second_lambda_init
+from src.second_lambda.second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
+from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
 
 
 
@@ -34,8 +30,9 @@ def lambda_handler(event, context):
             it to a dimension table or fact table (in the 
             form of a Python list), converts that to a 
             Parquet file and stores the Parquet file in 
-            the processed S3 bucket under a new key 
-            (f"{dt_timestamp}/{table_name}.parquet").
+            the processed S3 bucket under new key 
+            f"{timestamp}/fact_{table_name}.parquet" or
+            f"{timestamp}/dim_{table_name}.parquet".
         4) creates a date dimension table if this is the 
             first ever run of this lambda function, 
             converts that table to Parquet form and saves
@@ -49,7 +46,6 @@ def lambda_handler(event, context):
 
     Returns:
         None                    
-
     """
 
     # Get lookup table that contains 
@@ -68,9 +64,10 @@ def lambda_handler(event, context):
     s3_client = lookup['s3_client']
     ingestion_bucket = lookup['ingestion_bucket']
     object_key = lookup['object_key']
-    dt_timestamp = lookup['dt_timestamp']
+    timestamp_string = lookup['timestamp_string'] # time now, eg "2025-08-14_12-33-27"
     table_name = lookup['table_name']
     proc_bucket = lookup['proc_bucket']
+    start_date = lookup['start_date'] # a datetime object for 1 Jan 2024
 
     # Get the jsonified python list that
     # is the table that this function has 
@@ -80,15 +77,18 @@ def lambda_handler(event, context):
     table_python = json.loads(table_json) # [{...}, {...}, {...}]
 
     # If this is the first ever run of the ETL 
-    # pipeline make a date dimension table, 
-    # convert it to parquet form and save it
-    # in the processed bucket. If this is the 
-    # 2nd-plus run of the pipeline the
-    # following utility function does nothing:
-    create_and_save_dim_date(s3_client, proc_bucket, dt_timestamp)
+    # pipeline (ie if the processed bucket is 
+    # empty) make a date dimension table in 
+    # Parquet form and save it in the 
+    # processed bucket: 
+    if is_first_run_of_pipeline(proc_bucket, s3_client):
+        arr = create_dim_date_Parquet(start_date, timestamp_string)
+        upload_to_s3(s3_client, proc_bucket, arr[1], arr[0])
 
-    # Make either the facts table or a dimension 
-    # table (whichever is appropriate):
+
+    # Make either the fact table or a dimension 
+    # table (whichever is appropriate) as a 
+    # Python list of dictionaries:
     dim_or_fact_table = make_dim_or_fact_table(table_name, table_python, s3_client, ingestion_bucket)
 
     # Convert the dim/fact table to Parquet form. 
@@ -104,10 +104,11 @@ def lambda_handler(event, context):
     # bucket (note that when you put 
     # a datetime object in an fstring, Python 
     # converts the object to a string!):
-    processed_key = f"{dt_timestamp}/{table_name}.parquet"
-
-    # Save the Parquet file in the processed bucket:
-    upload_to_s3(s3_client, proc_bucket, processed_key, pq_file)
+    table_key = f"{timestamp_string}/fact_{table_name}.parquet" if table_name == "sales_order" else f"{timestamp_string}/dim_{table_name}.parquet"
+    
+    # Save the Parquet file in the processed 
+    # bucket:
+    upload_to_s3(s3_client, proc_bucket, table_key, pq_file)
 
 
 
