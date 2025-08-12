@@ -58,7 +58,8 @@ def second_lambda_init(event):
 
     dict_to_return = {
         's3_client': boto3.client("s3"),
-        'dt_timestamp': datetime.datetime.now().isoformat().replace(":", "-"), # 2025-07-08T13-13-13.123456
+        # 'dt_timestamp': datetime.datetime.now().isoformat().replace(":", "-"), # 2025-07-08T13-13-13.123456
+        'timestamp_string' : datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), # string of format "2025-08-14_12-33-27"
         # The name of the ingestion bucket:            
         'ingestion_bucket': event["Records"][0]["s3"]["bucket"]["name"],
         # The key under which the ingestion bucket stores an object: 
@@ -67,7 +68,9 @@ def second_lambda_init(event):
         'proc_bucket': "11-processed-bucket",
         # The name of the table that the object in the
         # ingestion bucket holds:
-        'table_name': object_key.split("/")[0] # 'sales_order'
+        'table_name': object_key.split("/")[0], # 'sales_order'
+        # Make a datetime object for 1 Jan 2024:
+        'start_date': datetime.datetime(2024, 1, 1)
                      }
 
     return dict_to_return
