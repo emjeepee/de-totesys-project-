@@ -32,14 +32,17 @@ def create_and_save_dim_date(s3_client, bucket_name: str, timestamp):
     # processed_bucket_name = "11-processed-bucket"
     timestamp = datetime.datetime.now()
 
-    # Check if the processed bucket is empty, and if so generate date.parquet file
-    boto_list_processed_objects = s3_client.list_objects_v2(  Bucket=bucket_name   )
+    # Check if the processed bucket is empty. 
+    # If so make a date dimension table, 
+    # convert it to parquet form and save it 
+    # in the S3 processed bucket:
+    objects_list = s3_client.list_objects_v2(  Bucket=bucket_name   )
 
     # If the processed bucket is empty
     # make a date dimension table, convert
     # it to parquet form and save it in 
     # the S3 processed bucket:
-    if boto_list_processed_objects["KeyCount"] == 0:
+    if objects_list["KeyCount"] == 0:
         dim_date_py = transform_to_dim_date()
         dim_date_pq = convert_to_parquet(dim_date_py)
         dim_date_key = f"{timestamp}/date.parquet"
