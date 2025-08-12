@@ -68,3 +68,7 @@ def make_SQL_queries(data_frame, table_name: str):
 
 
 
+
+
+
+
