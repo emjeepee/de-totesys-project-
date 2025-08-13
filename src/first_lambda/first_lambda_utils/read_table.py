@@ -1,4 +1,4 @@
-from src.first_lambda.first_lambda_utils.convert_dt_values_to_iso import convert_dt_values_to_iso
+from src.first_lambda.first_lambda_utils.convert_values import convert_values
 from src.first_lambda.first_lambda_utils.make_row_dicts import make_row_dicts
 from src.first_lambda.first_lambda_utils.contact_tote_sys_db import contact_tote_sys_db
 
@@ -72,37 +72,32 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     # ] 
 
     try:
-        query_result_2 = contact_tote_sys_db(conn, 2, 'not-relevant', table_name)
-        query_result_1 = contact_tote_sys_db(conn, 1, after_time, table_name)
+        query_result_2 = contact_tote_sys_db(conn, 2, 'not-relevant', table_name) # a list of lists,
+                                                                                  # each member list 
+                                                                                  # being a column 
+                                                                                  # name  
+        query_result_1 = contact_tote_sys_db(conn, 1, after_time, table_name) # a list of lists, 
+                                                                              # each member list 
+                                                                              # representing a row
+                                                                              # and containing 
+                                                                              # row values only
+                                                                              # (without column 
+                                                                              # names)
     except RuntimeError as e:
         raise RuntimeError from e
     
 
-    # OLD CODE (delete eventually):
-    # query_result_1 = conn.run(
-    #     f"""
-    #     SELECT * FROM {table_name}
-    #     WHERE last_updated > :after_time LIMIT 20;
-    #     """,
-    #     after_time=after_time,
-    #                 )
-    # query_result = conn.run(
-    #     f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}' ORDER BY ordinal_position"
-    #                        )
-
-
-
-
-    # Convert query_result to list 
-    # of column-name strings: 
+    # Convert query_result_2 to a 
+    # list of column-name strings: 
     column_names = [col[0] for col in query_result_2] # ['name', 'location', etc]
 
 
-    # convert those values in the member lists of result
-    # that are datetime.datetime objects into ISO time 
-    # strings and convert those values that are 
-    # decimal.Decimal values into floats:
-    result_washed = convert_dt_values_to_iso(query_result_1) 
+    # convert those values in the member lists of 
+    # query_result_1. Convert:
+    # datetime.datetime object -> ISO string
+    # Decimal value -> float
+    # json -> string:
+    result_washed = convert_values(query_result_1) 
 
     row_data = make_row_dicts(column_names, result_washed)
     # row_data ends up looking like 
