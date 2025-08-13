@@ -1,5 +1,6 @@
 from src.second_lambda.second_lambda_utils.get_latest_table import get_latest_table
 from src.second_lambda.second_lambda_utils.function_lookup_table import function_lookup_table
+from src.second_lambda.second_lambda_utils.make_staff_or_cp_dim_table import make_staff_or_cp_dim_table
 
 
 def make_dim_or_fact_table(table_name: str, table_python, s3_client, ingestion_bucket: str):
@@ -25,29 +26,24 @@ def make_dim_or_fact_table(table_name: str, table_python, s3_client, ingestion_b
         key (important for later utility function uesd by
         third lambda handler).      
     """
-        # get latest department table in 
-        # the ingestion bucket 
-        # function_lookup_table below is
-        # a dict each of whose keys have 
-        # a value that is a function that 
-        # converts a table into a dimension
-        # or facts table. In the case of 
-        # the staff and counterparty tables, 
-        # their conversion also requires 
-        # the use of the department table 
-        # and the address table, 
-        # respectively:
-        # dim_or_facts_table as set in the two if 
-        # statements below will be a dimension 
-        # table only:    
-    if table_name == 'staff':
-        dept_python = get_latest_table(s3_client, ingestion_bucket, 'department')
-        dim_or_fact_table = function_lookup_table[table_name](table_python, dept_python) # will be a dimension table   
-        
-    if table_name == 'counterparty':
-        address_python = get_latest_table(s3_client, ingestion_bucket, 'address')
-        dim_or_fact_table = function_lookup_table[table_name](table_python, address_python)  # will be a dimension table   
+    if table_name == 'staff' or table_name == 'counterparty':
+        # If the table name is 'staff' 
+        # or 'counterparty' the creation 
+        # of their dimension tables 
+        # requires data from the department 
+        # table and the address table, 
+        # respectively:  
  
-    dim_or_fact_table = function_lookup_table[table_name](table_python) # dimension table or the fact table
+        aux_table_name = 'department' if table_name == 'staff' else 'address'           
+        return make_staff_or_cp_dim_table( table_name, table_python, function_lookup_table, ingestion_bucket, aux_table_name, s3_client)
+    else:
+        # If the table name is 'currency',
+        # 'design', 'location' or 
+        # 'sales_order'.
+        # function_lookup_table is a 
+        # dict with keys whose values
+        # are functions that convert
+        # a table into a dimension
+        # or fact table:     
+        return function_lookup_table[table_name](table_python) # dimension table or the fact table
 
-    return dim_or_fact_table

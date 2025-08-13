@@ -17,26 +17,24 @@ logger = logging.getLogger("Mylogger")
 
 
 # This is the main function:
-def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_location: str, s3_client: boto3.client):
+def write_to_ingestion_bucket(data: list, bucket: str, file_location: str, s3_client: boto3.client):
     """
     This function:
     1. searches the ingestion bucket for all tables
         that are stored under a key that begins with
         file_location. This function then gets the 
-        most recent of those tables (remember that 
-        the bucket stores each table as a jsonified
-        lists of dictionaries).
-    2. reasds the most recent table in the ingestion 
-        bucket to a python list (of dictionaries).
+        most recent of those tables (which is
+        a jsonified lists of dictionaries).
+    2. converts the most recent table to a python 
+        list of dictionaries.
     3. replaces the appropriate rows in the python 
-        table list.
-    4. creates a new jsonified list to represent 
-        the updated table.
+        list.
+    4. jsonifies the new updated table.
     5. creates a timestamp string that will be 
         part of the key under which to store the 
-        jsonified list.
-    6. stores the new jsonified list (that 
-        represents the updated table) in the 
+        jsonified table and takes this form:
+        '2025-05-28_15-45-03'.
+    6. stores the new jsonified table in the 
         ingestion bucket under a key that looks
         like 'design/2025-05-28_15-45-03.json',
         where 'design' is the value of arg 
@@ -46,10 +44,8 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
 
     args:
         1) data: a Python list that looks like this:
-            [{<data from a row>}, {<data from a row>}, etc].
-            Each dictionary in the list represents an
-            updated row of a table. The name of the table is 
-            passed in as file_location. 
+            [{<data from updated row>}, 
+            {<data from updated row>}, etc].
         2) bucket_name: name of the ingestion S3 bucket.
         3) file_location: the name of the table (in the ToteSys
             database) that has had its rows updated. 
@@ -57,7 +53,8 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
             under which this function will store the updated
             table (the second part being a timestamp for the
             current time).
-            Examples: 'design', 'sales', 'transactions'.
+            Examples: 'design', 'sales_order', 'transactions'.
+        4) s3_client: a boto3 S3 client object.            
 
     returns:
         None
@@ -82,7 +79,7 @@ def write_to_ingestion_bucket(data: dict | list | str, bucket: str, file_locatio
     # rows:
     updated_table = update_rows_in_table(data, latest_table, file_location)
 
-        # convert updated_table into json:
+    # convert updated_table into json:
     updated_table_json = json.dumps(updated_table)
 
     # Create a formatted timestamp:

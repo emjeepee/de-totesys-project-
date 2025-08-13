@@ -32,7 +32,9 @@ def lambda_handler(event, context):
             Parquet file and stores the Parquet file in 
             the processed S3 bucket under new key 
             f"{timestamp}/fact_{table_name}.parquet" or
-            f"{timestamp}/dim_{table_name}.parquet".
+            f"{timestamp}/dim_{table_name}.parquet", 
+            where timestamp looks like this:
+            "2025-08-14_12-33-27".
         4) creates a date dimension table if this is the 
             first ever run of this lambda function, 
             converts that table to Parquet form and saves
@@ -98,12 +100,11 @@ def lambda_handler(event, context):
     # that makes SQL query strings):
     pq_file = convert_to_parquet(dim_or_fact_table)
 
-    # Make the key (a string) under which this
-    # second lambda function will save the 
-    # dimension/fact table in the processed 
-    # bucket (note that when you put 
+    # Make the key (a string) under which to 
+    # save the dim/fact table in the 
+    # processed bucket (note: when you put 
     # a datetime object in an fstring, Python 
-    # converts the object to a string!):
+    # converts the object to a string):
     table_key = f"{timestamp_string}/fact_{table_name}.parquet" if table_name == "sales_order" else f"{timestamp_string}/dim_{table_name}.parquet"
     
     # Save the Parquet file in the processed 

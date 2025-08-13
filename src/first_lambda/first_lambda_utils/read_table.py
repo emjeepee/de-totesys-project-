@@ -13,28 +13,30 @@ logger = logging.getLogger("MyLogger")
 def read_table(table_name: str, conn: Connection, after_time: str):
     """
     This function:
-         gets all data from all rows in a table
-         in the ToteSys database if those rows 
-         contain data that were updated after a
-         time that is passed in (ie after_time).
+         gets updated rows from a table in the 
+         ToteSys postgreSQL database if those rows 
+         were updated after a passed-in time 
+         after_time.
 
     Args:
          table_name: the name of the table.
          conn: an instance of a pg8000:native 
           Connection object.
-         after_time: a time stamp that will always 
-          be the time of the last run of the 
-          first lambda function.
+         after_time: a time stamp. On the very 
+          first run of this handler after_time
+          represents date 1/1/1900. On subsequent 
+          runs it represents the time of the 
+          previous run of this handler.
 
     Returns:
-         a dict such as {"sales": [
+         a dict such as {"sales_order": [
                                         {"Name": "xx", "Month": "January", "Value": 123.45, etc}, <-- data from one row
                                         {"Name": "yy", "Month": "January", "Value": 223.45, etc}, <-- data from one row
                                         {"Name": "zz", "Month": "January", "Value": 323.45, etc}, <-- data from one row
                                         etc
                                   ] 
                         },
-        where "sales" is the table name and "Name", "Month", "Value", 
+        where "sales" is the table name and keys "Name", "Month", "Value", 
         etc are the table's column names and the values of those keys
         are the row-cell values.
     """

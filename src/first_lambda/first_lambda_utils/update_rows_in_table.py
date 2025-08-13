@@ -15,19 +15,20 @@ def update_rows_in_table( rows_list: list, table_list, file_location: str ):
          from 1 to the number of rows in a whole table.
         2) table_list: the table that has to have  
          its outdated rows replaced. This is a 
-         python list of dictionaries, each dictionary
+         python list of dictionaries that came from the 
+         ingestion bucket, each dictionary
          representing a row. The number of dictionaries
          matches the number of rows of the corresponding
          whole table in the ToteSys database.
         3) file_location: the name of the table. this is
          also the first part of the key under which 
-         the S3 bucket stores the table. The second part 
-         is a timestamp. The key looks like this,
-         for example: 'design/<timestamp-here>' 
+         the S3 bucket stores the table, the second part 
+         being a timestamp. The key looks like this,
+         for example: 'design/2025-05-28_15-45-03.json' 
 
     Returns:
         a python list of dictionaries equal in number to
-         the number of rows in a particular table in the
+         the number of rows in a  table in the
          ToteSys database. The list represents an
          updated table. Each dictionary in it represents 
          a row of the table, some of them now updated.
