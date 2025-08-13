@@ -17,30 +17,31 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
     This function:
         1) loops through the passed-in python list,
             each of whose members is a dictionary 
-            that represents rows of one table.
+            that represents only the updated rows 
+            of one table.
         2) gets the name of the table from each 
             dictionary.
         3) looks in the ingestion bucket to determine
             whether one or more keys exist with
             the name of the table at the beginning
             (eg 'transactions/'), then
-            i) if no such key exists that means this is 
-             the first ever run of the first 
+            i) if no such key exists that means this 
+             is the first ever run of the first 
              lambda function and the table in 
              question has not yet been saved in the 
-             ingestion bucket (and the 
-             dictionary contains data 
-             from every row of the table). This 
-             function then creates an appropriate key
+             ingestion bucket (meaning that the
+             dictionary contains data from every
+             row of the table). This function then 
+             creates an appropriate key
              (eg 'design/<*timestamp-here*>')
              and saves the whole table to the
              S3 ingestion bucket
             ii) if one or more such keys exist this 
              means the table already exists in the
-             ingestion bucket, so this function reads and 
-             copies the latest table, updates its outdated rows 
-             and saves it as a new table in the 
-             bucket with a new timestamp.
+             ingestion bucket, so this function reads
+             and copies the latest table, updates its 
+             outdated rows and saves it as a new table
+             in the bucket with a new timestamp.
 
     Args:
         1) data_list: a python list that looks like this:
@@ -76,21 +77,21 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
         4) bucket_name:  name of the S3 ingestion bucket.
         5) convert_data: a utility that this function uses 
             to convert table data to json. If the row 
-            data from that table includes values that are
-            in the Datetime Datetime or Datetime Decimal 
+            data from the table includes values that are
+            in the datetime date or Decimal decimal
             format, then convert_data() changes them to 
-            ISO format before jsonifying them.      
+            ISO format so that they can be jsonified. 
 
     Returns:
         None
 
     """
 
-    # Make timestamp that code will  employ if 
-    # 
+    # Make timestamp that has this form:
+    # '2025-06-13_13-13-13'
     timestamp = create_formatted_timestamp()
 
-    for member in data_list:  # member looks like this: {'design': [{<data from one row>}, {<data from one row>}, etc]}
+    for member in data_list:  # member looks like this: {'design': [{<data from one updated row>}, {<data from one updated row>}, etc]}
         table_name = list(member.keys())[0]  # 'design'
         json_data = convert_data(member[table_name]) # jsonified version of [{<data from one row>}, {<data from one row>}, etc]
 
@@ -111,16 +112,16 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
             
             # if no, this is the first run of the 
             # first lambda function, so make a new 
-            # key that looks like this: 
-            # <timestamp-here>/<table-name-here>, and 
-            # write the table data to S3 bucket 
-            # under that key:
+            # key and write the table data to the
+            # ingestion bucket under that key:
         else:
             try: 
                 s3_client.put_object(
                     Bucket=bucket_name,
-                    Key=f"{table_name}/{timestamp}.json",
+                    Key=f"{table_name}/{timestamp}.json", # 'sales_order/2025-06-11_13-27-29.json'
                     Body=json_data,
                 )
             except ClientError as e:
                 raise RuntimeError("Error occurred in attempt to write a table to the ingestion bucket.") from e
+            
+            

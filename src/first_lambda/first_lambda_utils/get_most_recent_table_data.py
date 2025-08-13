@@ -18,10 +18,10 @@ def get_most_recent_table_data(
                               ):
     """
     This function:
-        1) gets a list of every jsonified dictionary
-            in the bucket if their
-            keys begin with file_location. The
-            list will be a python list
+        1) gets the most recent jsonified python 
+            list in the ingestion bucket that 
+            represents a table with the name 
+            file_location.
         2) sorts the list according to time,
             descending
         3) gets the most recent list
@@ -33,7 +33,7 @@ def get_most_recent_table_data(
         3) bucket_name: the bucket name
 
     Returns:
-        The most recent python dictionary
+        The most recent python list
 
 
     """

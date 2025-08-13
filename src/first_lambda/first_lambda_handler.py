@@ -1,10 +1,10 @@
 import boto3
-from first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
-from first_lambda_utils import convert_data, read_table
-from first_lambda_utils.conn_to_db import conn_to_db, close_db
-from first_lambda_utils import get_data_from_db, write_to_s3
-from first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
-from first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
+from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
+from src.first_lambda.first_lambda_utils import convert_data, read_table
+from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
+from src.first_lambda.first_lambda_utils import get_data_from_db, write_to_s3
+from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
+from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
 
 
 
@@ -36,19 +36,18 @@ def first_lambda_handler(event=None, context=None):
     # Make a list of names of the 
     # tables in the ToteSys database: 
     tables = [
-        "design",
-        "payment",
-        "sales",
-        "transaction",
-        "sales_order",
-        "counterparty",
-        "address",
-        "staff",
-        "purchase_order",
-        "department",
-        "currency",
-        "payment_type",
-    ]
+        "design",           # y
+        # "payment",        # n
+        "sales_order",      # y
+        # "transaction",    # n  
+        "counterparty",     # y
+        "address",          # y
+        "staff",             # y 
+        # "purchase_order",  # n
+        "department",        #
+        "currency",          # y
+        # "payment_type",    # n
+            ]
 
     # Create an instance of a 
     # pg8000.native.Connection
@@ -65,8 +64,9 @@ def first_lambda_handler(event=None, context=None):
                                             )
 
 
-    # Get updated data from each table
-    # in the ToteSys database.
+    # Get updated row data from each table
+    # in the ToteSys database and write that 
+    # data to the bucket.
     # data_for_s3 below looks like this:
     # [ 
     #   {'sales_orders'>: [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
@@ -74,9 +74,10 @@ def first_lambda_handler(event=None, context=None):
     #   {'transactions': [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
     #   etc        
     # ] 
-    # Also write data to the bucket:
+    # Each dictionary (eg {'sales_orders'>: []}) contains only those rows that have updated data.
+
     try:
-        data_for_s3 = get_data_from_db(tables, after_time, conn, read_table)
+        data_for_s3 = get_data_from_db(tables, after_time, conn, read_table) # list of dicts
         write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name, convert_data)
     
     except RuntimeError as e:

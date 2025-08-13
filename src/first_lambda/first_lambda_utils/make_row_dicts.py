@@ -21,6 +21,10 @@
 
 
 def make_row_dicts(col_names: list, row_values: list):
+    """
+    This function 
+    
+    """
     list_to_return = []
     num_of_rows = len(row_values)
     num_of_cols = len(col_names)

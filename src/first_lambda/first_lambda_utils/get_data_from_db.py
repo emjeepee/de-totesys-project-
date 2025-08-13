@@ -13,7 +13,8 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
             ToteSys database after passed-in 
             time after_time.
             read_table() returns a dictionary.
-        3) appends each dictionary to
+        3) appends each updated row (which is 
+            in the form of a dictionary) to
             a list.
         4) returns that list of dictionaries.            
 
@@ -33,16 +34,10 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
     Returns:
         a python list. Each member of the list is a 
          python dictionary that represents a table
-         and only its updated rows. 
+         and its updated rows only. 
          Each dictionary has one key, the name of a table.
          The value of the key is a list of dictionaries,
-         each of which is an updated row of that table 
-         (so the number of those dictionaries is not 
-         necessarily the same as the total number of rows 
-         in the table in the ToteSys database and is 
-         likely to be less). 
-
-
+         each of which is an updated row of that table. 
 
     """
     # read_table() below returns a dictionary, for example
