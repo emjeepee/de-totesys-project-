@@ -1,5 +1,7 @@
 import boto3
-import datetime
+
+from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
+
 
 
 
@@ -51,25 +53,24 @@ def third_lambda_init(event):
     #     }
     #     ]
     # }
+
+    Returns:
+        a dictionary that is a lookup table
+        that the third lambda handler employs
+        to find values it requires.
+
     """
 
-    # processed bucket name is "11-processed-bucket"
-
-    # 
     object_key = event["Records"][0]["s3"]["object"]["key"]
 
     lookup = {
-        's3_client': boto3.client("s3"),
-        # The key under which the ingestion bucket stores an object: 
-        'object_key': object_key, # eg ???????
-        # The name of the processed bucket:
-        'proc_bucket': ["Records"][0]["s3"]["bucket"]["name"],
-        # The name of the table that the object in the
-        # ingestion bucket holds:
-        'table_name': object_key.split("/")[0] # 'sales_order' ??????
-                     }
-
-    
+        's3_client': boto3.client("s3"),                        # boto3 S3 client
+        'object_key': object_key,                               # key for Parquet file in processed bucket 
+        'proc_bucket': ["Records"][0]["s3"]["bucket"]["name"],  # name of processed bucket
+        'table_name': object_key.split("/")[0],                 # name of Parquet file in processed bucket
+        'conn': conn_to_db('WAREHOUSE'),                        # pg8000.native Connection object
+        'close_db': close_db                                    # function to close connection to warehouse
+             }
 
 
     return lookup

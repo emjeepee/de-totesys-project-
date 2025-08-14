@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, Mock
-from third_lambda.third_lambda import lambda_handler
+from third_lambda.third_lambda_handler import lambda_handler
 
 
 @patch("src.third_lambda.make_SQL_queries_to_warehouse")

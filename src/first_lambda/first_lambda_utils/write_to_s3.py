@@ -1,6 +1,9 @@
 from first_lambda_utils.write_to_ingestion_bucket import create_formatted_timestamp
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
+
+
+import json
 import logging
 
 
@@ -12,7 +15,7 @@ load_dotenv()
 
 
 
-def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: str, convert_data):
+def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: str):
     """
     This function:
         1) loops through the passed-in python list,
@@ -75,12 +78,6 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
             that does the actual writing of rows 
             of a table to the S3 ingestion bucket.
         4) bucket_name:  name of the S3 ingestion bucket.
-        5) convert_data: a utility that this function uses 
-            to convert table data to json. If the row 
-            data from the table includes values that are
-            in the datetime date or Decimal decimal
-            format, then convert_data() changes them to 
-            ISO format so that they can be jsonified. 
 
     Returns:
         None
@@ -93,7 +90,7 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
 
     for member in data_list:  # member looks like this: {'design': [{<data from one updated row>}, {<data from one updated row>}, etc]}
         table_name = list(member.keys())[0]  # 'design'
-        json_data = convert_data(member[table_name]) # jsonified version of [{<data from one row>}, {<data from one row>}, etc]
+        json_data = json.dumps(member[table_name]) # jsonified version of [{<data from one row>}, {<data from one row>}, etc]
 
         try:
             # find out whether S3 bucket contains any objects 

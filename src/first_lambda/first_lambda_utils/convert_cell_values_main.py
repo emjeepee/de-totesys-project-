@@ -53,11 +53,14 @@ def convert_cell_values_main(val):
 
 
     if isinstance(val, str) or isinstance(val, datetime) or isinstance(val, Decimal) or isinstance(val, int) or val == None:  
-        # test if val is a json string:
+        # If val is a json string
+        # return it otherwise
+        # call 
+        # convert_cell_values_aux(val):
         try:
             return_val = json.loads(val)
             return return_val
-        # if val is not a json string:
-        except (JSONDecodeError, TypeError):
+
+        except (JSONDecodeError, TypeError): 
             return convert_cell_values_aux(val)
 
