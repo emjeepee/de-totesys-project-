@@ -51,26 +51,25 @@ def second_lambda_init(event):
     #     }
     #     ]
     # }
+
+    Returns:
+        a dictionary containing the values
+        the second lambda requires
     """
 
-    # Get the 
+    # Get the key under which 
+    # the ingestion bucket has 
+    # stored the table: 
     object_key = event["Records"][0]["s3"]["object"]["key"]
 
-    dict_to_return = {
-        's3_client': boto3.client("s3"),
-        # 'dt_timestamp': datetime.datetime.now().isoformat().replace(":", "-"), # 2025-07-08T13-13-13.123456
+    lookup = {
+        's3_client': boto3.client("s3"), # boto3 S3 client object
         'timestamp_string' : datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), # string of format "2025-08-14_12-33-27"
-        # The name of the ingestion bucket:            
-        'ingestion_bucket': event["Records"][0]["s3"]["bucket"]["name"],
-        # The key under which the ingestion bucket stores an object: 
-        'object_key': object_key, # eg sales_order/2025-06-04_09-21-32.json
-        # The name of the processed bucket:
-        'proc_bucket': "11-processed-bucket",
-        # The name of the table that the object in the
-        # ingestion bucket holds:
-        'table_name': object_key.split("/")[0], # 'sales_order'
-        # Make a datetime object for 1 Jan 2024:
-        'start_date': datetime.datetime(2024, 1, 1)
+        'ingestion_bucket': event["Records"][0]["s3"]["bucket"]["name"], # name of ingestion bucket   
+        'object_key': object_key, # # key for object in ingestion bucket, eg sales_order/2025-06-04_09-21-32.json
+        'proc_bucket': "11-processed-bucket", # name of processed bucket:
+        'table_name': object_key.split("/")[0], # name of table, eg 'sales_order'
+        'start_date': datetime.datetime(2024, 1, 1) # datetime object for 1 Jan 2024:
                      }
 
-    return dict_to_return
+    return lookup

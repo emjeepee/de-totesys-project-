@@ -5,13 +5,14 @@ from src.first_lambda.first_lambda_utils.convert_cell_values_main import convert
 def convert_values(updated_rows):
     """
     This function:
-        Receives a list that represents 
-         updated rows of a table in the 
-         Tote_Sys database. A member list 
-         represents each row. The values
-         in each row list are cell values. 
-        Converts the cell values in the 
-         list of lists like this:
+        1) Receives a list of lists that 
+         represents updated rows of a 
+         table in the Tote_Sys database. 
+         A member list represents each 
+         row. The values in each row 
+         list are cell values. 
+        2) Converts the cell values in 
+         member lists in this way:
          i)   json strings -> strings
          ii)  datetime objects -> strings
          iii) decimal.Decimal objects -> floats

@@ -51,24 +51,16 @@ def lambda_handler(event, context):
     """
 
     # Get lookup table that contains 
-    # values this lambda handler requires:
+    # values this handler requires:
     lookup = second_lambda_init(event)
-    # Set variables to values held by
-    # the lookup table: 
-    # 1) the boto3 S3 client object,
-    # 2) the name of the ingestion bucket,
-    # 3) the key under which the ingestion
-    #    bucket stores the object (ie table),
-    # 4) a datetime timestamp for the 
-    #    current time,
-    # 5) the name of the table and
-    # 6) the name of the processed bucket:
-    s3_client = lookup['s3_client']
-    ingestion_bucket = lookup['ingestion_bucket']
-    object_key = lookup['object_key']
-    timestamp_string = lookup['timestamp_string'] # time now, eg "2025-08-14_12-33-27"
-    table_name = lookup['table_name']
-    proc_bucket = lookup['proc_bucket']
+    
+    # Set vars to values in lookup table: 
+    s3_client = lookup['s3_client'] # boto3 S3 client object,
+    ingestion_bucket = lookup['ingestion_bucket'] # name of ingestion bucket,
+    object_key = lookup['object_key'] # ingestion bucket stores object under this key
+    timestamp_string = lookup['timestamp_string'] # a timestamp as a datetime object 
+    table_name = lookup['table_name'] # name of table
+    proc_bucket = lookup['proc_bucket'] # name of processed bucket
     start_date = lookup['start_date'] # a datetime object for 1 Jan 2024
 
     # Get the jsonified python list that

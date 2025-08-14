@@ -1,25 +1,35 @@
 import boto3
 from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
-from src.first_lambda.first_lambda_utils import convert_data, read_table
+from src.first_lambda.first_lambda_utils.read_table import read_table
 from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
-from src.first_lambda.first_lambda_utils import get_data_from_db, write_to_s3
+from src.first_lambda.first_lambda_utils.get_data_from_db import get_data_from_db
+from src.first_lambda.first_lambda_utils.write_to_s3 import write_to_s3
 from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
 from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
+from src.first_lambda.first_lambda_utils.first_lambda_init import first_lambda_init
 
 
 
-def first_lambda_handler(event=None, context=None):
+def first_lambda_handler(event, context):
     """
     This function:
         1) runs every five minutes.
-        2) gets updated row data for every
-         table.
-        3) updates the tables.
-        4) saves the tables to the S3 ingestion bucket. 
+        2) makes SQL queries to ToteSys database 
+            to get updated row data for every
+            table that has had its row data updated 
+            in the ToteSys database.
+        3) for each table that has had rows updated 
+            in the ToteSys database goes to the 
+            ingestion bucet and gets the previously 
+            saved table of the same name and updates 
+            it with the new row data.
+        4) saves each updated table to the ingestion
+             bucket under a new key (leaving the 
+             previous table in place). 
 
     Args:
-        1) event: set to None
-        2) context: set to None
+        1) event: object received from ????? 
+        2) context: ????
     
     Returns:
         None
@@ -29,30 +39,16 @@ def first_lambda_handler(event=None, context=None):
     if event is None:
         event = {"time": "1900-01-01 00:00:00"}
 
-    s3_client = boto3.client("s3")
-    bucket_name = "11-ingestion-bucket"
-    # after_time = event["time"]
+    # Get values this handler requires:
+    lookup = first_lambda_init()
 
-    # Make a list of names of the 
-    # tables in the ToteSys database: 
-    tables = [
-        "design",           # y
-        # "payment",        # n
-        "sales_order",      # y
-        # "transaction",    # n  
-        "counterparty",     # y
-        "address",          # y
-        "staff",             # y 
-        # "purchase_order",  # n
-        "department",        #
-        "currency",          # y
-        # "payment_type",    # n
-            ]
+    # Set variables to those values:
+    bucket_name = lookup['bucket_name'] # name of ingestion bucket
+    tables = lookup['tables'] # list of names of tables of interest
+    s3_client = lookup['s3_client'] # boto3 S3 client object
+    conn = lookup['conn'] # pg8000.native Connection object
+    close_db = lookup['close_db'] # function to close connection to database
 
-    # Create an instance of a 
-    # pg8000.native.Connection
-    # object:
-    conn = conn_to_db("TOTESYS")
 
 
     # Get the timestamp saved in 
@@ -75,10 +71,9 @@ def first_lambda_handler(event=None, context=None):
     #   etc        
     # ] 
     # Each dictionary (eg {'sales_orders'>: []}) contains only those rows that have updated data.
-
     try:
         data_for_s3 = get_data_from_db(tables, after_time, conn, read_table) # list of dicts
-        write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name, convert_data)
+        write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name)
     
     except RuntimeError as e:
         # CloudWatch will log the following error:
