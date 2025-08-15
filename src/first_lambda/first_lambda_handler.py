@@ -13,7 +13,8 @@ from src.first_lambda.first_lambda_utils.first_lambda_init import first_lambda_i
 def first_lambda_handler(event, context):
     """
     This function:
-        1) runs every five minutes.
+        1) runs every five minutes in response to
+            an AWS EventBridge trigger.
         2) makes SQL queries to ToteSys database 
             to get updated row data for every
             table that has had its row data updated 
