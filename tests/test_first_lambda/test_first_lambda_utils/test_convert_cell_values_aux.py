@@ -64,18 +64,3 @@ def test_returns_passed_in_value_unchanged():
     assert result_1 == expected_1
     assert result_2 == expected_2
     assert result_3 == expected_3
-
-
-
-
-@pytest.mark.skip
-def test_xxx():
-    # Arrange
-
-
-    # Act
-
-
-    # Assert
-    
-    assert True
