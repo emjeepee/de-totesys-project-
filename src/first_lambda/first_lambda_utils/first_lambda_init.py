@@ -42,7 +42,7 @@ def first_lambda_init():
         'tables': tables,  
         's3_client': boto3.client("s3"),
         'bucket_name': "11-ingestion-bucket",    
-        'conn': conn_to_db("TOTESYS"),
+        'conn': conn_to_db("TOTE_SYS"),
         'close_db': close_db     
             }
     
