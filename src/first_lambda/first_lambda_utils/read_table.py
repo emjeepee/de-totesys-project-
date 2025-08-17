@@ -1,6 +1,8 @@
 from src.first_lambda.first_lambda_utils.convert_values import convert_values
 from src.first_lambda.first_lambda_utils.make_row_dicts import make_row_dicts
-from src.first_lambda.first_lambda_utils.contact_tote_sys_db import contact_tote_sys_db
+from src.first_lambda.first_lambda_utils.get_updated_rows import get_updated_rows
+from src.first_lambda.first_lambda_utils.get_column_names import get_column_names
+
 
 
 from pg8000.native import Connection
@@ -73,14 +75,14 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     try:
         # Make a list of the column names of the
         # table in question. 
-        query_result_2 = contact_tote_sys_db(conn, 2, 'not-relevant', table_name) # a list of lists,
-                                                                                  # each member list 
-                                                                                  # containing a string
-                                                                                  # that is a column 
-                                                                                  # name  
+        query_result_2 = get_column_names(conn, table_name) # a list of lists,
+                                                            # each member list 
+                                                            # containing a string
+                                                            # that is a column 
+                                                            # name  
         # Get only those rows from the table
         # that contain updated data: 
-        query_result_1 = contact_tote_sys_db(conn, 1, after_time, table_name) # a list of lists, 
+        query_result_1 = get_updated_rows(conn, after_time, table_name)       # a list of lists, 
                                                                               # each member list 
                                                                               # representing a row
                                                                               # and containing 
@@ -93,7 +95,7 @@ def read_table(table_name: str, conn: Connection, after_time: str):
 
     # Convert query_result_2 to a 
     # list of column-name strings: 
-    column_names = [col[0] for col in query_result_2] # ['name', 'location', etc]
+    clean_col_names = [col[0] for col in query_result_2] # ['name', 'location', etc]
 
 
     # convert cell values in the 
@@ -101,14 +103,14 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     # datetime.datetime object -> ISO string
     # Decimal value            -> float
     # json                     -> string:
-    cleaned_list = convert_values(query_result_1) 
+    cleaned_rows = convert_values(query_result_1) 
 
     # Make a dictionaries for each
     # updated row where the 
     # key-value pairs of each
     # dictionary represent 
     # <column-name>: <cell-value>:
-    row_data = make_row_dicts(column_names, cleaned_list)
+    row_list_of_dicts = make_row_dicts(clean_col_names, cleaned_rows)
     # row_data looks like this:
     # [ ... 
     #   {"design_id": 6,  "name": "aaa",  "value": 3.14,  "date": '2024-05-01T10:30:00.123456', etc},         
@@ -116,7 +118,7 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     #   etc ]
 
 
-    return {table_name: row_data}
+    return {table_name: row_list_of_dicts}
 
 
 

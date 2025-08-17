@@ -1,10 +1,13 @@
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, ANY
 from moto import mock_aws
-from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
-
+from botocore.exceptions import ClientError
 import os
 import boto3
+
+
+from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
+
 
 # scope="function" ensures this setup runs 
 # before every test function that uses it.
@@ -85,6 +88,8 @@ def S3_setup(aws_credentials):
         yield yield_list
 
 
+
+# @pytest.mark.skip
 def test_that_function_change_after_time_timestamp_returns_default_timestamp_on_appropriate_occasion(
     S3_setup,
                                                                                     ):
@@ -151,3 +156,55 @@ def test_that_function_change_after_time_timestamp_saves_new_timestamp_to_bucket
 
         # Assert
         assert result_time == expected_time
+
+
+
+
+
+
+
+# @pytest.mark.skip
+def test_change_after_time_timestamp_raises_ClientError_error_for_get_object(S3_setup):
+    # Arrange
+    yield_list = S3_setup
+    bucket = yield_list[2]
+    s3_client = Mock()  # create a mock S3 client
+    default_ts = yield_list[3]
+    ts_key = yield_list[5]
+
+    # Make get_object raise ClientError
+    s3_client.get_object.side_effect = ClientError(
+        {"Error": {"Code": "500", "Message": "Read of ingestion bucket failed"}},
+        "get_object"
+    )
+
+    # Act
+    result = change_after_time_timestamp(bucket, s3_client, ts_key, default_ts)
+
+    # Assert
+    assert result == default_ts  # the function should return default_ts on error
+    s3_client.get_object.assert_called_once_with(Bucket=bucket, Key=ts_key)
+
+
+
+# @pytest.mark.skip
+def test_change_after_time_timestamp_raises_ClientError_error_for_put_object(S3_setup):
+    # Arrange
+    yield_list = S3_setup
+    bucket = yield_list[2]
+    s3_client = Mock()  # create a mock S3 client
+    default_ts = yield_list[3]
+    ts_key = yield_list[5]
+
+    # Make get_object raise ClientError
+    s3_client.put_object.side_effect = ClientError(
+        {"Error": {"Code": "500", "Message": "Write to ingestion bucket failed"}},
+        "get_object"
+    )
+
+    # Act
+    result = change_after_time_timestamp(bucket, s3_client, ts_key, default_ts)
+
+    # Assert
+    assert result == default_ts  # the function should return default_ts on error
+    s3_client.put_object.assert_called_once_with(Bucket=bucket, Key=ts_key, Body=ANY)

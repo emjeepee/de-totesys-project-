@@ -14,6 +14,10 @@ def contact_tote_sys_db(conn_obj, opt: int, after_time: str, table_name: str):
          determines which SQL query this 
          function makes to the ToteSys
          database.
+         when opt is 1 the query string
+          is to get updated rows.
+         when opt is 2 the query string
+          is to get column names.
         3) after_time: a time stamp that will 
           always be the time of the last run 
           of the first lambda function. 
@@ -42,7 +46,6 @@ def contact_tote_sys_db(conn_obj, opt: int, after_time: str, table_name: str):
     try: 
         response = conn_obj.run(query, after_time=after_time)
         return response
-        
     
     except ProgrammingError as e:
         raise RuntimeError(err_Msg) from e
