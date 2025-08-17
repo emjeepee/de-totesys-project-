@@ -5,10 +5,13 @@ import json
 from unittest.mock import Mock, patch
 from datetime import datetime
 import os
-import re
 from botocore.exceptions import ClientError
-from src.first_lambda.first_lambda_utils.get_most_recent_table_data import get_most_recent_table_data
-   
+from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
+
+
+
+
+
 
 
 @pytest.fixture(scope="function")
@@ -87,40 +90,10 @@ def S3_setup():
 
         yield S3_client, bucket_name, mock_table_1, mock_table_2, mock_table_3, key_1, key_2, key_3, key_mdt, mock_design_table_1, mdt_2_json, key_mdt2, updated_rows_of_mdt2, ur_mdt2
 
-# @pytest.mark.skip
-def test_function_save_updated_table_to_S3_saves_a_table_to_the_S3(S3_setup):
-    (
-        S3_client,
-        bucket_name,
-        mock_table_1,
-        mock_table_2,
-        mock_table_3,
-        key_1,
-        key_2,
-        key_3,
-        key_mdt,
-        mock_design_table_1,
-        mdt_2_json,
-        key_mdt2,
-        updated_rows_of_mdt2,
-        ur_mdt2,
-    ) = S3_setup
-    # arrange:
-
-    new_key = "design/12345.json"
-
-    # act:
-    save_updated_table_to_S3(mdt_2_json, S3_client, new_key, bucket_name)
-    response = S3_client.get_object(Bucket=bucket_name, Key=new_key)
-    returned_table_string = response["Body"].read().decode("utf-8")
-    returned_table = json.loads(returned_table_string)
-
-    # assert:
-    assert returned_table[0]["team"] == 31
 
 
 # @pytest.mark.skip
-def test_function_save_updated_table_to_S3_raises_exception_if_attempt_to_put_object_in_S3_fails(
+def test_function_write_to_ingestion_bucket_raises_correct_exception_if_called_function_get_most_recent_table_data_fails(
     S3_setup,
 ):
     (
@@ -140,27 +113,136 @@ def test_function_save_updated_table_to_S3_raises_exception_if_attempt_to_put_ob
         ur_mdt2,
     ) = S3_setup
     # arrange:
+    file_location = "design/"
+
     error_response = {
         "Error": {
             "Code": "Error",
-            "Message": "Error when function save_updated_table_to_S3() tried to save updated table to S3.",
+            "Message": "This is a mock ClientError exception raised by mocked version of get_most_recent_table_data().",
         }
     }
-    # make a mock object:
-    mock_s3 = Mock()
-    # make mock object have method put_object
-    # that has side effect that is
-    # botocore.exceptions ClientError object:
-    mock_s3.put_object.side_effect = ClientError(error_response, "put_object")
+
+    client_error_from_mock_function = ClientError(error_response, "get_object")
+
+    # act and assert:
+    with patch(
+        "src.utils_write_to_ingestion_bucket.get_most_recent_table_data",
+        side_effect=client_error_from_mock_function,
+    ):
+        result = write_to_ingestion_bucket(ur_mdt2, bucket_name, file_location)
+
+        assert result.response["Error"]["Message"] == error_response["Error"]["Message"]
+
+
+def test_function_write_to_ingestion_bucket_raises_correct_exception_if_called_function_update_rows_in_table_fails(
+    S3_setup,
+):
+    (
+        S3_client,
+        bucket_name,
+        mock_table_1,
+        mock_table_2,
+        mock_table_3,
+        key_1,
+        key_2,
+        key_3,
+        key_mdt,
+        mock_design_table_1,
+        mdt_2_json,
+        key_mdt2,
+        updated_rows_of_mdt2,
+        ur_mdt2,
+    ) = S3_setup
+    # arrange:
+    file_location = "design/"
+
+    error_response = {
+        "Error": {
+            "Code": "Error",
+            "Message": "This is a mock ClientError exception raised by mocked version of get_most_recent_table_data().",
+        }
+    }
+
+    client_error_from_mock_function = ClientError(error_response, "get_object")
+
+    # act and assert:
+    with patch(
+        "src.first_lambda.first_lambda_utils.get_most_recent_table_data",
+        side_effect=client_error_from_mock_function,
+    ):
+        result = write_to_ingestion_bucket(ur_mdt2, bucket_name, file_location)
+
+        assert result.response["Error"]["Message"] == error_response["Error"]["Message"]
+
+
+def test_function_write_to_ingestion_bucket_raises_correct_exception_if_called_function_save_updated_table_to_S3_fails(
+    S3_setup,
+):
+    (
+        S3_client,
+        bucket_name,
+        mock_table_1,
+        mock_table_2,
+        mock_table_3,
+        key_1,
+        key_2,
+        key_3,
+        key_mdt,
+        mock_design_table_1,
+        mdt_2_json,
+        key_mdt2,
+        updated_rows_of_mdt2,
+        ur_mdt2,
+    ) = S3_setup
+    # arrange:
+    file_location = "design"
+
+    error_response = {
+        "Error": {
+            "Code": "Error",
+            "Message": "This is a mock ClientError exception raised by the mocked version of save_updated_table_to_S3().",
+        }
+    }
+
+    client_error_from_mock_function = ClientError(error_response, "put_object")
+
+    # act and assert:
+    with patch(
+        "src.first_lambda.first_lambda_utils.save_updated_table_to_S3",
+        side_effect=client_error_from_mock_function,
+    ):
+        result = write_to_ingestion_bucket(ur_mdt2, bucket_name, file_location)
+
+        assert result.response["Error"]["Message"] == error_response["Error"]["Message"]
+
+
+# integration testing:
+# @pytest.mark.skip
+def test_that_funcion_write_to_ingestion_bucket_correctly_integrates_utility_functions(
+    S3_setup,
+):
+    (
+        S3_client,
+        bucket_name,
+        mock_table_1,
+        mock_table_2,
+        mock_table_3,
+        key_1,
+        key_2,
+        key_3,
+        key_mdt,
+        mock_design_table_1,
+        mdt_2_json,
+        key_mdt2,
+        updated_rows_of_mdt2,
+        ur_mdt2,
+    ) = S3_setup
+
+    # arrange:
 
     # act:
-    # Patch boto3.client to return the mock
-    with patch("boto3.client", return_value=mock_s3):
-        # the args for save_updated_table_to_S3 are:
-        # a jsonified updated table, the S3_client, a key for the object, the bucket name:
-        result = save_updated_table_to_S3(mdt_2_json, mock_s3, key_2, bucket_name)
-        # assert:
-        assert (
-            result.response["Error"]["Message"]
-            == "Error when function save_updated_table_to_S3() tried to save updated table to S3."
-        )
+    write_to_ingestion_bucket(ur_mdt2, bucket_name, "design")
+    most_recent_table = get_most_recent_table_data("design", S3_client, bucket_name)
+
+    # assert:
+    assert most_recent_table[0]["team"] == 41

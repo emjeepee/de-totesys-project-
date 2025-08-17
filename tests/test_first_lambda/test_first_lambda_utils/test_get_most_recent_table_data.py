@@ -136,7 +136,7 @@ def test_get_most_recent_table_data_returns_correct_list(S3_setup):
 # @pytest.mark.skip
 def test_function_raises_exception_if_attempt_to_list_objects_in_bucket_fails(
     S3_setup_list_objs_err
-                                                                                              ):
+                                                                             ):
     (
         S3_client,
         bucket_name,

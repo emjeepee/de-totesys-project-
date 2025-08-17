@@ -4,6 +4,9 @@ from src.first_lambda.first_lambda_utils.create_formatted_timestamp import creat
 from unittest.mock import Mock, patch, ANY
 
 
+
+
+
 def test_create_formatted_timestamp_returns_correctly_formatted_string():
     # Arrange
     # expect string returned by function to be of this form:
@@ -18,6 +21,50 @@ def test_create_formatted_timestamp_returns_correctly_formatted_string():
     # use re see if timestamp created by 
     # create_formatted_timestamp() 
     # matches the regex pattern:
+    result = bool(re.match(pattern, ts))
+
+
+    # Assert
+    assert result
+
+
+
+
+
+
+def test_create_formatted_timestamp_returns_string():
+    # Arrange
+    expected = str
+
+    # make a datetime object and extract
+    # information from it: 
+    now_dt_object = datetime.now(timezone.utc)
+
+    # Act
+    ts = create_formatted_timestamp()
+    result = type(ts)
+
+    # Assert
+    assert result == expected
+
+
+
+
+
+def test_create_formatted_timestamp_returns_correctly_formatted_string():
+    # Arrange
+    # expect string returned by function to be of this form:
+    # "2025-08-01_13-45-20".
+    # Make a raw string of regex:
+    pattern = r"^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$"
+
+    # Act
+    # make timestamp:
+    ts = create_formatted_timestamp()
+    
+    # use re to check whether 
+    # timestamp created matches 
+    # the regex pattern:
     result = bool(re.match(pattern, ts))
 
 

@@ -15,4 +15,5 @@ def create_formatted_timestamp():
     now_dt_object = datetime.now(timezone.utc)
 
     formatted_ts = now_dt_object.strftime("%Y-%m-%d_%H-%M-%S")
+    
     return formatted_ts
