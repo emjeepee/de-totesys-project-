@@ -34,215 +34,175 @@ def S3_setup():
             CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
         )
 
-        mock_design_table_1 = [
-            {"design_id": 1, "name": "abdul", "team": 11, "project": "terraform"},
-            {"design_id": 2, "name": "Mukund", "team": 12, "project": "terraform"},
-            {"design_id": 3, "name": "Neil", "team": 13, "project": "terraform"},
+    # Make a mock whole table. A jsonified
+    # version would exists in the ingestion 
+    # bucket:
+        mock_design_table_2 = [
+            {"design_id": 1, "name": "Abdul", "team": 1, "project": "terraform"},
+            {"design_id": 2, "name": "Mukund", "team": 2, "project": "terraform"},
+            {"design_id": 3, "name": "Neil", "team": 3, "project": "terraform"},
         ]
 
-        mock_design_table_2 = [
-            {"design_id": 1, "name": "abdul", "team": 31, "project": "terraform"},
-            {"design_id": 2, "name": "Mukund", "team": 32, "project": "terraform"},
+    # Make a mock list of updated rows.
+    # This is what gets passed to 
+    # write_to_ingestion_bucket()
+        updated_rows_of_mdt2 = [
+            {"design_id": 1, "name": "Abdul", "team": 41, "project": "Python"},
+            {"design_id": 2, "name": "Mukund", "team": 42, "project": "SQL"},
+                               ]
+        
+    # Make an updated version of 
+    # mock_design_table_2:
+        mock_dt2_updated = [
+            {"design_id": 1, "name": "Abdul", "team": 41, "project": "Python"},
+            {"design_id": 2, "name": "Mukund", "team": 42, "project": "SQL"},
             {"design_id": 3, "name": "Neil", "team": 33, "project": "terraform"},
         ]
 
-        updated_rows_of_mdt2 = [
-            {"design_id": 1, "name": "abdul", "team": 41, "project": "terraform"}
-        ]
-
-        mock_table_1 = [
-            {"name": "abdul", "team": 11, "project": "terraform"},
-            {"name": "Mukund", "team": 12, "project": "terraform"},
-            {"name": "Neil", "team": 13, "project": "terraform"},
-        ]
-
-        mock_table_2 = [
-            {"name": "abdul", "team": 14, "project": "terraform"},
-            {"name": "Mukund", "team": 15, "project": "terraform"},
-            {"name": "Neil", "team": 16, "project": "terraform"},
-        ]
-
-        mock_table_3 = [
-            {"name": "abdul", "team": 17, "project": "terraform"},
-            {"name": "Mukund", "team": 18, "project": "terraform"},
-            {"name": "Neil", "team": 19, "project": "terraform"},
-        ]
-
-        # create mock jsonified tables:
-        mt_1_json = json.dumps(mock_table_1)
-        mt_2_json = json.dumps(mock_table_2)
-        mt_3_json = json.dumps(mock_table_3)
-        mdt_1_json = json.dumps(mock_design_table_1)
-        mdt_2_json = json.dumps(mock_design_table_2)
-        ur_mdt2 = json.dumps(updated_rows_of_mdt2)
-
-        # create keys for mock jsonified tables:
-        key_1 = "design/2025-05-29_22-17-19-251352"
-        key_2 = "design/2025-05-29_22-07-19-251352"
-        key_3 = "design/2025-05-29_21-57-19-251352"
-        key_mdt = "design/2025-05-29_23-57-19-251352"
-        key_mdt2 = "design/2025-06-29_03-57-19-251352"
-
-        S3_client.put_object(Bucket=bucket_name, Key=key_1, Body=mt_1_json)
-        S3_client.put_object(Bucket=bucket_name, Key=key_2, Body=mt_2_json)
-        S3_client.put_object(Bucket=bucket_name, Key=key_3, Body=mt_3_json)
-        S3_client.put_object(Bucket=bucket_name, Key=key_mdt, Body=mdt_1_json)
-
-        yield S3_client, bucket_name, mock_table_1, mock_table_2, mock_table_3, key_1, key_2, key_3, key_mdt, mock_design_table_1, mdt_2_json, key_mdt2, updated_rows_of_mdt2, ur_mdt2
 
 
+    # Make a jsonified version of the 
+    # mock whole table created above:
+        mdt_2_updated_json = json.dumps(mock_dt2_updated)
 
-# @pytest.mark.skip
-def test_function_write_to_ingestion_bucket_raises_correct_exception_if_called_function_get_most_recent_table_data_fails(
-    S3_setup,
-):
-    (
-        S3_client,
-        bucket_name,
-        mock_table_1,
-        mock_table_2,
-        mock_table_3,
-        key_1,
-        key_2,
-        key_3,
-        key_mdt,
-        mock_design_table_1,
-        mdt_2_json,
-        key_mdt2,
-        updated_rows_of_mdt2,
-        ur_mdt2,
-    ) = S3_setup
-    # arrange:
-    file_location = "design/"
+    # Make a mock key of the type 
+    # under which 
+    # write_to_ingestion_bucket() would
+    # store the updated table to the 
+    # ingestion bucket:
+        key_mdt2 = "design/2025-06-29T03-57-19-251352.json"
 
-    error_response = {
-        "Error": {
-            "Code": "Error",
-            "Message": "This is a mock ClientError exception raised by mocked version of get_most_recent_table_data().",
-        }
-    }
-
-    client_error_from_mock_function = ClientError(error_response, "get_object")
-
-    # act and assert:
-    with patch(
-        "src.utils_write_to_ingestion_bucket.get_most_recent_table_data",
-        side_effect=client_error_from_mock_function,
-    ):
-        result = write_to_ingestion_bucket(ur_mdt2, bucket_name, file_location)
-
-        assert result.response["Error"]["Message"] == error_response["Error"]["Message"]
+    # The prefix of the key under which
+    # write_to_ingestion_bucket() would 
+    # store the jsonified updated table 
+    # in the injestion bucket:
+        file_location = "design"
 
 
-def test_function_write_to_ingestion_bucket_raises_correct_exception_if_called_function_update_rows_in_table_fails(
-    S3_setup,
-):
-    (
-        S3_client,
-        bucket_name,
-        mock_table_1,
-        mock_table_2,
-        mock_table_3,
-        key_1,
-        key_2,
-        key_3,
-        key_mdt,
-        mock_design_table_1,
-        mdt_2_json,
-        key_mdt2,
-        updated_rows_of_mdt2,
-        ur_mdt2,
-    ) = S3_setup
-    # arrange:
-    file_location = "design/"
+    # Make a timestamp:
+        timestamp = "2025-06-29T03-57-19-251352"         
 
-    error_response = {
-        "Error": {
-            "Code": "Error",
-            "Message": "This is a mock ClientError exception raised by mocked version of get_most_recent_table_data().",
-        }
-    }
-
-    client_error_from_mock_function = ClientError(error_response, "get_object")
-
-    # act and assert:
-    with patch(
-        "src.first_lambda.first_lambda_utils.get_most_recent_table_data",
-        side_effect=client_error_from_mock_function,
-    ):
-        result = write_to_ingestion_bucket(ur_mdt2, bucket_name, file_location)
-
-        assert result.response["Error"]["Message"] == error_response["Error"]["Message"]
-
-
-def test_function_write_to_ingestion_bucket_raises_correct_exception_if_called_function_save_updated_table_to_S3_fails(
-    S3_setup,
-):
-    (
-        S3_client,
-        bucket_name,
-        mock_table_1,
-        mock_table_2,
-        mock_table_3,
-        key_1,
-        key_2,
-        key_3,
-        key_mdt,
-        mock_design_table_1,
-        mdt_2_json,
-        key_mdt2,
-        updated_rows_of_mdt2,
-        ur_mdt2,
-    ) = S3_setup
-    # arrange:
-    file_location = "design"
-
-    error_response = {
-        "Error": {
-            "Code": "Error",
-            "Message": "This is a mock ClientError exception raised by the mocked version of save_updated_table_to_S3().",
-        }
-    }
-
-    client_error_from_mock_function = ClientError(error_response, "put_object")
-
-    # act and assert:
-    with patch(
-        "src.first_lambda.first_lambda_utils.save_updated_table_to_S3",
-        side_effect=client_error_from_mock_function,
-    ):
-        result = write_to_ingestion_bucket(ur_mdt2, bucket_name, file_location)
-
-        assert result.response["Error"]["Message"] == error_response["Error"]["Message"]
+        yield S3_client, bucket_name, mock_design_table_2, updated_rows_of_mdt2, mock_dt2_updated, mdt_2_updated_json, key_mdt2, file_location, timestamp
 
 
 # integration testing:
 # @pytest.mark.skip
 def test_that_funcion_write_to_ingestion_bucket_correctly_integrates_utility_functions(
     S3_setup,
-):
+):  
+    # Arrange:
     (
         S3_client,
         bucket_name,
-        mock_table_1,
-        mock_table_2,
-        mock_table_3,
-        key_1,
-        key_2,
-        key_3,
-        key_mdt,
-        mock_design_table_1,
-        mdt_2_json,
-        key_mdt2,
+        mock_design_table_2,
         updated_rows_of_mdt2,
-        ur_mdt2,
+        mock_dt2_updated,    
+        mdt_2_updated_json,
+        key_mdt2,
+        file_location,
+        timestamp
     ) = S3_setup
 
-    # arrange:
+    # test that write to ingestion bucket 
+    # calls these functions with the correct 
+    # arguments:
+    # get_most_recent_table_data(file_location, s3_client, bucket)
+    #           returns: mock_design_table_2 (most recent table)
+    # update_rows_in_table(data, latest_table, file_location)
+    #           returns: updated version of mock_design_table_2   
+    # create_formatted_timestamp()
+    #           returns:  "2025-06-29T03-57-19-251352""  
+    # save_updated_table_to_S3(updated_table_json, s3_client, new_key, bucket) 
+    #           returns: None    
 
-    # act:
-    write_to_ingestion_bucket(ur_mdt2, bucket_name, "design")
-    most_recent_table = get_most_recent_table_data("design", S3_client, bucket_name)
+    # Act and Assert:
+    with patch('src.first_lambda.first_lambda_utils.write_to_ingestion_bucket.get_most_recent_table_data') as mock_gmrtd, \
+         patch('src.first_lambda.first_lambda_utils.write_to_ingestion_bucket.update_rows_in_table') as mock_urit,  \
+         patch('src.first_lambda.first_lambda_utils.write_to_ingestion_bucket.create_formatted_timestamp') as mock_cft,  \
+         patch('src.first_lambda.first_lambda_utils.write_to_ingestion_bucket.save_updated_table_to_S3') as mock_suttS3:
 
-    # assert:
-    assert most_recent_table[0]["team"] == 41
+
+        mock_gmrtd.return_value = mock_design_table_2
+        mock_urit.return_value = mock_dt2_updated
+        mock_cft.return_value = timestamp
+        
+        # write_to_ingestion_bucket(data: list, bucket: str, file_location: str, s3_client: boto3.client):
+        write_to_ingestion_bucket( # NOTE: FAILS HERE
+                            updated_rows_of_mdt2, 
+                            bucket_name, 
+                            file_location, 
+                            S3_client
+                                 )
+
+
+
+        # Assert:
+        mock_gmrtd.assert_called_once_with(file_location, S3_client, bucket_name) #NOTE: TEST FAILS HERE
+
+        mock_urit.assert_called_once_with(
+                                    updated_rows_of_mdt2, 
+                                    mock_design_table_2,
+                                    file_location
+                                         )
+        
+        mock_cft.assert_called_once()
+
+        mock_suttS3.assert_called_once_with(
+            mdt_2_updated_json,
+            S3_client,
+            key_mdt2,
+            bucket_name
+                                            )
+
+
+
+def test_write_to_ingestion_bucket_raises_RuntimeError_if_get_most_recent_table_data_fails(S3_setup):
+    (
+        S3_client,
+        bucket_name,
+        mock_design_table_2,
+        updated_rows_of_mdt2,
+        mock_dt2_updated,
+        mdt_2_json,
+        key_mdt2,
+        file_location,
+        timestamp
+    ) = S3_setup
+
+    with patch(
+        "src.first_lambda.first_lambda_utils.write_to_ingestion_bucket.get_most_recent_table_data",
+        side_effect=RuntimeError("get_most_recent_table_data() failed to read ingestion bucket")
+    ):
+        with pytest.raises(RuntimeError, match=r"get_most_recent_table_data\(\) failed to read ingestion bucket"):
+            write_to_ingestion_bucket(updated_rows_of_mdt2, bucket_name, file_location, S3_client)
+            
+
+
+def test_write_to_ingestion_bucket_raises_RuntimeError_if_save_updated_table_to_S3_fails(S3_setup):
+    (
+        S3_client,
+        bucket_name,
+        mock_design_table_2,
+        updated_rows_of_mdt2,
+        mock_dt2_updated,
+        mdt_2_json,
+        key_mdt2,
+        file_location,
+        timestamp
+    ) = S3_setup
+
+    with patch(
+        "src.first_lambda.first_lambda_utils.write_to_ingestion_bucket.get_most_recent_table_data",
+        return_value=mock_design_table_2
+    ), patch(
+        "src.first_lambda.first_lambda_utils.write_to_ingestion_bucket.update_rows_in_table",
+        return_value=mock_dt2_updated
+    ), patch(
+        "src.first_lambda.first_lambda_utils.write_to_ingestion_bucket.create_formatted_timestamp",
+        return_value=timestamp
+    ), patch(
+        "src.first_lambda.first_lambda_utils.write_to_ingestion_bucket.save_updated_table_to_S3",
+        side_effect=RuntimeError("save_updated_table_to_S3() failed to save updated table to ingestion bucket")
+    ):
+        with pytest.raises(RuntimeError, match=r"save_updated_table_to_S3\(\) failed to save updated table to ingestion bucket"):
+            write_to_ingestion_bucket(updated_rows_of_mdt2, bucket_name, file_location, S3_client)            
