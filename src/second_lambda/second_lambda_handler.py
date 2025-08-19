@@ -1,4 +1,7 @@
 import json
+import boto3
+
+from datetime import datetime
 
 from src.second_lambda.second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
 from src.second_lambda.second_lambda_utils.read_from_s3             import read_from_s3
@@ -66,13 +69,13 @@ def second_lambda_handler(event, context):
 
     # Get lookup table that contains 
     # values this handler requires:
-    lookup = second_lambda_init(event)
+    lookup = second_lambda_init(event, boto3.client("s3"), datetime.now(), datetime(2024, 1, 1))
     
     # Set vars to values in lookup table: 
     s3_client = lookup['s3_client'] # boto3 S3 client object,
-    ingestion_bucket = lookup['ingestion_bucket'] # name of ingestion bucket,
-    object_key = lookup['object_key'] # ingestion bucket stores object under this key
-    timestamp_string = lookup['timestamp_string'] # a timestamp as a datetime object 
+    ingestion_bucket = lookup['ingestion_bucket'] # name of bucket,
+    object_key = lookup['object_key'] # bucket stores object under this key
+    timestamp_string = lookup['timestamp_string'] # a timestamp string
     table_name = lookup['table_name'] # name of table
     proc_bucket = lookup['proc_bucket'] # name of processed bucket
     start_date = lookup['start_date'] # a datetime object for 1 Jan 2024

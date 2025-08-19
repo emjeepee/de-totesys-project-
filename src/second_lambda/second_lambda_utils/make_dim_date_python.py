@@ -27,7 +27,7 @@ def make_dim_date_python(start_date, loop_range: int, ):
         loop_range: a number of days from loop_date.
          Also the number of dictionaries that will
          populate the list that represents the date 
-         dimension table.
+         dimension table (ie the number of rows).
 
     Returns:
         A date dimension table. This list of dictionaries 
@@ -44,23 +44,29 @@ def make_dim_date_python(start_date, loop_range: int, ):
     """
 
     dim_date = []
-    # Leap years = 24, 28
-    # Number of days between 1Jan2024 and 31Dec2030
-    # is 366 + 366 (for years 24 and 28)
+    # Leap years = 24, 28.
+    # Calculate days from 1Jan2024-31Dec2030:
+    # 366 + 366 (for years 24 and 28)
     # plus 5 * 365 (for the other years)
-    # or 2557 days. 
+    # equals 2557 days. 
     
+    # Doing this in row below: 
+    # "day_name": start_date.strftime("%B"),     
+    # "month_name": start_date.strftime("%B"), 
+    # makes values German for German locale.
+    # module calendar guarantees English.
     for i in range(loop_range):
-        row = {
-                "date_id": start_date,
-                "year": start_date.year,
-                "month": start_date.month,
-                "day": start_date.day,
-                "day_of_week": start_date.weekday(),
-                "day_name": calendar.day_name[start_date.weekday()],
-                "month_name": calendar.month_name[start_date.weekday()],
-                "quarter": (start_date.month - 1) // 3 + 1
+        row = {                                                          # 19Aug25 --HAVE CHECKED THESE:
+                "date_id": start_date.date(),                            # is datetime.date object. In warehouse, must be SQL date
+                "year": start_date.year,                                 # is int. In warehouse, must be SQL INT
+                "month": start_date.month,                               # is int (1 for January). In warehouse, must be SQL INT
+                "day": start_date.day,                                   # is int. In warehouse, must be SQL INT
+                "day_of_week": start_date.weekday() + 1,                 # is int (1 for Monday). In warehouse, must be SQL INT
+                "day_name": calendar.day_name[start_date.weekday()],     # is str (eg 'Monday'). In warehouse, must be SQL VARCHAR
+                "month_name": calendar.month_name[start_date.month],     # is str (eg 'January'). In warehouse, must be SQL VARCHAR
+                "quarter": (start_date.month - 1) // 3 + 1               # is int. In warehouse, must be SQL INT
               }
+
         dim_date.append(row)
         start_date += timedelta(days=1)
 
