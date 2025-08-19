@@ -12,16 +12,29 @@ from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline import is_fi
 
 
 
-def lambda_handler(event, context):
+def second_lambda_handler(event, context):
     """
     This function:
-        1) receives an event from the S3 ingestion bucket
+        1) Either:
+            i)   Reads an object from the ingestion bucket
+                 and converts it into a dimension table
+                 or fact table, converts that table into
+                 a Parquet file and writes the Parquet
+                 file to the processed S3 bucket.
+            ii)  Creates a date dimension table if this 
+                 is the first ever run of this second 
+                 lambda handler, converts that table to a 
+                 Parquet file and writes that file to the 
+                 processed S3 bucket.
+        2) carries out 1)i) and 1)ii) above by receiving 
+            an event from the S3 ingestion bucket
             when the first lambda function has saved a 
-            table in that bucket. The table includes 
-            all rows. The ingestion bucket saved the
-            table as a jsonified list of dictionaries
-            where each dictionary represents a row of
-            the table. 
+            table in that bucket. The table contains the 
+            same number of rows as the same table in the
+            ToteSys database. The ingestion bucket stores
+            each table as a jsonified list of 
+            dictionaries, where each dictionary 
+            represents a row of the table. 
         2) reads passed-in event to get the name of the S3 
             ingestion bucket and the name of the key under 
             which the first lambda stored the table in 
@@ -35,10 +48,11 @@ def lambda_handler(event, context):
             f"{timestamp}/dim_{table_name}.parquet", 
             where timestamp looks like this:
             "2025-08-14_12-33-27".
-        4) creates a date dimension table if this is the 
-            first ever run of this lambda function, 
-            converts that table to Parquet form and saves
-            it to the processed bucket.
+        4) creates a date dimension table (in the form 
+            of a Python list) if this is the first ever 
+            run of this lambda function, converts that 
+            table to Parquet form and saves it to the 
+            processed bucket.
 
     Args:
         event: the event object sent to this lambda 

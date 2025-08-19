@@ -4,7 +4,7 @@ from src.third_lambda.third_lambda_utils.make_SQL_queries               import m
 from src.third_lambda.third_lambda_utils.make_SQL_queries_to_warehouse  import make_SQL_queries_to_warehouse
 
 
-def lambda_handler(event, context):
+def third_lambda_handler(event, context):
     """
     This function:
         1) receives an event object from the processed
