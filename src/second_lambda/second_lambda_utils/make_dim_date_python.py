@@ -14,7 +14,7 @@ def make_dim_date_python(start_date, loop_range: int, ):
          the date dimension table. The first 
          member dictionary has key date_id,
          whose value is datetime object 
-         loopdateloopthis object. Subsequent member 
+         start_date. Subsequent member 
          dictionaries have their date_id values
          that increment by one day, ie 
          start_date + 1 day, start_date + 2 days, 
@@ -37,7 +37,7 @@ def make_dim_date_python(start_date, loop_range: int, ):
           {"date_id": -start_date+2days-, "year": 2020, "month": 07, "day": 4 ... etc},
           etc 
         ], 
-        assuming start_date is a datetime object representing 
+        For example, assuming start_date is a datetime object representing 
         the date 2jul2020. If loop_range is 5000 there will be
         5000 member dictionaries in the list        
 

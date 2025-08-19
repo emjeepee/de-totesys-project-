@@ -93,7 +93,7 @@ def second_lambda_handler(event, context):
     # Parquet form and save it in the 
     # processed bucket: 
     if is_first_run_of_pipeline(proc_bucket, s3_client):
-        arr = create_dim_date_Parquet(start_date, timestamp_string)
+        arr = create_dim_date_Parquet(start_date, timestamp_string, num_rows)
         upload_to_s3(s3_client, proc_bucket, arr[1], arr[0])
 
 
