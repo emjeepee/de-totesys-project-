@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 
-def second_lambda_init(event, s3_client, dt_now, dt_start):
+def second_lambda_init(event, s3_client, dt_now, dt_start, num_rows):
     """
     This function:
         creates a dictionary whose keys have values 
@@ -61,6 +61,9 @@ def second_lambda_init(event, s3_client, dt_now, dt_start):
             date from which to create a 
             date dimension table (ie the date of
             the first row).
+        num_rows:
+            the number of rows that the date
+            dimension table will have.    
 
     Returns:
         a dictionary containing the values
@@ -79,7 +82,8 @@ def second_lambda_init(event, s3_client, dt_now, dt_start):
         'object_key': object_key, # # key for object in ingestion bucket, eg sales_order/2025-06-04_09-21-32.json
         'proc_bucket': "11-processed-bucket", # name of processed bucket:
         'table_name': object_key.split("/")[0], # name of table, eg 'sales_order'
-        'start_date': dt_start # datetime object for 1 Jan 2024 (includes time info - midnight):
+        'start_date': dt_start, # datetime object for 1 Jan 2024 (includes time info for midnight)
+        'num_rows' : 100 # a datetime object for 1 Jan 2024
             }
 
     return lookup
