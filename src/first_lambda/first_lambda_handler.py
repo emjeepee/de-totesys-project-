@@ -1,12 +1,10 @@
-import boto3
-from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
-from src.first_lambda.first_lambda_utils.read_table import read_table
-from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
-from src.first_lambda.first_lambda_utils.get_data_from_db import get_data_from_db
-from src.first_lambda.first_lambda_utils.write_to_s3 import write_to_s3
-from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
+from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
+from src.first_lambda.first_lambda_utils.read_table                  import read_table
+from src.first_lambda.first_lambda_utils.get_data_from_db            import get_data_from_db
+from src.first_lambda.first_lambda_utils.write_to_s3                 import write_to_s3
+from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
 from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
-from src.first_lambda.first_lambda_utils.first_lambda_init import first_lambda_init
+from src.first_lambda.first_lambda_utils.first_lambda_init           import first_lambda_init
 
 
 

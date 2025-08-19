@@ -1,190 +1,152 @@
-from src.lambda_handler import lambda_handler
-from unittest.mock import Mock, patch
 import pytest
-from moto import mock_aws
 import json
 import boto3
 import os
-from src.utils import read_table, convert_data
-from first_lambda_utils.lambda_utils import get_data_from_db, write_to_s3
-from first_lambda_utils.conn_to_db import conn_to_db
+
+from moto import mock_aws
+from unittest.mock import Mock, patch
 from pg8000.native import Connection
-from first_lambda_utils.write_to_ingestion_bucket import (
-    write_to_ingestion_bucket,
-    save_updated_table_to_S3,
-    get_most_recent_table_data,
-)
+
+from src.first_lambda.first_lambda_handler import first_lambda_handler
+from src.first_lambda.first_lambda_utils import get_data_from_db, write_to_s3
+
+
+# Need to:
+# 1) Mock lookup = first_lambda_init()
+    # assert called once
+    # Mock its return dict
+    # Mock that dict's keys' values:
+    # bucket_name = lookup['bucket_name'] # name of ingestion bucket
+    # tables = lookup['tables'] # list of names of tables of interest
+    # s3_client = lookup['s3_client'] # boto3 S3 client object
+    # conn = lookup['conn'] # pg8000.native Connection object
+    # close_db = lookup['close_db'] # function to close connection to database
+# 2) test that change_after_timestamp() gets called once with
+#    appropriate args:
+#    Mock the function and pass in mocked values for 
+#    its args bucket_name, s3_client, "***timestamp***", "1900-01-01 00:00:00".
+#    Give the mock a return value of "1900-01-01 00:00:00"    
+# 3) test that get_data_from_db(tables, after_time, conn, read_table) is called once.
+#    So mock it and pass in mock values for tables, after_time, conn, read_table.
+#    Mock its return value data_for_s3 (make up a whole table/list of updated rows)
+#    Check it gets called once       
+# 4) Mock write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name)
+#    Mock its args (data_for_s3 should already be mocked)
+#   Assert the function is called once
+# 5) Mock close_db(conn), assert called once with mock conn
+# 6) Test that RuntimeError is raised should 
+#     get_data_from_db() or write_to_s3() raise Runtime errors.
+# 
 
 
 @pytest.fixture(scope="function")
-def aws_credentials():
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "test"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "test"
-    os.environ["AWS_SECURITY_TOKEN"] = "test"
-    os.environ["AWS_SESSION_TOKEN"] = "test"
-    os.environ["AWS_DEFAULT_REGION"] = "eu-west-2"
-
-
-tables = [
-    "design",
-    "payment",
-    "sales",
-    "transaction",
-    "sales_order",
-    "counterparty",
-    "address",
-    "staff",
-    "purchase_order",
-    "department",
-    "currency",
-    "payment_type",
-]
-
-tables_names = ["design", "payment"]
-
-
-@pytest.fixture(scope="function")
-def S3_setup(aws_credentials):
+def general_setup():
     with mock_aws():
         S3_client = boto3.client("s3", region_name="eu-west-2")
+        bucket_name_empty = "11-ingestion-bucket_empty"
+        bucket_name_with_objs = "11-ingestion-bucket_with_objs"
+        # Mock two buckets, one that will be empty
+        # one that will contain three tables:
         S3_client.create_bucket(
-            Bucket="11-ingestion-bucket",
+            Bucket=bucket_name_empty,
             CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
-        )
+                             )
+        S3_client.create_bucket(
+            Bucket=bucket_name_with_objs,
+            CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
+                             )
+        
+        # values to put in mock dictionary that 
+        # mock first_lambda_init() returns 
+        # (plus S3_client and bucket_name_empty above):        
+        mock_tables = ['design', 'sales_orders', 'transactions'] # list of names of tables of interest
+        mock_conn = Mock() # mock pg8000.native.Connection object
+        mock_cdb = Mock() # mock close_db
+        
+        # mock functions passed in to 
+        # get_data_from_db() and write_to_s3(),
+        # respectively:        
+        mock_rt   = Mock() # mock read_table()
+        mock_wtib = Mock() # mock write_to_ingestion_bucket()
 
-        yield S3_client
+        mock_fli_return_value = { 
+            'bucket_name': bucket_name_empty,
+            'tables'     : mock_tables,                     
+            's3_client'  : S3_client,  
+            'conn'       : mock_conn,
+            'close_db'   : mock_cdb
+                                 }    
+        
+        mock_cats_return_value = "1900-01-01 00:00:00"
 
-
-def test_get_data_from_db_returns_python_list_of_dicts():
-    # arrange
-    # get_data_from_db() returns a list like this:
-    # [{'design': [{<data from one row>}, {<data from one row>}, etc]}, {'sales': [{<data from one row>}, {<data from one row>}, etc]}, etc]
-
-    mock_dict = {
-        "design": [
-            {"design_id": 1, "name": "abdul", "team": 1},
-            {"design_id": 2, "name": "neil", "team": 1},
-            {"design_id": 3, "name": "mukund", "team": 1},
-        ]
-    }
-
-    # read_table() returns {table_name: [{},{}]}
-
-    mock_read_table = Mock()
-    mock_read_table.return_value = mock_dict
-    # response = get_data_from_db(tables_names, "1960-01-01 00:00:00", conn, mock_read_table, convert_data)
-    response = get_data_from_db(
-        tables_names, "1960-01-01 00:00:00", "xxx", mock_read_table, convert_data
-    )
-    # response should be mock_dict
-
-    # print(f'response is >>> {response}')
-    assert json.loads(response[0]) == mock_dict
-    # assert json.loads(response[1])["payment"] == mock_dict
-
-
+        mock_gdfd_return_value = [{}, {}, {}]
+        
 
 
 
+        yield S3_client, 
+        bucket_name_empty, 
+        bucket_name_with_objs, 
+        mock_rt, 
+        mock_wtib, 
+        mock_fli_return_value, 
+        mock_cats_return_value, 
+        mock_gdfd_return_value
 
 
 
+def test_calls_first_lambda_init_once(general_setup):
+    # Arrange:
+    (S3_client, 
+     bucket_name_empty, 
+     bucket_name_with_objs, 
+     mock_rt, 
+     mock_wtib, 
+     mock_fli_return_value,
+     mock_cats_return_value,
+     mock_gdfd_return_value
+     ) = general_setup
 
-# @pytest.mark.skip
-def test_write_to_s3_saves_a_whole_table_to_the_bucket_when_no_key_in_bucket_equals_table_name(
-    S3_setup,
-):
-    # s3 bucket is empty
-    # write_to_s3 must receive one whole table
-    # we want to test that write_to_s3 realises that the S3 bucket
-    # contains no keys with prefix eg 'design'
-    #
-    # arrange:
+    # patch all functions that first_lambda_handler
+    # calls without having them passed in:
+    with patch('src.first_lambda.first_lambda_handler.first_lambda_init') as fli, \
+         patch('src.first_lambda.first_lambda_handler.change_after_time_timestamp') as cats, \
+         patch('src.first_lambda.first_lambda_handler.get_data_from_db') as gdfd, \
+         patch('src.first_lambda.first_lambda_handler.read_table') as rt, \
+         patch('src.first_lambda.first_lambda_handler.write_to_s3') as wts3, \
+         patch('src.first_lambda.first_lambda_handler.write_to_ingestion_bucket') as wtib:
+        
+        fli.return_value  = mock_fli_return_value 
+        cats.return_value = mock_cats_return_value
+        gdfd.return_value = mock_gdfd_return_value
 
-    table_data = [
-        {"design_id": 1, "name": "abdul", "team": 1},
-        {"design_id": 2, "name": "neil", "team": 1},
-        {"design_id": 3, "name": "mukund", "team": 1},
-    ]
+        # Act:
+        first_lambda_handler(None, None)
 
-    # this is a mock complete table:
-    mock_dict = {
-        "design": [
-            {"design_id": 1, "name": "abdul", "team": 1},
-            {"design_id": 2, "name": "neil", "team": 1},
-            {"design_id": 3, "name": "mukund", "team": 1},
-        ]
-    }
+        # Assert:
+        fli.assert_called_once()
+        cats.assert_called_once_with(
+            mock_fli_return_value['bucket_name'], 
+            mock_fli_return_value['s3_client'], 
+            "***timestamp***", 
+            "1900-01-01 00:00:00"
+                                    )
 
-    mock_read_table = Mock()
-    mock_read_table.return_value = mock_dict
+        gdfd.assert_called_once_with(
+            mock_fli_return_value['tables'], 
+            mock_cats_return_value,
+            mock_fli_return_value['conn'],
+            rt
+            )
 
-    data_list = get_data_from_db(
-        tables_names, "1900-01-01 00:00:00", "xxx", mock_read_table, convert_data
-    )
+        wts3.assert_called_once_with(
+            mock_gdfd_return_value,
+            mock_fli_return_value['S3_client'],
+            wtib,
+            mock_fli_return_value['bucket_name'] 
+            )
+        
 
-    # data_list should be a list of these kinds of objects jsonified:
-    # {'design': [{<data from one row>}, {<data from one row>}, etc]}.
-    # in or case data_list will be a list like this [jsonified mock_dict ]
-    write_to_s3(data_list, S3_setup, write_to_ingestion_bucket, "11-ingestion-bucket")
+        
 
-    response = S3_setup.list_objects_v2(Bucket="11-ingestion-bucket", Prefix="design")
-
-    assert response["KeyCount"] == 1
-    assert response["Prefix"] == "design"
-
-
-# @pytest.mark.skip
-def test_write_to_s3_saves_a_whole_table_to_the_bucket_when_no_key_in_bucket_equals_table_name(
-    S3_setup,
-):
-    # put the whole table in the s3 bucket
-    #
-    # we want to test that write_to_s3 realises that the S3 bucket
-    # does contain a key with prefix eg 'design' and modifies
-    # only the rows that this function receives
-    #
-    # arrange:
-
-    # this is a mock complete table:
-    whole_table = [
-        {"design_id": 1, "name": "abdul", "team": 1},
-        {"design_id": 2, "name": "neil", "team": 1},
-        {"design_id": 3, "name": "mukund", "team": 1},
-        {"design_id": 4, "name": "Amar", "team": 1},
-        {"design_id": 5, "name": "Duncan", "team": 1},
-    ]
-
-    # the folllowing is what theis function receives (ie updated rows):
-    modified_rows = [
-        {"design_id": 1, "name": "abdul", "team": 2},
-        {"design_id": 2, "name": "neil", "team": 2},
-        {"design_id": 3, "name": "mukund", "team": 2},
-    ]
-
-    # put whole in S3 bucket (function save_updated_table_to_S3() has already
-    # passed its tests):
-    save_updated_table_to_S3(
-        json.dumps(whole_table), S3_setup, "design/111111.json", "11-ingestion-bucket"
-    )
-
-    mock_read_table = Mock()
-    mock_read_table.return_value = {"design": modified_rows}
-
-    data_list = get_data_from_db(
-        tables_names, "1900-01-01 00:00:00", "xxx", mock_read_table, convert_data
-    )
-
-    # data_list should be a list of these kinds of objects jsonified:
-    # {'design': [{<data from one row>}, {<data from one row>}, etc]}.
-    # in our case data_list will contain one members like this [jsonified modified_rows ]
-    write_to_s3(data_list, S3_setup, write_to_ingestion_bucket, "11-ingestion-bucket")
-
-    # get the most recent table with prefix 'design'
-    response = get_most_recent_table_data("design", S3_setup, "11-ingestion-bucket")
-    # print(f'response is >>> {response} ')
-    # [{'design_id': 1, 'name': 'abdul', 'team': 2}]
-    assert response[0]["team"] == 2
-    assert response[1]["team"] == 2
-    assert response[2]["team"] == 2
+    
