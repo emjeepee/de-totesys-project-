@@ -5,6 +5,7 @@ import json
 
 from moto import mock_aws
 from unittest.mock import Mock, patch, call
+from botocore.exceptions import ClientError
 
 from src.second_lambda.second_lambda_utils.read_from_s3 import read_from_s3
 
@@ -64,8 +65,22 @@ def test_returns_correct_object(general_setup):
     # Act
     # read_from_s3(s3_client, bucket_name: str, key: str)
     response = read_from_s3(mock_S3_client, bucket_name, test_key)             
-    result = None
-    # result = json.loads(response)
+    # result = None
+    result = json.loads(response)
 
     # Assert
     assert result == expected
+
+
+
+# @pytest.mark.skip
+def test_raises_Runtime_Error(general_setup):
+    (mock_S3_client, bucket_name, test_obj, test_key) = general_setup
+    
+    mock_S3_client.get_object = Mock(side_effect=ClientError(
+    {"Error": {"Code": "500", "Message": "Failed to get object in bucket"}},
+    "GetObject"
+                                        ))
+
+    with pytest.raises(RuntimeError):
+        read_from_s3(mock_S3_client, bucket_name, test_key)

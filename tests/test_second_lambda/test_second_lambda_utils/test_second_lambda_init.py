@@ -150,30 +150,3 @@ def test_returns_dict_with_correct_keys_and_values(general_setup):
 
 
 
-@pytest.mark.skip
-def test_xxx():
-    # Arrange:
-
-    # Act:
-
-    # Assert:
-
-    pass
-
-
-
-
-    # {
-    #     "Records": [
-    #       {        
-    #         "s3": {
-    #             "bucket": {
-    #                 "name": "ingestion-bucket",
-    #                       },
-    #             "object": {
-    #                 "key": "design/2025-06-13_13:23:34", # the key under which the object has been saved 
-    #                        }
-    #               }
-    #     }
-    #               ]
-    # }
