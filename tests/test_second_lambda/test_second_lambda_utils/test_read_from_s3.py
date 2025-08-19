@@ -10,10 +10,6 @@ from botocore.exceptions import ClientError
 from src.second_lambda.second_lambda_utils.read_from_s3 import read_from_s3
 
 
-# Need to:
-# 1) test second_lambda_init() returns a dict
-# 2) test second_lambda_init() returns a dict
-#    with the correct keys and values 
 
 
 @pytest.fixture(scope="function")

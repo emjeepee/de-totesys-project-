@@ -1,4 +1,4 @@
-
+from botocore.exceptions import ClientError
 
 
 
@@ -21,8 +21,12 @@ def is_first_run_of_pipeline(proc_bucket: str, s3_client):
         empty.
         False otherwise.
     """
-    objects_list = s3_client.list_objects_v2(Bucket=proc_bucket)
-    if objects_list["KeyCount"] == 0:
-        return True
+    try:
+        objects_list = s3_client.list_objects_v2(Bucket=proc_bucket)
+        if objects_list["KeyCount"] == 0:
+            return True
+        return False
+    except ClientError as e:
+        raise RuntimeError("Second lambda encountered an error in attempt to list objects in the processed bucket") from e
 
-    return False
+
