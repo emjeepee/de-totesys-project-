@@ -73,11 +73,42 @@ def test_bucket_is_empty(general_setup):
     (mock_S3_client, bucket_name_empty, bucket_name_not_empty, test_obj_1, test_obj_2, test_key_1,  test_key_2) = general_setup
 
     # Act
-    # is_first_run_of_pipeline(proc_bucket: str, s3_client):
-    result = False
-    # result = is_first_run_of_pipeline(bucket_name_empty, mock_S3_client)
+    # result = False
+    result = is_first_run_of_pipeline(bucket_name_empty, mock_S3_client)
     
     
 
     # Assert
     assert result
+
+
+
+def test_correct_reaction_to_bucket_not_being_empty(general_setup):
+    # Arrange
+    (mock_S3_client, bucket_name_empty, bucket_name_not_empty, test_obj_1, test_obj_2, test_key_1,  test_key_2) = general_setup
+
+    # Act
+    # result = True
+    result = is_first_run_of_pipeline(bucket_name_not_empty, mock_S3_client)
+    
+    
+
+    # Assert
+    assert not result
+
+
+
+def test_raises_RuntimeError_on_failure_to_read_bucket(general_setup):
+    # Arrange
+    (mock_S3_client, bucket_name_empty, bucket_name_not_empty, test_obj_1, test_obj_2, test_key_1,  test_key_2) = general_setup
+
+    # Act
+    # result = True
+    mock_S3_client.list_objects_v2 = Mock(side_effect=ClientError(
+    {"Error": {"Code": "500", "Message": "Failed to list objects in bucket"}},
+    "ListObjectsV2"
+                                        ))
+
+    with pytest.raises(RuntimeError):
+        # return
+        result = is_first_run_of_pipeline(bucket_name_not_empty, mock_S3_client)
