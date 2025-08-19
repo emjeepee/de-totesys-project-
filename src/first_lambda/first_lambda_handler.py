@@ -55,7 +55,7 @@ def first_lambda_handler(event, context):
     # and replace that timestamp 
     # with one for the current time:
     after_time = change_after_time_timestamp(
-        bucket_name, s3_client, "***timestamp***", "1900-01-01 00:00:00"
+       bucket_name, s3_client, "***timestamp***", "1900-01-01 00:00:00"
                                             )
 
 
