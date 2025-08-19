@@ -72,21 +72,23 @@ def general_setup():
 
         mock_dt_start = datetime(24, 1, 1) 
 
+        num_rows = 100
 
-        yield mock_event, mock_S3_client, mock_dt_now, mock_dt_start
+
+        yield mock_event, mock_S3_client, mock_dt_now, mock_dt_start, num_rows
 
 
 
 
 
 def test_returns_a_dict(general_setup):
-    (mock_event, mock_S3_client, mock_dt_now, mock_dt_start) = general_setup
+    (mock_event, mock_S3_client, mock_dt_now, mock_dt_start, num_rows) = general_setup
     # Arrange:
     # second_lambda_init(event, s3_client, dt_now, dt_start)
     expected = dict
 
     # Act:
-    response = second_lambda_init(mock_event, mock_S3_client, mock_dt_now, mock_dt_start)
+    response = second_lambda_init(mock_event, mock_S3_client, mock_dt_now, mock_dt_start, num_rows)
     # result = None 
     result = type(response) 
 
@@ -96,7 +98,7 @@ def test_returns_a_dict(general_setup):
     
 
 def test_returns_dict_with_correct_keys_and_values(general_setup):
-    (mock_event, mock_S3_client, dt_now, dt_start) = general_setup
+    (mock_event, mock_S3_client, dt_now, dt_start, num_rows) = general_setup
     # Arrange:
     # second_lambda_init(event, s3_client, dt_now, dt_start)
     
@@ -106,7 +108,8 @@ def test_returns_dict_with_correct_keys_and_values(general_setup):
                        'object_key',
                        'proc_bucket', 
                        'table_name', 
-                       'start_date']
+                       'start_date',
+                       'num_rows']
     
     expected_values = [mock_S3_client,
                        "2025-08-13_13-13-13",
@@ -114,7 +117,8 @@ def test_returns_dict_with_correct_keys_and_values(general_setup):
                        "design/2025-11-11_11:11:11",
                        "11-processed-bucket",
                        'design', 
-                       datetime(24, 1, 1)]
+                       datetime(24, 1, 1),
+                       100]
     keys = []
     values = []
         # lookup = {
@@ -130,7 +134,7 @@ def test_returns_dict_with_correct_keys_and_values(general_setup):
 
 
     # Act:
-    response = second_lambda_init(mock_event, mock_S3_client, dt_now, dt_start)
+    response = second_lambda_init(mock_event, mock_S3_client, dt_now, dt_start, num_rows)
 
     result_keys = []
     result_values = []

@@ -83,7 +83,7 @@ def second_lambda_init(event, s3_client, dt_now, dt_start, num_rows):
         'proc_bucket': "11-processed-bucket", # name of processed bucket:
         'table_name': object_key.split("/")[0], # name of table, eg 'sales_order'
         'start_date': dt_start, # datetime object for 1 Jan 2024 (includes time info for midnight)
-        'num_rows' : 100 # a datetime object for 1 Jan 2024
+        'num_rows' : num_rows # a datetime object for 1 Jan 2024
             }
 
     return lookup
