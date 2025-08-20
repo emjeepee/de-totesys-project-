@@ -12,8 +12,8 @@ def transform_to_star_schema_fact_table(table_data):
 
     Args:
         table_data: the sales_order table 
-         from the ingestion bucket but 
-         converted into a list of 
+         from the ingestion bucket 
+         converted into a Python list of 
          dictionaries. 
         
     Returns:
@@ -61,7 +61,7 @@ def transform_to_star_schema_fact_table(table_data):
         dt_add = dt_add.date()  # extract date only
 
 
-        dimension_row = {
+        table_row = {
                 "sales_order_id": row.get("sales_order_id"),
                 "created_date": dt_created_date,
                 "created_time": dt_created_time,
@@ -78,5 +78,5 @@ def transform_to_star_schema_fact_table(table_data):
                 "agreed_delivery_location_id": row.get("agreed_delivery_location_id"),
                         }
         
-    fact_sales_order.append(dimension_row)
+    fact_sales_order.append(table_row)
     return fact_sales_order
