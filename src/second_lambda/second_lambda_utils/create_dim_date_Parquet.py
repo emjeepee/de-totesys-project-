@@ -1,4 +1,4 @@
-from second_lambda.second_lambda_utils.make_dim_date_python import make_dim_date_python
+from src.second_lambda.second_lambda_utils.make_dim_date_python import make_dim_date_python
 from src.second_lambda.second_lambda_utils.convert_to_parquet import convert_to_parquet
 
 
