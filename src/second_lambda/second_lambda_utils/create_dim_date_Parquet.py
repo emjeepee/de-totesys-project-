@@ -30,12 +30,13 @@ def create_dim_date_Parquet(start_date, timestamp_string: str, num_rows: int):
             table will cover.
 
     Returns: 
-        A list. The member of the list at 
-        index 0 is the date dimension table 
-        as a Parquet file. The member at 
-        index 1 is the key (a string) under 
+        A list. The member at index 0 is 
+        the date dimension table as a 
+        Parquet file. The member at index 
+        1 is the key (a string) under 
         which the processed bucket will 
         store the table.
+    
     """            
     
     
