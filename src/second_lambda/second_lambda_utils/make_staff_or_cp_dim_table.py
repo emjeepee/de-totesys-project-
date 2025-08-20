@@ -8,18 +8,19 @@ def make_staff_or_cp_dim_table(
         aux_table_name: str, s3_client):
     """
     This function:
-        Makes the staff or counterparty 
-         dimension table. 
-        To create the staff table, this 
-         function requires data from 
-         the department table, which 
-         it retrieves from the 
-         ingestion bucket. To create 
-         the counterparty dimension 
-         table, this function requires 
-         data from the address table, 
-         which it retrieves from 
-         the ingestion bucket.
+        1) makes the staff or counterparty 
+            dimension table. 
+        2) achieves 1) by creatinge the 
+            staff table, for which this 
+            function requires data from 
+            the department table, which 
+            it retrieves from the 
+            ingestion bucket. To create 
+            the counterparty dimension 
+            table, this function requires 
+            data from the address table, 
+            which it retrieves from 
+            the ingestion bucket.
 
     Args:
         1) table_name: the name of the 
