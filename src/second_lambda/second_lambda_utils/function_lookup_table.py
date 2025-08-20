@@ -23,7 +23,7 @@ from src.second_lambda.second_lambda_utils.transform_to_dim_location import tran
 
 
 function_lookup_table = {
-"sales_order": transform_to_star_schema_fact_table,
+"sales_order": transform_to_star_schema_fact_table, # tested
 "staff": transform_to_dim_staff,
 "address": transform_to_dim_location, # address table converted to location dim table
 "design": transform_to_dim_design,

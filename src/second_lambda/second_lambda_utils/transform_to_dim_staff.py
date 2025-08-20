@@ -1,4 +1,3 @@
-from src.second_lambda.second_lambda_utils.dicts_for_dim_tables import staff_dict
 from src.second_lambda.second_lambda_utils.preprocess_dim_tables import preprocess_dim_tables
 
 
