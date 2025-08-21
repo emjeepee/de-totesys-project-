@@ -6,9 +6,11 @@ from src.second_lambda.second_lambda_utils.preprocess_dim_tables import preproce
 def transform_to_dim_location(address_data: list):
     """
     This function:
-        transforms the address table data as read from the 
-        ingestion bucket (and converted into a python list) 
-        into a location dimension table.
+        1) transforms the address table data as read from the 
+         ingestion bucket (and converted into a python list) 
+         into a location dimension table.
+        2) carries out 1) above by changing key 'address_id' 
+          to 'location_id'   
 
     Args:
         address_data: a list of dictionaries that represents 
@@ -21,6 +23,23 @@ def transform_to_dim_location(address_data: list):
         A list of dictionaries that is the location dimension 
         table.    
     """
+
+    # create the final location 
+    # dimension table:
+    location_dim_table = preprocess_dim_tables(address_data, ['created_at', 'last_updated'])
+
+        # In each dict in list 
+        # change key  
+        # "address_id" to
+        # "location_id":
+    for dict in location_dim_table:
+        dict["location_id"] = dict.pop("address_id")
+
+    return location_dim_table
+    
+
+
+
     # OLD CODE:
     # dim_location = []
 
@@ -38,17 +57,3 @@ def transform_to_dim_location(address_data: list):
     #         }
     #         dim_location.append(transformed_row)
     # return dim_location
-
-    # create the final location 
-    # dimension table:
-    location_dim_table = preprocess_dim_tables(address_data, ['created_at', 'last_updated'])
-        # In each dict in the list 
-        # change the name of key  
-        # "address_id" to
-        # "location_id":
-    for dict in location_dim_table:
-        dict["location_id"] = dict.pop("address_id")
-
-    return location_dim_table
-    
-

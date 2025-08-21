@@ -58,22 +58,30 @@
 def preprocess_dim_tables(table: list, keys_to_cut: list):
     """
     This function:
-        Removes the keys whose names are in list 
-        keys_to_cut from every dictionary in list
-        table.
+        Removes certain keys from a list that 
+        represents a table. Code had read that 
+        table from the ingestion bucket and 
+        unjsonified it into a python list of 
+        dictionaries, where each dictionary 
+        represents a table row.
+        
     
     Args:
-        1) table: an unjsonified version of a table from
-            the ingestion bucket.
+        1) table: a table in the form of a 
+            python list of dictionaries, where 
+            each dictionary represents a row of
+            the table. The table came from the 
+            ingestion bucket.
         2) keys_to_cut: a list of strings, each 
             representing a key that this function 
-            will remove from each dictionary in list
-            table.
+            will remove from each dictionary in 
+            the list table.
 
     Returns:
-        A new list that is a version of list table but 
-         whose member dictionaries no longer contain
-         the keys whose names are in list keys_to_cut.            
+        A new list that is a version of list 
+         table but whose member dictionaries 
+         no longer contain the keys whose 
+         names are in list keys_to_cut.            
     
     """
 
