@@ -84,11 +84,21 @@ def preprocess_dim_tables(table: list, keys_to_cut: list):
          names are in list keys_to_cut.            
     
     """
+    # make a deep copy of table:
 
-    for dict in table:
+    copy_list = [dict(item) for item in table]
+
+    # This might work:
+    # copy_list = [
+    # {k: v for k, v in d.items() if k not in keys_to_cut}
+    # for d in table
+    #             ]
+    
+    for dct in copy_list:
         for key in keys_to_cut:
-            if key in dict:
-                dict.pop(key)
+            dct.pop(key, None)
 
-    return table
+    # print(f'In transform_to_dim_counterparty and copy_list is >>>>>>   {copy_list}')
+
+    return copy_list
     
