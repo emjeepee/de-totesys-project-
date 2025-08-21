@@ -52,20 +52,23 @@ def transform_to_dim_counterparty(counterparty_data, address_data):
 # "counterparty_legal_country"          COMES FROM LOOKUP
 # "counterparty_legal_phone_number"     COMES FROM LOOKUP
 
-
+# commercial_contact
+# delivery_contact
+# created_at 
+# last_updated
 
     pp_cp_dim_table = preprocess_dim_tables(counterparty_data, ['legal_address_id', 'commercial_contact', 'delivery_contact', 'created_at', 'last_updated'])
 
     # make a look-up dictionary that contains data from the
     # address table. the dictionary will look like this:
     # {
-    # 1: {"address_line_1": 'aaa, aaa, aaaaa', "address_line_2": 'bbb, bbb, bbbbb', 'district': 'cccc' }, etc},
-    # 2: {"address_line_1": 'ddd, ddd, ddddd', "address_line_2": 'eee, eee, eeeee', 'district': 'ffff' }, etc},
-    # 3: {"address_line_1": 'ggg, ggg, ggggg',  etc},
+    # '1': {"address_line_1": 'aaa, aaa, aaaaa', "address_line_2": 'bbb, bbb, bbbbb', 'district': 'cccc' }, etc},
+    # '2': {"address_line_1": 'ddd, ddd, ddddd', "address_line_2": 'eee, eee, eeeee', 'district': 'ffff' }, etc},
+    # '3': {"address_line_1": 'ggg, ggg, ggggg',  etc},
     # etc
     # }
     address_lookup = {
-        address["address_id"]: {
+        str(address["address_id"]): {
             "address_line_1": address.get("address_line_1"),
             "address_line_2": address.get("address_line_2"),
             "district": address.get("district"),
