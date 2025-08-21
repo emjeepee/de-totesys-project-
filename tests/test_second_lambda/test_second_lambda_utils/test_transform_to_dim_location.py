@@ -2,7 +2,6 @@ import pytest
 
 from datetime import datetime, date, time
 
-
 from src.second_lambda.second_lambda_utils.transform_to_dim_location import transform_to_dim_location
 
 

@@ -11,7 +11,7 @@ def transform_to_dim_design(design_data):
 
     Args:
         design_data: a list of dictionaries that represents 
-        the currency table and each dictionary represents a row
+        the design table. Each dictionary represents a row
         (and its key-value pairs represent columnName-cellValue
         pairs). This list is the unjsonified design table 
         that the ingestion bucket stored.

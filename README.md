@@ -1,14 +1,13 @@
 
 # Project Title
 
-ETL pipeline 
-
+### **Extract-transform-load (ETL) pipeline** <br><br><br>
 
 
 ## Description of project
-
-This project converts updated data from a transactional (OLTP) database called ToteSys, converts it into denormalised data in the form of dimensions tables and a facts table and puts this data in an Amazon RDS postgresql data warehouse. 
-
+A project that transforms data in a transactional OLTP database into star-schema data for analytics.  
+This project converts updated data from OLTP database ToteSys into denormalised data in the form of dimensions tables and a facts table and puts this data in an Amazon RDS postgresql data warehouse. 
+ <br><br><br>
 
 
 ## Project directories
@@ -23,83 +22,102 @@ This project includes the following directories:
  - tests -- this directory contains test_*.py files, which contain the pytest
 		functions that will test all of the python code that makes up the 
 		lambda functions
+ <br><br><br>
 
 
 
+## Authors (alphabetical)
 
-
-
-
-
-## Authors
-
- - Duncan Cornish (github.com/duncancornish)
- - Neill Hallard (github.com/nhallard)
- - Abdulmomen Jameli (github.com/Farctated)
- - Mukund Pandit (github.com/emjeepee)
- - Amar Walji (github.com/AvengedA)
-
+ - Duncan Cornish
+ - Neill Hallard
+ - Abdulmomen Jameli
+ - Mukund Pandit
+ - Amar Walji
+ <br><br><br>
 
 
 
 ## Installation
 
-Setup instructions: fork this GitHub repository: https://github.com/AvengedA/de-totesys-project- and run file workflow.yml, which is in the .github directory.
-
+Setup instructions:  <br>
+fork this GitHub repository: https://github.com/emjeepee/de-totesys-project- and run file workflow.yml, which is in directory .github.
+ <br><br><br>
     
 ## Tech Stack
 
  - CI/CD: GitHub Actions
  - Code: Python 3.13
- - Python modules pg8000.native, pandas, pyarrow, io, botocore, datetime, os, logging, json, dotenv, currency_codes, decimal
- - Testing: Python modules Pytest, coverage, unittest, moto 
- - Provisioning clud services: Terraform
- - Cloud services: AWS services S3, Lambda, EventBridge and CloudWatch
+ - Python modules pg8000.native, pandas, pyarrow, io, botocore, datetime, os, logging, json, dotenv, currency_codes and decimal
+ - Testing: Python modules Pytest, coverage, unittest and moto 
+ - Provisioning of cloud services: Terraform
+ - AWS cloud services: S3, Lambda, EventBridge and CloudWatch
+ <br><br><br>
+
 
 
 ## What this project provisions
  - An AWS EventBridge scheduler
  - Three AWS lambda functions
- - Three AWS S3 buckets
- - EventBridge notifications
- - CloudWatch logging
-
+ - Two AWS S3 buckets
+ - AWS EventBridge notifications
+ - AWS CloudWatch logging
+ <br><br><br>
 
 
 ## Operation of the project:
- - 1) An AWS EventBridge scheduler runs every five minutes and triggers the first of the 
-	three lambda functions
- - 2) The first lambda function reads data in the ToteSys database and converts it into json 
-	form before storing it in an S3 bucket called the ingestion bucket.
-	The first lambda function saves complete tables in the ingestion bucket under a 
-	key that includes a timestamp.
-	On its very first run the first lambda function saves each table and all of its rows 
-	in the postGresql ToteSys database as json data in the ingestion S3 bucket. The key 
-	under the lambda saves each table contains a timestamp. 
-	On subsequent runs the first lambda function only receives updated rows for tables.
-	Here the lambda gets the appropriate table from the ingestion bucket and inserts the 
-	updated rows into that table. The lambda then saves the whole table as json in the 
-	ingestion bucket as json data under a key that contains a timestamp.
- - 3) When the ingestion S3 bucket has a new object put in it it generates and EventBridge 
-	event that triggers the second lambda.
- - 4) When the second lambda is triggered it reads the new data that has just been put in 
-	the ingestion bucket, converts it into dimension table and fact table data, converts 
-	the tables into Parquet files and saves the Parquet files in the processed bucket.
- - 5) Putting objects into the processed S3 bucket makes the bucket send and EventBridge
-	event to the third lamda, triggering it.
- - 6) The third lambda takes the new Parquet files out of the processed bucket, makes 
-	SQL INSERT queries out of the data in them and makes the queries to the 
-	appropriate tables in the data warehouse.	
+### **Overview** <br>
+***This project:***
+ - 		extracts updated data from postgresql database ToteSys, 
+ 		which holds the data in several tables. 
+ - 		transforms each updated table into either a dimension table 
+		or the single fact table.
+ - 		converts each dimension table or the single fact table into a 
+		Parquet file.
+ - 		converts the Parquet file into a Pandas DataFrame.   
+ - 		converts each DataFrame into SQL queries and, using those 
+		queries, inserts the table's rows into a data warehouse (an
+		AWS RDS postgresql database). 		
+ <br>
+
+### **In detail** <br>
+***This project:***
+ -  	Has an AWS EventBridge scheduler run every five minutes to 
+ 	  	trigger the first of the three lambda functions.
+ -  	The first lambda function polls ToteSys for updated row data 
+ 	  	for each table, creates an updated table and stores it in 
+	  	json form in the ingestion bucket, the first S3 bucket, where 
+	  	the previous, now-outdated, table also remains.
+	  	The first lambda function saves each table in the bucket under 
+	  	a key string comprising two parts: the table name, eg 'design', 
+	  	and a timestamp.
+ -  	On its very first run the first lambda function receives all of 
+      	the rows of a table.
+ -  	When the first lambda function writes a table to the ingestion 
+ 	  	bucket, AWS generates an EventBridge event that triggers the 
+	  	second lambda function.
+ -  	The second lambda function reads the new table file that has 
+ 	  	just entered the ingestion bucket, converts it into a dimension 
+	  	table or a fact table and converts the dimension/fact table 
+	  	into a Parquet file. 
+	  	The second lambda function then saves the Parquet file in the 
+	  	second S3 bucket, the processed bucket, replacing the Parquet 
+	  	file for the same table that is already there. 
+	  	Writing the file to the bucket triggers an AWS EventBridge 
+	  	event that reaches the third lambda function.
+ -  	The third lambda function responds to the event by reading the 
+ 	  	new Parquet file in the processed bucket and converting it to 
+	  	a pandas DataFrame.
+	  	The third lambda function reads the DataFrame and forms 
+		SQL	INSERT query strings out of the row data in it, then makes 
+	  	those queries to the appropriate table in the data warehouse.	
+	  
+ <br><br><br>
 
 
 
+# Running Tests
 
-
-
-
-## Running Tests
-
-To run tests, run the following command after having navigated to the project directory
+To run the tests, execute the following in the command line after having navigated to the project directory:
 
 ```bash
 	pytest -vvvrP
