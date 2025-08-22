@@ -117,8 +117,10 @@ def second_lambda_handler(event, context):
         # processed bucket (note: when you put 
         # a datetime object in an fstring, Python 
         # converts the object to a string):
-        table_key = f"{timestamp_string}/fact_{table_name}.parquet" if table_name == "sales_order" else f"{timestamp_string}/dim_{table_name}.parquet"
-        
+        # table_key = f"{timestamp_string}/fact_{table_name}.parquet" if table_name == "sales_order" else f"{timestamp_string}/dim_{table_name}.parquet"
+        table_key = f"fact_{table_name}/{timestamp_string}/.parquet" if table_name == "sales_order" else f"dim_{table_name}/{timestamp_string}.parquet"
+
+
         # Save the Parquet file in the processed 
         # bucket:
         upload_to_s3(s3_client, proc_bucket, table_key, pq_file)

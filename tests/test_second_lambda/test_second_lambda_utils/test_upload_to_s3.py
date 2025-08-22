@@ -34,21 +34,26 @@ def general_setup():
         bucket_name = "11-process-bucket_empty"
         
         
-        # Create two buckets, 
-        # one that will be empty, the
-        # other that will contain 
-        # two objects:
+        # Create a bucket:
         mock_S3_client.create_bucket( # empty bucket
             Bucket=bucket_name,
             CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
                              )
         
-        test_key = 'test-prefix/test.json'
+        # make a test key, which will in real code
+        # look like:
+        # "design/2025-06-13_13:23:34.parquet" 
+        # OR 
+        # fact_sales_order/2025-06-13_13:23:34.parquet 
+        test_key = "design/2025-06-13_13:23:34.parquet"
+
+        # create a test prefix:
+        test_prefix = "design"
 
         test_body = json.dumps([{'test_1': 1}, {'test_2': 2}, {'test_3': 3}])
 
 
-        yield mock_S3_client, bucket_name, test_key, test_body
+        yield mock_S3_client, bucket_name, test_key, test_prefix, test_body
 
 
 
@@ -58,12 +63,12 @@ def general_setup():
 # @pytest.mark.skip
 def test_uploads_with_correct_key(general_setup):
     # Arrange:
-    (mock_S3_client, bucket_name, test_key, test_body) = general_setup
+    (mock_S3_client, bucket_name, test_key, test_prefix, test_body) = general_setup
     expected = test_key
 
     # Act:
     upload_to_s3(mock_S3_client, bucket_name, test_key, test_body)
-    response = mock_S3_client.list_objects_v2(Bucket = bucket_name, Prefix = 'test-prefix')
+    response = mock_S3_client.list_objects_v2(Bucket = bucket_name, Prefix = test_prefix)
     result = response['Contents'][0]['Key']
     # result = None
 
@@ -77,7 +82,7 @@ def test_uploads_with_correct_key(general_setup):
 # @pytest.mark.skip
 def test_uploads_correct_data(general_setup):
     # Arrange:
-    (mock_S3_client, bucket_name, test_key, test_body) = general_setup
+    (mock_S3_client, bucket_name, test_key, test_prefix, test_body) = general_setup
     expected_0 = json.loads(test_body)[0]
     expected_1 = json.loads(test_body)[1]
     expected_2 = json.loads(test_body)[2]
@@ -110,7 +115,7 @@ def test_uploads_correct_data(general_setup):
 # @pytest.mark.skip
 def test_raises_RuntimeError(general_setup):
     # Arrange:
-    (mock_S3_client, bucket_name, test_key, test_body) = general_setup
+    (mock_S3_client, bucket_name, test_key, test_prefix, test_body) = general_setup
 
     mock_S3_client.put_object = Mock(side_effect=ClientError(
     {"Error": {"Code": "500", "Message": "Failed to upload object to bucket"}},

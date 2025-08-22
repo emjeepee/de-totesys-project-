@@ -44,7 +44,8 @@ def third_lambda_init(event):
     #                 "arn": "arn:aws:s3:::example-bucket"
     #             },
     #             "object": {
-    #                 "key": "design/2025-06-13_13:23:34", # the key under which the object has been saved 
+    #                 "key": "design/2025-06-13_13:23:34.parquet" OR fact_sales_order/2025-06-13_13:23:34.parquet, 
+    #                                   # the key under which the object has been saved 
     #                 "size": 1024,
     #                 "eTag": "0123456789abcdef0123456789abcdef",
     #                 "sequencer": "0A1B2C3D4E5F678901"
