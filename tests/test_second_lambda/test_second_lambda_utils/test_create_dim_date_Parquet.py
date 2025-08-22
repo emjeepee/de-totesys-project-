@@ -22,7 +22,7 @@ def general_setup():
         ts = "2025-08-14_12-33-27" 
         nor = 3
 
-        dim_date_key = f"{ts}/dim_date.parquet" # "2025-08-11_15-42-10/dim_date.parquet"
+        dim_date_key = f"dim_date/{ts}.parquet" # "2025-08-11_15-42-10/dim_date.parquet"
 
         yield start_date, mock_dim_date_py, mock_Parquet, ts, nor, dim_date_key
 
