@@ -6,14 +6,20 @@ import pytest
 import os
 import json
 import boto3
+import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
+from io import BytesIO
+
 
 from moto import mock_aws
-from unittest import Mock, patch
+from unittest.mock import patch, ANY, call, Mock
 from io import BytesIO
-from datetime import datetime, timedelta
+from datetime import datetime 
 from botocore.exceptions import ClientError
 
 from src.second_lambda.second_lambda_handler import second_lambda_handler
+from src.second_lambda.second_lambda_utils.convert_to_parquet import convert_to_parquet
 
 
 
@@ -37,10 +43,12 @@ def aws_credentials():
 def general_setup():
     with mock_aws():
         # mock_S3_client = boto3.client("s3", region_name="eu-west-2")
-        mock_S3_client = boto3.client
+        mock_boto3_client = boto3.client
         b_name_1 = "11-ingestion-bucket"
         b_name_2 = "11-processed-bucket"
         
+        mock_S3_client = mock_boto3_client("s3", region_name="eu-west-2")
+
         # Create a mock ingestion bucket:
         mock_S3_client.create_bucket( # empty bucket
             Bucket=b_name_1,
@@ -59,7 +67,7 @@ def general_setup():
           {        
             "s3": {
                 "bucket": {
-                    "name": "ingestion-bucket",
+                    "name": "11-ingestion-bucket",
                           },
                 "object": {
                     "key": "design/2025-11-11_11:11:11", # the key under which the object has been saved 
@@ -70,9 +78,55 @@ def general_setup():
                 }   
 
 
+        mock_py_tbl = [
+             {'design_id': 1, 
+              'created_at': '2025-8-12-12-11-10-73000)', 
+              'design_name': 'Fresh',
+              'file_location': '/Network',
+              'file_name': 'fresh-20240124-ap0b.json', 
+              'last_updated': '2025-8-12-12-11-10-73000'
+              },
+                {'design_id': 2, 
+              'created_at': '2025-8-12-12-11-10-73000)', 
+              'design_name': 'Stale',
+              'file_location': '/Network',
+              'file_name': 'Stale-20240124-ap0b.json', 
+              'last_updated': '2025-8-12-12-11-10-73000)'
+              }
+                     ]
+
+        mock_json_tbl = json.dumps(mock_py_tbl)
+
+        # make mock design dimension table:
+        mock_mdoft_return = [
+             {'design_id': 1, 'design_name': 'Fresh', 'file_location': 'aaa', 'file_name': 'bbb'},
+             {'design_id': 2, 'design_name': 'Stale', 'file_location': 'ccc', 'file_name': 'ddd'}
+                            ]
+        
+        mock_pq = convert_to_parquet(mock_mdoft_return)
 
 
-        yield mock_S3_client, b_name_1, b_name_2, mock_event
+        mock_sli_return = {}
+
+
+        object_key = mock_event["Records"][0]["s3"]["object"]["key"]
+
+        mock_sli_return = {
+        's3_client': mock_S3_client, # boto3 S3 client object
+        'timestamp_string' : "2025-08-22_15-30-00", # string of format "2025-08-14_12-33-27"
+        'ingestion_bucket': mock_event["Records"][0]["s3"]["bucket"]["name"], # name of ingestion bucket   
+        'object_key': object_key, # # key for object in ingestion bucket, eg sales_order/2025-06-04_09-21-32.json
+        'proc_bucket': "11-processed-bucket", # name of processed bucket:
+        'table_name': object_key.split("/")[0], # name of table, eg 'sales_order'
+        'start_date': datetime(24, 1, 1), # datetime object for 1 Jan 2024 (includes time info for midnight)
+        'num_rows' : 3 # a datetime object for 1 Jan 2024
+            }
+        
+        mock_ts = "dim_design/2025-08-22_15-30-00.parquet"
+
+
+
+        yield mock_event, mock_py_tbl, mock_json_tbl, mock_mdoft_return, mock_pq, mock_sli_return, mock_ts 
 
 
 
@@ -82,9 +136,9 @@ def general_setup():
 
 
 # @pytest.mark.skip
-def test_integration_of_utility_functions(general_setup):
+def test_integrates_all_utility_functions(general_setup):
     # Arrange:
-    (mock_S3_client, b_name_1, b_name_2, mock_event) = general_setup
+    (mock_event, mock_py_tbl, mock_json_tbl, mock_mdoft_return, mock_pq, mock_sli_return, mock_ts ) = general_setup
     
 
     # Act and assert:
@@ -99,41 +153,131 @@ def test_integration_of_utility_functions(general_setup):
 
     with patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
          patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
+         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
+         patch('src.second_lambda.second_lambda_handler.boto3.client') as mock_mb3c, \
+         patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
+         patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
+         patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
+         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
          patch('src.second_lambda.second_lambda_handler.is_first_run_of_pipeline') as mock_ifrop, \
-         patch('src.second_lambda.second_lambda_handler.boto3.client') as mock_S3_client:
+         patch('src.second_lambda.second_lambda_handler.create_dim_date_Parquet') as mock_cddP:     
+            mock_sli.return_value = mock_sli_return
+            mock_rfs3.return_value = mock_json_tbl
+            mock_mdoft.return_value = mock_mdoft_return
+            mock_ctp.return_value = mock_pq
             second_lambda_handler(mock_event, 'context')
-            mock_sli.assert_called_once_with(mock_event, mock_S3_client("s3"), datetime.now(), datetime(2024, 1, 1))
+            mock_sli.assert_called_once_with(mock_event, mock_mb3c("s3"), ANY, datetime(2024, 1, 1))
+            # read_from_s3(s3_client from lookup, ingestion_bucket from lookup, object_key from lookup)
+            mock_rfs3.assert_called_once_with(mock_sli_return['s3_client'],  mock_sli_return['ingestion_bucket'],  mock_sli_return['object_key'] )
+
+            # should_make_dim_date(ifrop, cddP, uts3, start_date, timestamp_string, num_rows, proc_bucket, s3_client)    
+            mock_smdd.assert_called_once_with(mock_ifrop, mock_cddP, mock_uts3, 
+                                              mock_sli_return['start_date'], mock_sli_return['timestamp_string'],
+                                              mock_sli_return['num_rows'], mock_sli_return['proc_bucket'],
+                                              mock_sli_return['s3_client'])
+
+            # make_dim_or_fact_table(table_name--from lookup, table_python, s3_client--from lookup, ingestion_bucket--from lookup)
+            mock_mdoft.assert_called_once_with(mock_sli_return['table_name'], mock_py_tbl, mock_sli_return['s3_client'], mock_sli_return['ingestion_bucket'])
+
+            # convert_to_parquet(dim_or_fact_table--return of mdoft)
+            mock_ctp.assert_called_once_with(mock_mdoft_return)
+
+            # upload_to_s3(s3_client, proc_bucket, table_key, pq_file)
+            mock_uts3.assert_called_once_with(mock_sli_return['s3_client'], mock_sli_return['proc_bucket'], mock_ts, mock_pq)
+
+
+
+
+# @pytest.mark.skip
+def test_raises_RuntimeError_when_read_from_s3_fails(general_setup):
+    # Arrange:
+    (mock_event, mock_py_tbl, mock_json_tbl, mock_mdoft_return, mock_pq, mock_sli_return, mock_ts ) = general_setup
+    
+
+    with patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
+         patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
+         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
+         patch('src.second_lambda.second_lambda_handler.boto3.client') as mock_mb3c, \
+         patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
+         patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
+         patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
+         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
+         patch('src.second_lambda.second_lambda_handler.is_first_run_of_pipeline') as mock_ifrop, \
+         patch('src.second_lambda.second_lambda_handler.create_dim_date_Parquet') as mock_cddP:     
+            mock_sli.return_value = mock_sli_return
+            # mock_rfs3.return_value = mock_json_tbl
+            mock_rfs3.side_effect = RuntimeError()
+            mock_mdoft.return_value = mock_mdoft_return
+            mock_ctp.return_value = mock_pq
+            with pytest.raises(RuntimeError):
+                # return
+                second_lambda_handler(mock_event, 'context')
+            
+
+
+
+# @pytest.mark.skip
+def test_raises_RuntimeError_when_smdd_fails(general_setup):
+    """
+    smdd is utility function should_make_dim_date().
+    """
+    # Arrange:
+    (mock_event, mock_py_tbl, mock_json_tbl, mock_mdoft_return, mock_pq, mock_sli_return, mock_ts ) = general_setup
+    
+
+    with patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
+         patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
+         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
+         patch('src.second_lambda.second_lambda_handler.boto3.client') as mock_mb3c, \
+         patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
+         patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
+         patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
+         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
+         patch('src.second_lambda.second_lambda_handler.is_first_run_of_pipeline') as mock_ifrop, \
+         patch('src.second_lambda.second_lambda_handler.create_dim_date_Parquet') as mock_cddP:     
+            mock_sli.return_value = mock_sli_return
+            mock_rfs3.return_value = mock_json_tbl
+            mock_smdd.side_effect = RuntimeError()
+            # mock_mdoft.return_value = mock_mdoft_return
+            # mock_ctp.return_value = mock_pq
+            
+            # mock_mdoft.return_value = mock_mdoft_return
+            # mock_ctp.return_value = mock_pq
+            with pytest.raises(RuntimeError):
+                # return
+                second_lambda_handler(mock_event, 'context')
 
 
 
 
 
+# @pytest.mark.skip
+def test_raises_RuntimeError_when_uts3_fails(general_setup):
+    """
+    uts3 is utility function upload_to_s3().
+    """
+    # Arrange:
+    (mock_event, mock_py_tbl, mock_json_tbl, mock_mdoft_return, mock_pq, mock_sli_return, mock_ts ) = general_setup
+    
+
+    with patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
+         patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
+         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
+         patch('src.second_lambda.second_lambda_handler.boto3.client') as mock_mb3c, \
+         patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
+         patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
+         patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
+         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
+         patch('src.second_lambda.second_lambda_handler.is_first_run_of_pipeline') as mock_ifrop, \
+         patch('src.second_lambda.second_lambda_handler.create_dim_date_Parquet') as mock_cddP:     
+            mock_sli.return_value = mock_sli_return
+            mock_rfs3.return_value = mock_json_tbl
+            mock_mdoft.return_value = mock_mdoft_return
+            mock_ctp.return_value = mock_pq
+            mock_uts3.side_effect = RuntimeError()
+            
+            with pytest.raises(RuntimeError):
+                # return
+                second_lambda_handler(mock_event, 'context')
 
 
-
-
-        # sli_return_dict = {
-        #  's3_client': mock_S3_client,               # boto3 S3 client object,
-        #  'ingestion_bucket': b_name_1,              # name of bucket,
-        #  'object_key': '',                          # ingestion bucket stores object under this key
-        #  'table_name': 'design',                    # name of (in this case dimension) table
-        #  'proc_bucket': b_name_2,                   # name of processed bucket
-        #  'start_date': datetime(24, 1, 1),          # start date from which code makes date dimension table
-        #  'num_rows': 3                              # number of rows (ie days) date dimension table covers
-        #                   } 
-
-
-
-# 
-        
-        # # make a test key, which will in real code
-        # # look like:
-        # # "design/2025-06-13_13:23:34.parquet" 
-        # # OR 
-        # # fact_sales_order/2025-06-13_13:23:34.parquet 
-        # test_key = "design/2025-06-13_13:23:34.parquet"
-
-        # # create a test prefix:
-        # test_prefix = "design"
-
-        # test_body = json.dumps([{'test_1': 1}, {'test_2': 2}, {'test_3': 3}])

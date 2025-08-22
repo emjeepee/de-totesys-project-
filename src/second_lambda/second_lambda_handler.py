@@ -10,6 +10,7 @@ from src.second_lambda.second_lambda_utils.upload_to_s3             import uploa
 from src.second_lambda.second_lambda_utils.second_lambda_init       import second_lambda_init
 from src.second_lambda.second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
 from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
+from src.second_lambda.second_lambda_utils.should_make_dim_date     import should_make_dim_date
 
 
 
@@ -86,6 +87,7 @@ def second_lambda_handler(event, context):
     # just been notified about and 
     # convert it to a python list:
     try:
+        # read_from_s3(s3_client from lookup, ingestion_bucket from lookup, object_key from lookup)
         table_json = read_from_s3(s3_client, ingestion_bucket, object_key) # jsonified[{...}, {...}, {...}]
         table_python = json.loads(table_json) # [{...}, {...}, {...}]
 
@@ -95,10 +97,14 @@ def second_lambda_handler(event, context):
         # empty) make a date dimension table in 
         # Parquet form and save it in the 
         # processed bucket: 
-        if is_first_run_of_pipeline(proc_bucket, s3_client):
-            arr = create_dim_date_Parquet(start_date, timestamp_string, num_rows)
-            upload_to_s3(s3_client, proc_bucket, arr[1], arr[0])
-
+        should_make_dim_date(is_first_run_of_pipeline, 
+                             create_dim_date_Parquet, 
+                             upload_to_s3, 
+                             start_date, 
+                             timestamp_string, 
+                             num_rows, 
+                             proc_bucket, 
+                             s3_client)
 
         # Make either the fact table or a dimension 
         # table (whichever is appropriate) as a 
@@ -212,3 +218,11 @@ def second_lambda_handler(event, context):
     #         s3_client, ingestion_bucket, f"address/{timestamp}"
     #                         )
     # address_python = json.load(address_json)
+
+
+
+
+        # if is_first_run_of_pipeline(proc_bucket, s3_client):
+        #     arr = create_dim_date_Parquet(start_date, timestamp_string, num_rows)
+        #     upload_to_s3(s3_client, proc_bucket, arr[1], arr[0])
+

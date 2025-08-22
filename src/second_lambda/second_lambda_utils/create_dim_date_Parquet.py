@@ -55,10 +55,9 @@ def create_dim_date_Parquet(start_date, timestamp_string: str, num_rows: int):
     # Make a key under which to store 
     # the Parquet file in the S3 
     # processed bucket:
-    dim_date_key = f"{timestamp_string}/dim_date.parquet" # "2025-08-11_15-42-10/dim_date.parquet"
+    dim_date_key = f"dim_date/{timestamp_string}.parquet" # "dim_date/2025-08-11_15-42-10.parquet"
     
     # Return Parquet file and timestamp
     # in a list:
-    return [dim_date_pq, dim_date_key]
-        
+    return [dim_date_pq, dim_date_key]       
     
