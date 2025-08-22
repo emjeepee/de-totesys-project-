@@ -23,12 +23,20 @@ def general_setup():
                     'Records': [
                     {"s3": 
                      { "object": {
-                         'key': "design/2025-06-13_13:23:34" 
+                         'key': "design/2025-06-13_13:23.parquet" 
                                  }
                      }
                     }
                               ]
                 }
+
+    # proc_bucket = lookup['proc_bucket'] # name of processed bucket
+    # s3_client = lookup['s3_client']     # boto3 S3 client object
+    # object_key = lookup['object_key']   # key under which processed bucket saved Parquet file
+    # table_name = lookup['table_name']   # name of table
+    # conn = lookup['conn']               # pg8000.native Connection object that knows about warehouse
+    # close_db = lookup['close_db']       # function to close connection to warehouse
+
 
     yield 
 
