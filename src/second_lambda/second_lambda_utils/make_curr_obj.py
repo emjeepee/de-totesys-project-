@@ -40,6 +40,7 @@ def make_curr_obj(currency_dict):
 
         try:
             curr_obj = get_currency_by_code(code)
+            return curr_obj
 
         except CurrencyNotFoundError as e:
             raise RuntimeError(err_Msg) from e

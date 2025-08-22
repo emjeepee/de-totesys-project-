@@ -27,15 +27,22 @@ def transform_to_dim_currency(currency_data):
 
     pp_curr_dim_table = preprocess_dim_tables(currency_data, ['created_at', 'last_updated'])
     
-    for row_dict in pp_curr_dim_table: # {'currency_id': 3, 'currency_code': 'EUR'}
-        curr_obj = make_curr_obj(row_dict)
-        curr_name = curr_obj.name
-        row_dict['currency_name'] = curr_name
+    try:
+        for row_dict in pp_curr_dim_table: # {'currency_id': 3, 'currency_code': 'EUR'}
+            curr_obj = make_curr_obj(row_dict)
+            curr_name = curr_obj.name
+            row_dict['currency_name'] = curr_name
 
-    # preproc_currency_dim_table is 
-    # now the finished currency 
-    # dimension table. Return it:
-    return pp_curr_dim_table
+        # preproc_currency_dim_table is 
+        # now the finished currency 
+        # dimension table. Return it:
+        return pp_curr_dim_table
+    except:
+        raise(RuntimeError)
+
+
+
+
 
 
 
