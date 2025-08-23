@@ -1,6 +1,3 @@
-import boto3
-from datetime import datetime
-
 
 
 def second_lambda_init(event, s3_client, dt_now, dt_start, num_rows):

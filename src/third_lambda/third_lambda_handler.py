@@ -1,8 +1,11 @@
+import boto3
+
 from src.third_lambda.third_lambda_utils.third_lambda_init              import third_lambda_init
 from src.third_lambda.third_lambda_utils.make_pandas_dataframe          import make_pandas_dataframe
 from src.third_lambda.third_lambda_utils.make_SQL_queries               import make_SQL_queries
 from src.third_lambda.third_lambda_utils.make_SQL_queries_to_warehouse  import make_SQL_queries_to_warehouse
-
+from src.first_lambda.first_lambda_utils.conn_to_db                     import conn_to_db
+from src.first_lambda.first_lambda_utils.conn_to_db                     import close_db
 
 def third_lambda_handler(event, context):
     """
@@ -45,13 +48,13 @@ def third_lambda_handler(event, context):
 
     # Get lookup table that contains 
     # values this lambda handler requires:
-    lookup = third_lambda_init(event)    
+    lookup = third_lambda_init(event, conn_to_db, close_db, boto3.client('s3'))    
     proc_bucket = lookup['proc_bucket'] # name of processed bucket
     s3_client = lookup['s3_client']     # boto3 S3 client object
     object_key = lookup['object_key']   # key under which processed bucket saved Parquet file
     table_name = lookup['table_name']   # name of table
     conn = lookup['conn']               # pg8000.native Connection object that knows about warehouse
-    close_db = lookup['close_db']       # function to close connection to warehouse
+    close_conn = lookup['close_db']       # function to close connection to warehouse
 
     # Get the Parquet file and convert
     # it to a pandas dataframe:
@@ -66,7 +69,7 @@ def third_lambda_handler(event, context):
     make_SQL_queries_to_warehouse(queries_list, conn)
 
     # Close connection to warehouse:
-    close_db(conn)
+    close_conn(conn)
 
 
 

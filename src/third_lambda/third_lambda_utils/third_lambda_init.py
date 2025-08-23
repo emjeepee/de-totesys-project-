@@ -1,20 +1,20 @@
 import boto3
 
-from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
 
 
 
 
-def third_lambda_init(event):
+
+def third_lambda_init(event, conn_to_db, close_db, s3_client):
     """
     This function:
         creates a dictionary whose keys have values 
         that the third lambda function requires.    
     
     Args:
-        event: the event object passed as argument 
-         by Lambda to the third lambda handler.
-         An example of event is:
+        1) event: the event object passed as argument 
+            by Lambda to the third lambda handler.
+            An example of event is:
     # {
     #     "Records": [
     #     {
@@ -37,14 +37,14 @@ def third_lambda_init(event):
     #             "s3SchemaVersion": "1.0",
     #             "configurationId": "testConfigRule",
     #             "bucket": {
-    #                 "name": "ingestion-bucket",
+    #                 "name": "11-processed-bucket",
     #                 "ownerIdentity": {
     #                     "principalId": "EXAMPLE"
     #                 },
     #                 "arn": "arn:aws:s3:::example-bucket"
     #             },
     #             "object": {
-    #                 "key": "design/2025-06-13_13-23.parquet" OR fact_sales_order/2025-06-13_13:23:34.parquet, 
+    #                 "key": "design/2025-06-13_13-23.parquet" OR fact_sales_order/2025-06-13_13-23.parquet, 
     #                                   # the key under which the object has been saved 
     #                 "size": 1024,
     #                 "eTag": "0123456789abcdef0123456789abcdef",
@@ -54,6 +54,14 @@ def third_lambda_init(event):
     #     }
     #     ]
     # }
+            2) conn_to_db: utility function that 
+                makes a connection to a postgresql
+                database.  
+            3) close_db: utility function that 
+                closes a connection to a postgresql
+                database.  
+            4) s3_client: the boto3 s3 client 
+                object (boto3.client('s3')).
 
     Returns:
         a dictionary that is a lookup table
@@ -65,12 +73,12 @@ def third_lambda_init(event):
     object_key = event["Records"][0]["s3"]["object"]["key"]
 
     lookup = {
-        's3_client': boto3.client("s3"),                        # boto3 S3 client
-        'object_key': object_key,                               # key for Parquet file in processed bucket 
-        'proc_bucket': ["Records"][0]["s3"]["bucket"]["name"],  # name of processed bucket
-        'table_name': object_key.split("/")[0],                 # name of Parquet file in processed bucket
-        'conn': conn_to_db('WAREHOUSE'),                        # pg8000.native Connection object
-        'close_db': close_db                                    # function to close connection to warehouse
+        's3_client': s3_client,                                     # boto3 S3 client
+        'object_key': object_key,                                   # key for Parquet file in processed bucket 
+        'proc_bucket': event["Records"][0]["s3"]["bucket"]["name"], # name of processed bucket
+        'table_name': object_key.split("/")[0],                     # name of Parquet file in processed bucket
+        'conn': conn_to_db('WAREHOUSE'),                            # pg8000.native Connection object
+        'close_db': close_db                                        # function to close connection to warehouse
              }
 
 
