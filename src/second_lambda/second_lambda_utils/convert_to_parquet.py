@@ -21,11 +21,11 @@ def convert_to_parquet(data):
 
     Args:
         data: A Python list of dictionaries
-         that represents either the facts table 
+         that represents either the fact table 
          or a dimension table.
 
     Returns:         
-        a Parquet version of either the facts
+        a Parquet version of either the fact
         table or a dimension table in a 
         buffer in memory.
     """

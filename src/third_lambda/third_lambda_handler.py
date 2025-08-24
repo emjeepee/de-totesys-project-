@@ -61,8 +61,13 @@ def third_lambda_handler(event, context):
     df = make_pandas_dataframe(proc_bucket, s3_client, object_key)  # NOTE: TESTED
 
     # make the SQL queries from the 
-    # data in the dataFrame:
-    queries_list = make_SQL_queries(df, table_name)
+    # data in the dataFrame. 
+    # queries_list will take one 
+    # form when table_name is 
+    # 'sales_order' and another 
+    # form when table_name is, for 
+    # example, 'design':
+    queries_list = make_SQL_queries(df, table_name)   # NOTE: started testing sat23aug25
 
     # Make SQL queries to the data 
     # warehouse to insert data into

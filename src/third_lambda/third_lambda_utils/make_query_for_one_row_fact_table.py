@@ -1,34 +1,71 @@
+from src.third_lambda.third_lambda_utils.make_parts_of_a_query_string import make_parts_of_a_query_string
 
 
-def make_SQL_qry_for_one_row(table_name: str, pk_col, cols, vals, row):
+def make_query_for_one_row_fact_table(table_name: str, cols: list, vals: list):
     """
     This function:
-        makes an SQL query string depending
-        on the value of tabel_name.
+        1) makes an SQL query string for 
+            one row of the fact table.
+        2) gets called by function
+            make_row_query_for_correct_table() 
+    
     Args:
-        table_name: a string for the name of 
-         a table.
-        pk_col: the name of the primary key.
-        cols: a string of comma-separated 
-         table column names. 
-        vals: a string of comma-separated cell
-         values for a table row. 
-        row: a row from a pandas dataFrame.            
+        1) table_name: a string for the name  
+            of a table. Will always be 
+            'sales_order'.
+        2) cols: a list of column names, eg
+            ['www', 'xxx', 'yyy', 'zzz']
+        3) vals: a list of values, all strings,
+            eg [13, '1', 'NULL', 'sausages']
+    
     Returns:
-        An SQL query string the exact form of 
-         which depends on whether the table is 
-         a dimension table or the fact table.       
+        An SQL query string for one row of the 
+         fact table.       
     
     """
+    # convert ['www', 'xxx', 'yyy', 'zzz']     ->  '('www, xxx, yyy, zzz)' 
+    # and     [13, '1', 'NULL', 'turnip'] ->       '(13, '1', NULL, 'turnip')' :
+    cols_vals = make_parts_of_a_query_string(cols, vals)
 
-    if table_name == 'sales_order': # if it's the fact table
-        sql_query_str = f"INSERT INTO {table_name} ({cols}) VALUES ({vals});"
-    else: # if it's a dimensions table
-        sql_query_str = (
-                f"DELETE FROM {table_name} WHERE {pk_col} = '{row[pk_col]}'; "
-                f"INSERT INTO {table_name} ({cols}) VALUES ({vals});"
-                            )   
-    return sql_query_str        
+    # Make a string like this:
+    # INSERT INTO sales_order (xxx, yyy, zzz)
+    # VALUES (1, NULL, 'turnip');
+
+    sql_query_str = f"INSERT INTO {table_name} {cols_vals[0]} VALUES {cols_vals[1]};"
+
+    return sql_query_str  
+
+
+
+
+
+
+
+
+
+
+
+    # cols_str = vals_str = ''
+
+    # for i in range(len(cols)):
+    #     cols_str += f'{cols[i]}, '
+    #     if type(vals[i]) is int: 
+    #         vals_str += f"{str(vals[i])}, "            
+    #     if type(vals[i]) is str: 
+    #         if vals[i] == 'NULL': # get rid of inverted commas:
+    #             vals_str += f"{vals[i]}, "
+    #         else: # if '1' or 'turnip'
+    #             vals_str += f"'{vals[i]}', "                    
+            
+
+    # # get rid of ', ' and add 
+    # # round brackets: 
+    # cols_str = '(' + cols_str[:-2] + ')'
+    # vals_str = '(' + vals_str[:-2] + ')'
+
+
+
+
 
 
 # IMPORTANT!!!:
