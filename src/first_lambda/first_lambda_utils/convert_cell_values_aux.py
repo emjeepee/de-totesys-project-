@@ -30,6 +30,9 @@ def convert_cell_values_aux(val):
                 'no data'.                
           v)   any empty string (ie '') 
                 to 'no data'.
+          vi)  Booleans True or False                  
+                to strings 'TRUE' or 
+                'FALSE'     
         4) returns unchanged a 
          passed-in:
          i)   a non-json string
@@ -61,9 +64,19 @@ def convert_cell_values_aux(val):
     if isinstance(val, Decimal):
         return float(val)
     
-    # Don't change ints:    
+    # NOTE: class bool is a subclass of 
+    # int, so you need the code below!! 
+    # Don't change ints but 
+    # True -> 'TRUE' and 
+    # False -> 'FALSE':    
     if isinstance(val, int):
-        return val
+        if isinstance(val, bool):
+            if val:
+                return 'TRUE'
+            else:
+                return 'FALSE'
+        else:
+            return val
 
     # run of spaces or '' -> 'no data'
     if isinstance(val, str):
@@ -76,5 +89,6 @@ def convert_cell_values_aux(val):
     if val is None:
         return 'no data'
 
+    # Boolean -> string version, all caps;        
 
-# isinstance(val, datetime) or isinstance(val, Decimal) or isinstance(val, int) or val == None:  
+

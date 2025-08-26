@@ -94,3 +94,19 @@ def test_changes_runs_of_spaces_or_empty_string_to_no_data():
     assert result_2 == expected
     assert result_3 == expected
     assert result_4 == expected
+
+
+# @pytest.mark.skip
+def test_changes_Booleans_to_all_caps_string_versions():
+    # Arrange
+    expected_1 = 'TRUE'
+    expected_2 = 'FALSE'
+
+    # Act
+    result_1 = convert_cell_values_aux(True)
+    result_2 = convert_cell_values_aux(False)
+
+    # Assert
+    assert result_1 == expected_1
+    assert result_2 == expected_2
+

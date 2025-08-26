@@ -1,41 +1,48 @@
+from decimal import Decimal
+from datetime import datetime
 
 
 
 
+def test_fn(val):
+    print(f"Outside if statements and val is of type {type(val)}")    
+    
+
+    
+    # Don't change ints:    
+    if isinstance(val, int):
+        print(f'Inside the int if statement')
+        return val
 
 
-def test_fn(cols, vals, table_name):
-    # convert ['xxx', 'yyy', 'zzz']     ->  '(xxx, yyy, zzz)' 
-    # and     ['1', 'NULL', 'sausages'] ->  '('1',  NULL, 'turnip')'
+    # run of spaces or '' -> 'no data'
+    if isinstance(val, str):
+        if bool(re.fullmatch(r" *", val)):
+            return 'no data'
+        else: # don't change other types of string:
+            return val
+        
 
-    cols_str = vals_str = ''
 
-    for i in range(len(cols)):
-        cols_str += f'{cols[i]}, '
-        if vals[i] is not 'NULL':
-            vals_str += f"'{vals[i]}', "
-        else:
-            vals_str += f"{vals[i]}, "            
-
-    cols_str = '(' + cols_str[:-2] + ')'
-    vals_str = '(' + vals_str[:-2] + ')'
-
-    # Make a string like this:
-    # 'INSERT INTO sales_order (xxx, yyy, zzz) 
-    # VALUES ('1',  'NULL', 'turnip')
-
-    sql_query_str = f"INSERT INTO {table_name} {cols_str} VALUES {vals_str};"
-
-    return sql_query_str        
-
-#   cols_str, vals_str = ", ".join(f"{c}" for c in cols), ", ".join(f"'{v}'" for v in vals  )        
-
+        # None -> 'no data';        
+    if val is None:
+        return 'no data'
     
 
 
 
+    if isinstance(val, bool):
+        
+        if val:
+            print(f"Inside if statements and val is of type {type(val)}")    
+            return 'TRUE'
+        else:
+            print(f"Inside if statements and val is of type {type(val)}")    
+            return 'FALSE'
 
-
+    
+test_fn(True)    
+test_fn(False)    
 
 
 
@@ -86,62 +93,6 @@ def test_fn(cols, vals, table_name):
 
 
 
-
-
-counterparty_dict ={
-"counterparty_id": "counterparty_id",
-"counterparty_legal_name": "counterparty_legal_name",
-                    }
-
-currency_dict ={
-                "currency_id": "currency_id",
-                "currency_code": "currency_code"
-               }
-
-
-design_dict = {
-                "design_id": "design_id",
-                "design_name": "design_name",
-                "file_location": "file_location",
-                "file_name": "file_name"
-            }
-
-location_dict = {
-                "location_id": "address_id",
-                "address_line_1": "address_line_1",
-                "address_line_2": "address_line_2",
-                "district": "district",
-                "city": "city",
-                "postal_code": "postal_code",
-                "country": "country",
-                "phone": "phone",
-                }
-
-staff_dict = {
-                "new_staff_id": "old_staff_id",
-                "new_first_name": "old_first_name",
-                "new_last_name": "old_last_name",
-                "new_email_address": "old_email_address"
-            }
-
-
-test_staff_table = [
-                {"old_staff_id": 1,
-                "old_first_name": "Mukund",
-                "old_last_name": "Pandit",
-                "old_email_address": "mp@test.com"},
-
-                {"old_staff_id": 2,
-                "old_first_name": "Madonna",
-                "old_last_name": "Cipriati",
-                "old_email_address": "madonna@test.com"},
-
-                {"old_staff_id": 3,
-                "old_first_name": "Nigel",
-                "old_last_name": "Tuffnell",
-                "old_email_address": "nigel@test.com"},
-
-]
 
 
 
