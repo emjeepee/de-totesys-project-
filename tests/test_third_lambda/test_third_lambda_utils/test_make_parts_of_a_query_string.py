@@ -8,11 +8,11 @@ from src.third_lambda.third_lambda_utils.make_parts_of_a_query_string import mak
 @pytest.fixture(scope="function")
 def general_setup():
 
-    cols = ['design_id', 'xxx', 'yyy',  'zzz']
-    vals = [13,          '1',   'NULL', 'cabbage']
+    cols = ['design_id', 'xxx',  'yyy',  'zzz']
+    vals = [13,          'TRUE', 'NULL', 'cabbage']
 
     exp_col_str = '(design_id, xxx, yyy, zzz)'
-    exp_val_str = "(13, '1', NULL, 'cabbage')"
+    exp_val_str = "(13, TRUE, NULL, 'cabbage')"
 
     yield cols, vals, exp_col_str, exp_val_str
 
@@ -48,7 +48,6 @@ def test_returns_list_with_correct_member_at_index_0(general_setup):
 
     # Assert:
     assert result_0 == expected_0
-    # error: assert '(design_id, xxx, yyy, zzz)' == 'design_id, xxx, yyy, zzz'
 
 
 
