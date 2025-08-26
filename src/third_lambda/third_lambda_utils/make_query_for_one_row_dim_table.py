@@ -40,19 +40,50 @@ def make_query_for_one_row_dim_table(table_name: str, pk_col: str, cols: list, v
 
 
     # make the column-value pairs
-    # cols looks like this: ['design_id', 'xxx', 'yyy', 'zzz']
-    # vals looks like this: [13, '1', 'NULL', 'sausages']
-    col_val_pairs = ''
-    for i in range(len(cols)):
-        if type(vals[i]) == int:
-            col_val_pairs += f"{cols[i]} = {str(vals[i])}, "
-        else:
-            if vals[i] == 'NULL' or vals[i] == 'TRUE' or vals[i] == 'FALSE': # get rid of inverted commas:
-                col_val_pairs += f"{cols[i]} = {vals[i]}, "
-            else: # eg if '1' or 'turnip' keep the inverted commas:
-                col_val_pairs += f"{cols[i]} = '{vals[i]}', "
+    # cols looks like this: ['design_id', 'xxx', 'yyy']
+    # vals looks like this: [13, 'NULL', 'sausages'].
+    # NOTE: for the five dimension tables and the fact 
+    # table of this project, table values are never 
+    # actually booleans and generally won't be NULL.
+    col_val_pairs = ", ".join(
+        f"{col} = {val}" if isinstance(val, int) or val in ('NULL', 'TRUE', 'FALSE')
+        else f"{col} = '{val}'"
+        for col, val in zip(cols, vals)  # NOTE: args for zip() can be any types of iterable
+                             ) # NOTE the arg to join() is a
+                               # generator expression, which 
+                               # returns an iterable, and 
+                               # method join() takes an 
+                               # iterable as arg. As the 
+                               # generator expression is the 
+                               # only argument of join() you 
+                               # don't need round brackets 
+                               # around it.    
 
-    col_val_pairs = col_val_pairs[:-2] + ';'          
+    col_val_pairs = col_val_pairs + ';'          
+
+
+    return f'INSERT INTO {table_name} {parts_lst[0]} VALUES {parts_lst[1]} ON CONFLICT {pk_col} DO UPDATE SET {col_val_pairs}'        
+
+
+
+
+
+
+    # col_val_pairs = ''
+    # for i in range(len(cols)):
+    #     if type(vals[i]) == int:
+    #         col_val_pairs += f"{cols[i]} = {str(vals[i])}, "
+    #     else:
+    #         # if 'turnip' keep the inverted commas, 
+    #         # if 'NULL' or "TRUE" or "FALSE" get 
+    #         # rid of them:
+    #         col_val_pairs += f"{cols[i]} = {vals[i]}, " if vals[i] in ('NULL', 'TRUE', 'FALSE') else f"{cols[i]} = '{vals[i]}', "
+
+
+
+
+
+
 
     # if type(vals[i]) is int: 
     #         vals_str += f"{str(vals[i])}, "            
@@ -61,14 +92,6 @@ def make_query_for_one_row_dim_table(table_name: str, pk_col: str, cols: list, v
     #         vals_str += f"{vals[i]}, "
     #     else: # eg if '1' or 'turnip' keep the inverted commas:
     #         vals_str += f"'{vals[i]}', "
-    
-
-
-    sql_query_str = (
-            f'INSERT INTO {table_name} {parts_lst[0]} VALUES {parts_lst[1]} ON CONFLICT {pk_col} DO UPDATE SET {col_val_pairs}'
-                    )
-
-    return sql_query_str        
 
 
 

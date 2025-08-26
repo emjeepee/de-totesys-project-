@@ -23,8 +23,8 @@ def make_query_for_one_row_fact_table(table_name: str, cols: list, vals: list):
          fact table.       
     
     """
-    # convert ['www', 'xxx', 'yyy', 'zzz']     ->  '('www, xxx, yyy, zzz)' 
-    # and     [13, '1', 'NULL', 'turnip'] ->       '(13, '1', NULL, 'turnip')' :
+    # convert ['design_id', 'xxx', 'yyy']     ->  '(www, xxx,   yyy)' 
+    # and     [13,          'NULL', 'turnip'] ->  '(13,  NULL, 'turnip')' :
     cols_vals = make_parts_of_a_query_string(cols, vals)
 
     # Make a string like this:

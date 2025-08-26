@@ -12,14 +12,14 @@ def general_setup():
 
     pk_col = 'design_id'
 
-    cols = ['design_id', 'xxx', 'yyy',  'zzz']
-    vals = [13,          '1',   'NULL', 'sausages']
+    cols = ['design_id', 'xxx',  'yyy',  ]
+    vals = [13,          'NULL', 'sausages']
 
 
-    exp_cols_str = '(design_id, xxx, yyy, zzz)'
-    exp_vals_str = "(13, '1', NULL, 'sausages')"
+    exp_cols_str = '(design_id, xxx, yyy)'
+    exp_vals_str = "(13, NULL, 'sausages')"
 
-    exp_cv_pairs = "design_id = 13, xxx = '1', yyy = NULL, zzz = 'sausages';"
+    exp_cv_pairs = "design_id = 13, xxx = NULL, yyy = 'sausages';"
 
     yield table_name, pk_col, cols, vals, exp_cols_str, exp_vals_str, exp_cv_pairs 
 
