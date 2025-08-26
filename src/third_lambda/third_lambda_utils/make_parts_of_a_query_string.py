@@ -19,10 +19,9 @@ def make_parts_of_a_query_string(cols, vals):
 
     Args:
         1) cols: a list of column names, eg
-        ['design_id', 'xxx', 'yyy', 'zzz'] 
+        ['design_id', 'xxx', 'yyy'] 
         2) vals: a list of values for one row,
-        eg
-        [13, '1', 'NULL', 'cabbage']                     
+        eg [13, 'NULL', 'cabbage']                     
     
     """
 

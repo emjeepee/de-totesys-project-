@@ -47,7 +47,7 @@ def make_row_query_for_correct_table(table_name: str, pk_col: str, df_cols, vals
 
     if table_name == 'sales_order':
         sql_query_str = make_query_for_one_row_fact_table(table_name, df_cols, vals_lst)
-    else: # table_name is, for example, 'design'
+    else: # if table_name is, eg, 'design':
         sql_query_str = make_query_for_one_row_dim_table(table_name, pk_col, df_cols, vals_lst)
 
     return sql_query_str 
