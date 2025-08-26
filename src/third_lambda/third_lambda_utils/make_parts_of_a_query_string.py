@@ -11,10 +11,11 @@ def make_parts_of_a_query_string(cols, vals):
             lambda will employ to 
             insert or update data in 
             tables in the warehouse.
-        2) gets called by functions             
-            make_query_for_one_row_fact_table()
+        2) gets called by these two 
+            functions:             
+            i) make_query_for_one_row_fact_table()
             and 
-            make_query_for_one_row_dim_table()
+            ii) make_query_for_one_row_dim_table().
 
     Args:
         1) cols: a list of column names, eg
@@ -32,9 +33,9 @@ def make_parts_of_a_query_string(cols, vals):
         if type(vals[i]) is int: 
             vals_str += f"{str(vals[i])}, "            
         if type(vals[i]) is str: 
-            if vals[i] == 'NULL': # get rid of inverted commas:
+            if vals[i] == 'NULL' or vals[i] == 'TRUE' or vals[i] == 'FALSE': # get rid of inverted commas:
                 vals_str += f"{vals[i]}, "
-            else: # eg if '1' or 'turnip' keep the inverted commas:
+            else: # eg if 'turnip' keep the inverted commas:
                 vals_str += f"'{vals[i]}', "
 
     # get rid of ', ' and add 

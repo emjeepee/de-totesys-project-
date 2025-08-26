@@ -18,13 +18,15 @@ def make_row_query_for_correct_table(table_name: str, pk_col: str, df_cols, vals
             sales_order (the fact 
             table) or anything else 
             (the dimensions tables).
+        3) gets called by 
+            make_SQL_queries().            
         
     Args: 
         1) table_name: the name of the
             table. will be 'sales_order' 
             in the case of the fact 
             table or, eg, 'design' for a 
-            dimesnion table.
+            dimension table.
         2) pk_col: the name of the 
             primary key, eg 'design_id'.
         3) df_cols: a list of the 

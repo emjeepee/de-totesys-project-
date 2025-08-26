@@ -67,12 +67,12 @@ def third_lambda_handler(event, context):
     # 'sales_order' and another 
     # form when table_name is, for 
     # example, 'design':
-    queries_list = make_SQL_queries(df, table_name)       # NOTE: TESTED
+    queries_list = make_SQL_queries(df, table_name)  
 
     # Make SQL queries to the data 
     # warehouse to insert data into
     # the table there:
-    make_SQL_queries_to_warehouse(queries_list, conn)     # NOTE: TESTED
+    make_SQL_queries_to_warehouse(queries_list, conn)  
 
     # Close connection to warehouse:
     close_db(conn)

@@ -47,7 +47,7 @@ def make_query_for_one_row_dim_table(table_name: str, pk_col: str, cols: list, v
         if type(vals[i]) == int:
             col_val_pairs += f"{cols[i]} = {str(vals[i])}, "
         else:
-            if vals[i] == 'NULL': # get rid of inverted commas:
+            if vals[i] == 'NULL' or vals[i] == 'TRUE' or vals[i] == 'FALSE': # get rid of inverted commas:
                 col_val_pairs += f"{cols[i]} = {vals[i]}, "
             else: # eg if '1' or 'turnip' keep the inverted commas:
                 col_val_pairs += f"{cols[i]} = '{vals[i]}', "

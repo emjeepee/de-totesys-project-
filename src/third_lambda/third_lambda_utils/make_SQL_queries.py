@@ -21,6 +21,7 @@ def make_SQL_queries(df, table_name: str):
             under other columns). 
         3) puts the SQL query strings into a python 
             list.
+        4) gets called by third_lambda_handler().
 
     Args:
         1) table_name: a string, the name of a table.
@@ -55,9 +56,11 @@ def make_SQL_queries(df, table_name: str):
         # ['aaa', 'bbb', 'ccc'].
 
         # Make a list of strings of the values 
-        # of a row:
-        vals_lst = [str(val)    if val is not None else "NULL"    for val in row_data]
-                
+        # of a row, converting None to "NULL", 
+        # True to "TRUE" and "False" to "FALSE":
+        vals_lst = [str(val)    if val is not None else "NULL"      for val in row_data]
+        vals_lst = [val         if val is not 'True' else "TRUE"    for val in vals_lst ]
+        vals_lst = [val         if val is not 'False' else "FALSE"  for val in vals_lst ]        
         # Get the primary key name (eg 
         # 'design_id'). The first column 
         # in df is always the primary 
