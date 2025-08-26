@@ -9,13 +9,13 @@ import json
 
 
 
-def test_calls_aux_function_when_invalid_json_passed_in():
+def test_calls_aux_function_when_non_json_string_passed_in():
     # Arrange
     not_json_string = 'this is not a json string'
 
     dt = datetime(2025, 8, 12, 12, 11, 10, 73000)
     
-    dpork = Decimal(str(3.1415))
+    dec_pork = Decimal(str(3.1415))
 
     int_val = 42
 
@@ -31,8 +31,8 @@ def test_calls_aux_function_when_invalid_json_passed_in():
         mock_aux.assert_called_once_with(dt)
 
     with patch('src.first_lambda.first_lambda_utils.convert_cell_values_main.convert_cell_values_aux') as mock_aux:
-        convert_cell_values_main(dpork)
-        mock_aux.assert_called_once_with(dpork)
+        convert_cell_values_main(dec_pork)
+        mock_aux.assert_called_once_with(dec_pork)
 
     with patch('src.first_lambda.first_lambda_utils.convert_cell_values_main.convert_cell_values_aux') as mock_aux:
         convert_cell_values_main(int_val)

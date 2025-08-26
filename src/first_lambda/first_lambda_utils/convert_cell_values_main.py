@@ -1,9 +1,6 @@
-from datetime import datetime
 import json
+
 from json.decoder import JSONDecodeError
-
-from decimal import Decimal
-
 from src.first_lambda.first_lambda_utils.convert_cell_values_aux import convert_cell_values_aux
 
 
@@ -35,6 +32,7 @@ def convert_cell_values_main(val):
          iii) a Decimal object
          iv)  a non-json string
          v)   an int  
+         vi)  None
 
     Return:
         a string if the passed-in val
@@ -42,17 +40,18 @@ def convert_cell_values_main(val):
          string or a non-json string.
         a float if the passed-in val 
          is a decimal.Decimal object.
-        the passed-in val unchanged 
-         if the passed-in val is an 
-         int.
-        the passed-in val unchanged 
-         if the passed-in val is a 
-         non-json string.
+        an int if the passed-in val 
+         is an int.
     """
 
+    # if val is a string
+    # i)  if it is a json string then 
+    #     unjsonify it
+    # ii) if other type of string pass 
+    #     it to 
+    #     convert_cell_values_aux()
 
-
-    if isinstance(val, str) or isinstance(val, datetime) or isinstance(val, Decimal) or isinstance(val, int) or val == None:  
+    if isinstance(val, str): 
         # If val is a json string
         # return it otherwise
         # call 
@@ -64,3 +63,9 @@ def convert_cell_values_main(val):
         except (JSONDecodeError, TypeError): 
             return convert_cell_values_aux(val)
 
+    # if val is a datetime object, 
+    # a Decimal object, an int or 
+    # None, pass it to
+    # convert_cell_values_aux():  
+    else: 
+        convert_cell_values_aux(val)
