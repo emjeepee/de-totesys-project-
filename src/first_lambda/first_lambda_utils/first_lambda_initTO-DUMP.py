@@ -1,4 +1,5 @@
 import boto3
+import os
 
 from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
 

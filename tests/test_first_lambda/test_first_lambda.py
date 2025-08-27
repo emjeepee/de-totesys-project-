@@ -69,7 +69,7 @@ def general_setup():
         mock_rt   = Mock() # mock read_table()
         mock_wtib = Mock() # mock write_to_ingestion_bucket()
 
-        mock_fli_return_value = { 
+        mock_gev_return_value = { 
             'bucket_name': bucket_name_empty,
             'tables'     : mock_tables,                     
             's3_client'  : S3_client,  
@@ -86,7 +86,7 @@ def general_setup():
             bucket_name_with_objs, \
             mock_rt, \
             mock_wtib, \
-            mock_fli_return_value, \
+            mock_gev_return_value, \
             mock_cats_return_value, \
             mock_gdfd_return_value
 
@@ -99,21 +99,21 @@ def test_calls_first_lambda_init_once(general_setup):
      bucket_name_with_objs, 
      mock_rt, 
      mock_wtib, 
-     mock_fli_return_value,
+     mock_gev_return_value,
      mock_cats_return_value,
      mock_gdfd_return_value
      ) = general_setup
 
     # patch all functions that first_lambda_handler
     # calls without having them passed in:
-    with patch('src.first_lambda.first_lambda_handler.first_lambda_init') as fli, \
+    with patch('src.first_lambda.first_lambda_handler.get_env_vars') as mock_gev, \
          patch('src.first_lambda.first_lambda_handler.change_after_time_timestamp') as cats, \
          patch('src.first_lambda.first_lambda_handler.get_data_from_db') as gdfd, \
          patch('src.first_lambda.first_lambda_handler.read_table') as rt, \
          patch('src.first_lambda.first_lambda_handler.write_to_s3') as wts3, \
          patch('src.first_lambda.first_lambda_handler.write_to_ingestion_bucket') as wtib:
         
-        fli.return_value  = mock_fli_return_value 
+        mock_gev.return_value  = mock_gev_return_value 
         cats.return_value = mock_cats_return_value
         gdfd.return_value = mock_gdfd_return_value
 
@@ -121,26 +121,26 @@ def test_calls_first_lambda_init_once(general_setup):
         first_lambda_handler(None, None)
 
         # Assert:
-        fli.assert_called_once()
+        mock_gev.assert_called_once()
         cats.assert_called_once_with(
-            mock_fli_return_value['bucket_name'], 
-            mock_fli_return_value['s3_client'], 
+            mock_gev_return_value['bucket_name'], 
+            mock_gev_return_value['s3_client'], 
             "***timestamp***", 
             "1900-01-01 00:00:00"
                                     )
 
         gdfd.assert_called_once_with(
-            mock_fli_return_value['tables'], 
+            mock_gev_return_value['tables'], 
             mock_cats_return_value,
-            mock_fli_return_value['conn'],
+            mock_gev_return_value['conn'],
             rt
             )
 
         wts3.assert_called_once_with(
             mock_gdfd_return_value,
-            mock_fli_return_value['s3_client'],
+            mock_gev_return_value['s3_client'],
             wtib,
-            mock_fli_return_value['bucket_name'] 
+            mock_gev_return_value['bucket_name'] 
             )
         
 
@@ -153,21 +153,21 @@ def test_get_data_from_db_RuntimeError_causes_new_RuntimeError(general_setup):
      bucket_name_with_objs, 
      mock_rt, 
      mock_wtib, 
-     mock_fli_return_value,
+     mock_gev_return_value,
      mock_cats_return_value,
      mock_gdfd_return_value
      ) = general_setup
 
     # patch all functions that first_lambda_handler
     # calls without having them passed in:
-    with patch('src.first_lambda.first_lambda_handler.first_lambda_init') as fli, \
+    with patch('src.first_lambda.first_lambda_handler.get_env_vars') as mock_gev, \
          patch('src.first_lambda.first_lambda_handler.change_after_time_timestamp') as cats, \
          patch('src.first_lambda.first_lambda_handler.get_data_from_db') as gdfd, \
          patch('src.first_lambda.first_lambda_handler.read_table') as rt, \
          patch('src.first_lambda.first_lambda_handler.write_to_s3') as wts3, \
          patch('src.first_lambda.first_lambda_handler.write_to_ingestion_bucket') as wtib:
         
-        fli.return_value  = mock_fli_return_value 
+        mock_gev.return_value  = mock_gev_return_value 
         cats.return_value = mock_cats_return_value
         # gdfd.return_value = mock_gdfd_return_value
         gdfd.side_effect = RuntimeError() 
@@ -189,21 +189,21 @@ def test_write_to_s3_RuntimeError_causes_new_RuntimeError(general_setup):
      bucket_name_with_objs, 
      mock_rt, 
      mock_wtib, 
-     mock_fli_return_value,
+     mock_gev_return_value,
      mock_cats_return_value,
      mock_gdfd_return_value
      ) = general_setup
 
     # patch all functions that first_lambda_handler
     # calls without having them passed in:
-    with patch('src.first_lambda.first_lambda_handler.first_lambda_init') as fli, \
+    with patch('src.first_lambda.first_lambda_handler.get_env_vars') as mock_gev, \
          patch('src.first_lambda.first_lambda_handler.change_after_time_timestamp') as cats, \
          patch('src.first_lambda.first_lambda_handler.get_data_from_db') as gdfd, \
          patch('src.first_lambda.first_lambda_handler.read_table') as rt, \
          patch('src.first_lambda.first_lambda_handler.write_to_s3') as wts3, \
          patch('src.first_lambda.first_lambda_handler.write_to_ingestion_bucket') as wtib:
         
-        fli.return_value  = mock_fli_return_value 
+        mock_gev.return_value  = mock_gev_return_value 
         cats.return_value = mock_cats_return_value
         gdfd.return_value = mock_gdfd_return_value
         wts3.side_effect = RuntimeError() 

@@ -5,6 +5,7 @@ from pg8000.native import Connection
 
 
 def conn_to_db(DB_NAME: str = "TESTDB"):
+    
     username = os.environ[f"TF_{DB_NAME}_DB_USER"]
     password = os.environ[f"TF_{DB_NAME}_DB_PASSWORD"]
     database = os.environ[f"TF_{DB_NAME}_DB_DB"]

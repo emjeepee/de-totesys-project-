@@ -4,7 +4,7 @@ from src.first_lambda.first_lambda_utils.get_data_from_db            import get_
 from src.first_lambda.first_lambda_utils.write_to_s3                 import write_to_s3
 from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
 from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
-from src.first_lambda.first_lambda_utils.first_lambda_init           import first_lambda_init
+from src.first_lambda.first_lambda_utils.get_env_vars                import get_env_vars
 
 
 
@@ -39,7 +39,7 @@ def first_lambda_handler(event, context):
         event = {"time": "1900-01-01 00:00:00"}
 
     # Get values this handler requires:
-    lookup = first_lambda_init()
+    lookup = get_env_vars()
 
     # Set variables to those values:
     bucket_name = lookup['bucket_name'] # name of ingestion bucket
