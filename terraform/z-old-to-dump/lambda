@@ -23,12 +23,16 @@ resource "aws_s3_object" "first_lambda_deployment" {
   source_hash = data.archive_file.first_lambda_archive.output_base64sha256
 }
 
+
+
 resource "aws_s3_object" "layer_deployment" {
   bucket = aws_s3_bucket.lambda-bucket.bucket
   key    = "layer/layer.zip"
   source = data.archive_file.layer_archive.output_path
   source_hash = data.archive_file.layer_archive.output_base64sha256
 }
+
+
 
 resource "aws_lambda_layer_version" "layer" {
   layer_name          = "layer"
@@ -37,15 +41,18 @@ resource "aws_lambda_layer_version" "layer" {
   s3_key              = aws_s3_object.layer_deployment.key
 }
 
+
+
 resource "aws_lambda_function" "extract_handler" {
-  s3_bucket        = aws_s3_bucket.lambda-bucket.bucket
+  s3_bucket        = aws_s3_bucket.lambda-bucket.bucket # bucket that we put this Lambda's zipped deployment package
   s3_key           = aws_s3_object.first_lambda_deployment.key
 
   layers           = [aws_lambda_layer_version.layer.arn]
 
-  function_name    = var.first_lambda_function
+  function_name    = var.first_lambda_function # no point in using a var here!
   role             = aws_iam_role.first_lambda_function_role.arn
-  handler          = "lambda_handler.lambda_handler" # change this to point to the handler
+  handler          = "first_lambda_handler.first_lambda_handler" # Format is <file_name>.<function_name> .
+                                                     
   runtime          = var.python_runtime
   source_code_hash = data.archive_file.first_lambda_archive.output_base64sha256
 
