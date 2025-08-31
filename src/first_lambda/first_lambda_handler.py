@@ -19,7 +19,7 @@ def first_lambda_handler(event, context):
             in the ToteSys database.
         3) for each table that has had rows updated 
             in the ToteSys database goes to the 
-            ingestion bucet and gets the previously 
+            ingestion bucket and gets the previously 
             saved table of the same name and updates 
             it with the new row data.
         4) saves each updated table to the ingestion

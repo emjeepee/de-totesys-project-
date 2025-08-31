@@ -18,4 +18,3 @@ venv/
 *.tfvars*
 .env
 
-src/myTest_files/test1.py
