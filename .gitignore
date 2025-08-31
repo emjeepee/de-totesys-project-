@@ -17,4 +17,5 @@ venv/
 *.tfstate*
 *.tfvars*
 .env
+otherDocs
 

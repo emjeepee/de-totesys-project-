@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 import boto3
-import json
 from botocore.exceptions import ClientError
 from src.first_lambda.first_lambda_utils.get_latest_table import get_latest_table
 

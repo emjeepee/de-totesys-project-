@@ -56,7 +56,7 @@ module "lambda1-and-code-and-ing-buckets" {
   # for first lambda function:
   code_bucket_name                     = "totesys-code-bucket-m1x-7q.r0b"
   lambda_name                          = "extract-lambda"
-  runtime                              = "python3.12"
+  runtime                              = "python3.13.2"
   handler                              = "first_lambda_handler.first_lambda_handler"
   s3_key_for_zipped_lambda             = "1st_lambda_zipped"
 
@@ -106,7 +106,7 @@ module "lambda2-and-proc-bucket" {
   # for first lambda function:
   code_bucket_name                     = "totesys-code-bucket-m1x-7q.r0b"
   lambda_name                          = "transform-lambda"
-  runtime                              = "python3.12"
+  runtime                              = "python3.13.2"
   handler                              = "second_lambda_handler.second_lambda_handler"
   s3_key_for_zipped_lambda             = "2nd_lambda_zipped"
 
@@ -152,7 +152,7 @@ module "lambda3" {
   # for first lambda function:
   code_bucket_name                     = "totesys-code-bucket-m1x-7q.r0b"
   lambda_name                          = "load-lambda"
-  runtime                              = "python3.12"
+  runtime                              = "python3.13.2"
   handler                              = "third_lambda_handler.third_lambda_handler"
   s3_key_for_zipped_lambda             = "3rd_lambda_zipped"
 

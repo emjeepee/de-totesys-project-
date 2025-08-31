@@ -1,5 +1,8 @@
-pg8000
+boto3
+botocore
+currency_codes
+dotenv
 pandas
-parquet
+pg8000
 pyarrow
-currency-codes
+
