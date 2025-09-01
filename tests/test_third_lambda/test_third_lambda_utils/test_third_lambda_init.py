@@ -2,7 +2,7 @@
 import boto3
 import pytest
 import os
-from datetime import datetime
+
 
 from moto import mock_aws
 from unittest.mock import Mock, patch, call

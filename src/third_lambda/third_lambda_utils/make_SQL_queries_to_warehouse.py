@@ -1,4 +1,4 @@
-from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
+
 
 
 def make_SQL_queries_to_warehouse(qrs_list: list, conn):

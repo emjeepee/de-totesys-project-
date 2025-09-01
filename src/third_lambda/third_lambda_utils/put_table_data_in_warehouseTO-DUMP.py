@@ -1,4 +1,4 @@
-from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
+from src.third_lambda.third_lambda_utils.conn_to_db import conn_to_db, close_db
 
 
 def put_table_data_in_warehouse(query_list):

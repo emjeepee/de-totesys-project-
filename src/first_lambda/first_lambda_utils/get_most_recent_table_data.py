@@ -3,11 +3,7 @@ import boto3
 from botocore.exceptions import ClientError
 from src.first_lambda.first_lambda_utils.get_latest_table import get_latest_table
 
-import logging
 
-
-
-logger = logging.getLogger("Mylogger")
 
 
 

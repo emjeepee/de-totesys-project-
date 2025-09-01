@@ -2,12 +2,7 @@ from src.first_lambda.first_lambda_utils.create_formatted_timestamp import creat
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
-
 import json
-import logging
-
-
-logger = logging.getLogger("MyLogger")
 
 load_dotenv()
 

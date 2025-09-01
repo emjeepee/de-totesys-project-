@@ -18,4 +18,5 @@ venv/
 *.tfvars*
 .env
 otherDocs
-
+layer/python
+layer.zip

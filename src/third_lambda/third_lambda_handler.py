@@ -4,8 +4,8 @@ from src.third_lambda.third_lambda_utils.third_lambda_init              import t
 from src.third_lambda.third_lambda_utils.make_pandas_dataframe          import make_pandas_dataframe
 from src.third_lambda.third_lambda_utils.make_SQL_queries               import make_SQL_queries
 from src.third_lambda.third_lambda_utils.make_SQL_queries_to_warehouse  import make_SQL_queries_to_warehouse
-from src.first_lambda.first_lambda_utils.conn_to_db                     import conn_to_db
-from src.first_lambda.first_lambda_utils.conn_to_db                     import close_db
+from src.third_lambda.third_lambda_utils.conn_to_db                     import conn_to_db, close_db
+
 
 def third_lambda_handler(event, context):
     """
