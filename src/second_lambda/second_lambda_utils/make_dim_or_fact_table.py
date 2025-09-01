@@ -1,10 +1,9 @@
 
-from src.second_lambda.second_lambda_utils.get_latest_table import get_latest_table
-from src.second_lambda.second_lambda_utils.function_lookup_table import function_lookup_table
+from src.second_lambda.second_lambda_utils.func_lookup_table import func_lookup_table
 from src.second_lambda.second_lambda_utils.make_staff_or_cp_dim_table import make_staff_or_cp_dim_table
 
 
-def make_dim_or_fact_table(table_name: str, table_python, s3_client, ingestion_bucket: str):
+def make_dim_or_fact_table(table_name: str, table_python: list, s3_client, ingestion_bucket: str):
     """
     This function:
         Makes either a dimension table or the fact 
@@ -36,15 +35,19 @@ def make_dim_or_fact_table(table_name: str, table_python, s3_client, ingestion_b
         # respectively:  
  
         aux_table_name = 'department' if table_name == 'staff' else 'address'           
-        return make_staff_or_cp_dim_table( table_name, table_python, function_lookup_table, ingestion_bucket, aux_table_name, s3_client)
+        tbl_to_return = make_staff_or_cp_dim_table( table_name, table_python, func_lookup_table, ingestion_bucket, aux_table_name, s3_client)
+        
     else:
         # If the table name is 'currency',
         # 'design', 'location' or 
         # 'sales_order'.
-        # function_lookup_table is a 
-        # dict with keys whose values
-        # are functions that convert
+        # func_lookup_table is a 
+        # lookup that returns
+        # a functions that converts
         # a table into a dimension
         # or fact table:     
-        return function_lookup_table[table_name](table_python) # dimension table or the fact table
+        func = func_lookup_table(table_name)
+        tbl_to_return = func(table_python) # dimension table or the fact table
+
+    return tbl_to_return
 

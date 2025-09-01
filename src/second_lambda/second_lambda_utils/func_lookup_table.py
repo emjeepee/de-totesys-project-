@@ -18,15 +18,21 @@ from src.second_lambda.second_lambda_utils.transform_to_dim_location import tran
 # key in the dictionary below is 'design'
 
 # The value of each key is a function that creates 
-# either the facts table (in the case of key 
+# either the fact table (in the case of key 
 # 'sales_order') or a dimension table.
 
 
-function_lookup_table = {
-"sales_order": transform_to_star_schema_fact_table, # tested
-"staff": transform_to_dim_staff,
-"address": transform_to_dim_location, # address table converted to location dim table
-"design": transform_to_dim_design,
-"counterparty": transform_to_dim_counterparty,
-"currency": transform_to_dim_currency,
-                        }
+def func_lookup_table(table_name: str):
+
+    lookup_table = {
+    "sales_order": transform_to_star_schema_fact_table, # tested
+    "staff": transform_to_dim_staff,
+    "address": transform_to_dim_location, # address table converted to location dim table
+    "design": transform_to_dim_design,
+    "counterparty": transform_to_dim_counterparty,
+    "currency": transform_to_dim_currency,
+                   }
+    
+    fn_to_return = lookup_table[table_name]
+
+    return fn_to_return

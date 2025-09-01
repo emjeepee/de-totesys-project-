@@ -1,4 +1,3 @@
-from currency_codes import get_currency_by_code, Currency, CurrencyNotFoundError
 
 from src.second_lambda.second_lambda_utils.preprocess_dim_tables import preprocess_dim_tables
 from src.second_lambda.second_lambda_utils.make_curr_obj import make_curr_obj
