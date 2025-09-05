@@ -101,8 +101,6 @@ resource "aws_lambda_function" "mod_lambda" {
 # like this one, use count of for each):
 resource "aws_iam_role" "lambda_exec" {
   name = "${var.lambda_name}-IAM-role"
-# "lambda_exec" is the Terraform name
-# "${var.lambda_name}-IAM-role" is the aws name
 
 # Define the trust policy to allow 
 # lambda functions to assume this 
@@ -116,7 +114,7 @@ resource "aws_iam_role" "lambda_exec" {
       Action    = "sts:AssumeRole"
     }]
   })
-}
+                                      }
 
 
 
@@ -142,7 +140,7 @@ resource "aws_iam_policy" "lambda_put_policy" {
       Resource = "arn:aws:s3:::${var.name_of_write_to_bucket}/*"
     }]
   })
-}
+                                              }
 
 
 # Provision policy attachment

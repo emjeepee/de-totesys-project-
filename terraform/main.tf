@@ -9,29 +9,29 @@ terraform {
 
 # Provision the S3 bucket that will
 # contain Terraform state file.backend 
-# FROM AWS: General purpose 
-# bucket names can consist 
-# only of lowercase letters, 
-# numbers, periods (.), and 
-# hyphens (-).
-# (the 'a9f.k3-l2q' in the bucket name 
-# is a random 10-char substring to
+# (the 'a9fk3l2q' in the bucket name 
+# is a random 8-char substring to
 # ensure name is unique worldwide
 # within an AWS partition -- all 
 # buckets in this project are 
 # named this way):
   backend "s3" {
-    bucket = "totesys-state-bucket-a9f.k3-l2q"
+    bucket = "totesys-state-bucket-a9fk3l2q"
     key = "state.tf"
     region = "eu-west-2"
-              }
+               }
          }
+
+
+
 
 
 
 provider "aws" {
   region = "eu-west-2"
                }
+
+
 
 
 
@@ -55,7 +55,7 @@ module "lambda1-and-code-and-ing-buckets" {
   source                               = "./lambda-IAMrole-s3-module/"
 
   # for first lambda function:
-  code_bucket_name                     = "totesys-code-bucket-m1x-7q.r0b"
+  code_bucket_name                     = "totesys-code-bucket-m1x7qr0b"
   lambda_name                          = "extract-lambda"
   runtime                              = "python3.13"
   handler                              = "first_lambda_handler.first_lambda_handler"
@@ -64,7 +64,7 @@ module "lambda1-and-code-and-ing-buckets" {
   # for lambda exec role policy 
   # that allows lambda to write
   # to ingestion bucket:
-  name_of_write_to_bucket              = "totesys-ingestion-bucket-t8v.l5-n6p"
+  name_of_write_to_bucket              = "totesys-ingestion-bucket-t8vl5n6p"
 
   # Not needed in this call 
   # to the module but you 
@@ -73,7 +73,7 @@ module "lambda1-and-code-and-ing-buckets" {
 
   # for ingestion bucket:
   # (STILL NEEDED?):
-  ing_or_proc_bucket_name              = "totesys-ingestion-bucket-t8v.l5-n6p"
+  ing_or_proc_bucket_name              = "totesys-ingestion-bucket-t8vl5n6p"
 
   # conditional vars:
   should_make_s3_code_bucket           = true
@@ -105,7 +105,7 @@ module "lambda2-and-proc-bucket" {
   source                               = "./lambda-IAMrole-s3-module"
 
   # for first lambda function:
-  code_bucket_name                     = "totesys-code-bucket-m1x-7q.r0b"
+  code_bucket_name                     = "totesys-code-bucket-m1x7qr0b"
   lambda_name                          = "transform-lambda"
   runtime                              = "python3.13"
   handler                              = "second_lambda_handler.second_lambda_handler"
@@ -114,18 +114,18 @@ module "lambda2-and-proc-bucket" {
   # for lambda exec role policy 
   # that allows lambda to read
   # from ingestion bucket:
-  name_of_read_from_bucket             = "totesys-ingestion-bucket-t8v.l5-n6p"
+  name_of_read_from_bucket             = "totesys-ingestion-bucket-t8vl5n6p"
 
 
   # for lambda exec role policy 
   # that allows lambda to read
   # from ingestion bucket:
-  name_of_write_to_bucket             = "totesys-processed-bucket-h2z-4k.s9w"
+  name_of_write_to_bucket             = "totesys-processed-bucket-h2z4ks9w"
 
 
   # for processed bucket:
   # (STILL NEEDED?):
-  ing_or_proc_bucket_name              = "totesys-processed-bucket-h2z-4k.s9w"
+  ing_or_proc_bucket_name              = "totesys-processed-bucket-h2z4ks9w"
 
   # conditional vars (value of a var 
   # not set here is false by default):
@@ -151,7 +151,7 @@ module "lambda3" {
   source                               = "./lambda-IAMrole-s3-module"
 
   # for first lambda function:
-  code_bucket_name                     = "totesys-code-bucket-m1x-7q.r0b"
+  code_bucket_name                     = "totesys-code-bucket-m1x7qr0b"
   lambda_name                          = "load-lambda"
   runtime                              = "python3.13"
   handler                              = "third_lambda_handler.third_lambda_handler"
@@ -165,11 +165,11 @@ module "lambda3" {
   # for lambda exec role policy 
   # that allows lambda to read
   # from processed bucket:
-  name_of_read_from_bucket             = "totesys-processed-bucket-h2z-4k.s9w"
+  name_of_read_from_bucket             = "totesys-processed-bucket-h2z4ks9w"
 
   # for processed bucket
   # (STILL NEEDED?):
-  ing_or_proc_bucket_name              = "totesys-processed-bucket-h2z-4k.s9w"
+  ing_or_proc_bucket_name              = "totesys-processed-bucket-h2z4ks9w"
 
   # conditional vars (value of a var 
   # not set here is false by default):
