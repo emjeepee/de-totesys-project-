@@ -15,6 +15,7 @@ venv/
 *.zip
 **/.terraform*
 *.tfstate*
+*.tfstate.backup
 *.tfvars*
 .env
 otherDocs

@@ -36,6 +36,61 @@ provider "aws" {
 
 
 
+# LOAD LAYER ZIP AND LAMBDA FUNCTIONS' 
+# ZIPS INTO THE CODE BUCKET
+#=========================================
+
+# put the layer zip file object 
+# in the code bucket: 
+resource "aws_s3_object" "layer_zip" {
+  bucket = "totesys-code-bucket-m1x-7q.r0b"
+  key    = "zipped/layer.zip"
+  source = "../zipped_files/layer.zip"
+                                     }
+
+# put the objects that are the 
+# lambda zip files in the code 
+# bucket: 
+resource "aws_s3_object" "first_lambda_zip" {
+  bucket = "totesys-code-bucket-m1x-7q.r0b"
+  key    = "zipped/first_lambda.zip"
+  source = "../zipped_files/first_lambda.zip" # must be relative to terraform dir
+                                            }
+
+resource "aws_s3_object" "second_lambda_zip" {
+  bucket = "totesys-code-bucket-m1x-7q.r0b"
+  key    = "zipped/second_lambda.zip"
+  source = "../zipped_files/second_lambda.zip"  # must be relative to terraform dir
+                                              }
+
+resource "aws_s3_object" "third_lambda_zip" {
+  bucket = "totesys-code-bucket-m1x-7q.r0b"
+  key    = "zipped/third_lambda.zip"
+  source = "../zipped_files/third_lambda.zip"  # must be relative to terraform dir
+                                            }
+
+
+
+
+
+# CREATE LAMBDA LAYER VERSION
+# (SHARED BY THE THREE LAMBDAS)
+# =============================
+resource "aws_lambda_layer_version" "shared-layer" {
+  layer_name          = "layer-shared-by_all_lambdas"
+  s3_bucket           = "totesys-code-bucket-m1x-7q.r0b"
+  s3_key              = aws_s3_object.layer_zip.key
+  compatible_runtimes = ["python3.13"]
+                                                  }
+
+
+
+
+
+
+
+
+
 
 # FIRST LAMBDA
 # The first call of the module will provision:
