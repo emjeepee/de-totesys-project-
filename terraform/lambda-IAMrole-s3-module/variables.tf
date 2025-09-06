@@ -47,19 +47,6 @@ variable "name_of_write_to_bucket"  {
       type        = string
                    }
 
-# for use in the block that
-# creates a policy for lambda
-# execution role to allow a
-# lambda to read from an s3 bucket:
-variable "name_of_read_from_bucket"  {
-      # value will be either:
-      #  1) name of the ingestion bucket 
-      #     in the case of the 2nd lambda 
-      #  2) name of the processed bucket
-      #     in the case of the 3rd lambda.
-      description = "name of the bucket from which a lambda will read data."
-      type        = string
-                                     }
 
 
 

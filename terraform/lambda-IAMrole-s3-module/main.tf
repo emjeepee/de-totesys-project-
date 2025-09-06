@@ -111,36 +111,33 @@ resource "aws_iam_role_policy_attachment" "lambda_put_attach" {
                                                           }
 
 
-# POLICY AND ATTACHMENT TO LET
+# PROVISION A POLICY TO LET
 # A LAMBDA GET FROM AN S3
 # =============================
 
-# Provision the policy for 
-# a lambda execution role to 
-# allow the lambda to read
-# from a bucket:
-resource "aws_iam_policy" "lambda_get_policy" {
-  count = var.should_make_s3_get_obj_policy ? 1 : 0
+# Two uses:
+# The extract lambda does not need this poicy at all, so make it conditional!!!!!!
+# 1) The transform lambda needs
+#    this policy to read from 
+#    the ingestion bucket:
+# 2) The load lambda needs
+#    this policy to read from 
+#    the processed bucket:
 
-  name   = "${var.lambda_name}-policy"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect   = "Allow",
-      Action   = ["s3:GetObject"],
-      Resource = "arn:aws:s3:::${var.name_of_read_from_bucket}/*"
-    }]
-  })
+resource "aws_lambda_permission" "allow_s3_invoke" {
+  statement_id  = "AllowExecutionFromS3"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.my_lambda.function_name   # <-- attachment happens here
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.my_bucket.arn
 }
 
 
-# Provision policy attachment
-# for the policy above
-resource "aws_iam_role_policy_attachment" "lambda_get_attach" {
-  count      = var.should_make_s3_get_obj_policy_attach ? 1 : 0
-  role       = aws_iam_role.lambda_exec.name
-  policy_arn = aws_iam_policy.lambda_get_policy[0].arn
-                                                          }
+
+
+
+
+
 
 
 
