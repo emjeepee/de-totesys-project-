@@ -8,7 +8,7 @@ variable "lambda_name" {
                        }
 
 variable "code_bucket_name"  {
-      description = "AWS name of ingestion/processed/code bucket"
+      description = "AWS name of the code bucket"
       type        = string
                           }
 
@@ -32,6 +32,12 @@ variable "handler"  {
                    }
 
 
+variable "layer_version_arn" {
+      description = "arn of the layer version created in root module"
+      type        = string
+                         }
+
+
 
 # for use in the block that
 # creates a policy for lambda
@@ -46,6 +52,51 @@ variable "name_of_write_to_bucket"  {
       description = "name of the bucket to which a lambda will write data."
       type        = string
                    }
+
+
+
+
+
+# for use in the block that
+# creates a policy for lambda
+# execution role to allow a
+# lambda to read from an s3 bucket:
+variable "name_of_read_from_bucket"  {
+      # value will be either:
+      #  1) name of the ingestion bucket 
+      #     in the case of the second lambda 
+      #  2) name of the processed bucket
+      #     in the case of the 3rd lambda.
+      description = "name of the bucket from which a lambda will read data."
+      type        = string
+                   }
+
+
+
+
+
+
+
+# Setting the value of this variable 
+# to true means that Terraform 
+# provisions an AWS resource-based 
+# inline policy that allows the 
+# module's lambda to be triggered by
+# events from an S3 bucket:
+variable "should_make_allow_s3_invoke_policy" {
+  description = <<EOT
+Used to conditionally provision 
+the inline resource-based policy 
+that a Lambda needs to allow it 
+to be triggered by an event sent 
+by an S3 bucket.
+EOT
+  type = bool
+  default = false
+                                              }
+
+
+
 
 
 
@@ -104,19 +155,15 @@ variable "should_make_s3_code_bucket" {
 variable "should_make_s3_put_obj_policy" {
   type    = bool
   default = false
-  description = "when true, code will create a policy to allow a lambda function to put an object in an s3 bucket"
+  description = <<EOT
+"When true, code will create 
+a policy to allow a lambda 
+function to put an object 
+in an s3 bucket" 
+EOT
                                          }
 
 
-# for conditionally 
-# provisioning an attachment to 
-# to attach the put object policy 
-# to a lambda's execution role: 
-variable "should_make_s3_put_obj_policy_attach" {
-  type    = bool
-  default = false
-  description = "when true, code will create a policy attachment to allow a policy that allows a lambda function to write to a bucket be attached to the lambda's execution role"
-                            }
 
 
 # for conditionally 
@@ -128,18 +175,13 @@ variable "should_make_s3_put_obj_policy_attach" {
 variable "should_make_s3_get_obj_policy" {
   type    = bool
   default = false
-  description = "when true, code will create a policy to allow a lambda function to get an object from an s3 bucket"
+    description = <<EOT
+  "When true, code will provision
+   a policy to allow a lambda to 
+   get an object from an s3 bucket"
+  EOT
                             }
 
 
 
-# for conditionally 
-# provisioning an attachment to 
-# to attach the get object policy 
-# to a lambda's execution role: 
-variable "should_make_s3_get_obj_policy_attach" {
-  type    = bool
-  default = false
-  description = "when true, code will create a policy attachment to allow a policy that allows a lambda function to read from a bucket be attached to the lambda's execution role"
-                                                }
 
