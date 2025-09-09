@@ -35,7 +35,18 @@ variable "handler"  {
 variable "layer_version_arn" {
       description = "arn of the layer version created in root module"
       type        = string
-                         }
+                             }
+
+
+
+variable "lambda_to_trigger" {
+      description = "the lambda function that must be triggered"
+      
+                             }
+
+
+
+
 
 
 
@@ -71,8 +82,13 @@ variable "name_of_read_from_bucket"  {
       type        = string
                    }
 
+# The arn of the bucket that will
+# trigger a lambda (used in
+# aws_lambda_permission.allow_s3_invoke) 
+variable "trigger_bucket_arn" {
+  type = string
 
-
+                              }
 
 
 
@@ -183,5 +199,18 @@ variable "should_make_s3_get_obj_policy" {
                             }
 
 
+# for conditionally 
+# provisioning the notification 
+# by the ingestion/processed 
+# bucket to the transform/load
+# lambda: 
+variable "should_make_s3_notif" {
+  type    = bool
+  default = false
+    description = <<EOT
+  "When true, code will provision
+   an aws_s3_bucket_notification
+  EOT
+                            }
 
 

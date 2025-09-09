@@ -50,7 +50,8 @@ resource "aws_lambda_function" "mod_lambda" {
 
 
   layers = [
-    aws_lambda_layer_version.shared-layer.arn
+    var.layer_version_arn
+    # aws_lambda_layer_version.shared-layer.arn
            ]
 
   environment {
@@ -127,7 +128,7 @@ resource "aws_iam_policy" "lambda_get_policy" {
     Version = "2012-10-17",
     Statement = [{
       Effect   = "Allow",
-      Action   = ["s3:PutObject"],
+      Action   = ["s3:GetObject"],
       Resource = "arn:aws:s3:::${var.name_of_read_from_bucket}/*" # var will be set to an output.
     }]
   })
@@ -144,7 +145,7 @@ resource "aws_iam_role_policy_attachment" "lambda_get_attach" {
                                              # as the lambda exec role that reads
                                              # from a bucket will be in another
                                              # call of the module !!!!!!  
-  policy_arn = aws_iam_policy.lambda_put_policy[0].arn
+  policy_arn = aws_iam_policy.lambda_get_policy[0].arn
                                                           }
 
 
@@ -173,7 +174,8 @@ resource "aws_lambda_permission" "allow_s3_invoke" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.mod_lambda.function_name   # <-- attachment happens here
   principal     = "s3.amazonaws.com"
-  source_arn    = aws_s3_bucket.my_bucket.arn # NOTE: THIS WILL COME FROM A MODULE OUTPUT
+  source_arn    = var.trigger_bucket_arn
+  # source_arn    = aws_s3_bucket.my_bucket.arn # NOTE: THIS WILL COME FROM A MODULE OUTPUT
                                               # as the bucket will be provisioned in a previous 
                                               # invocation of the module.  
                                                   }
@@ -202,17 +204,16 @@ resource "aws_s3_bucket" "mod-ing-or-proc-buck" {
 # 8 i) Provision the notification 
 # by the ingestion/processed 
 # bucket to the transform/load
-# lambd:
+# lambda:
 resource "aws_s3_bucket_notification" "bucket_notification" {
-  bucket = aws_s3_bucket.var.ing_or_proc_bucket_name.id
+  count = var.should_make_s3_notif ? 1 : 0
+  
+  bucket = aws_s3_bucket.mod-ing-or-proc-buck[0].id
 
   lambda_function {
-    lambda_function_arn = aws_lambda_function.my_lambda.arn # will come from an output
-                                                            # as the ingestion bkect sends
-                                                            # an event to the transform
-                                                            # lambda (and the processed 
-                                                            # bucket sends an event to the 
-                                                            # load lambda).  
+    
+    lambda_function_arn = var.lambda_to_trigger.arn 
+
     events              = ["s3:ObjectCreated:*"]  # trigger on every object PUT
                   }
 

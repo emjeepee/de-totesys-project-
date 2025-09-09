@@ -29,10 +29,24 @@
 #    this output to set its policy 
 #    for reading from the processed bucket.
 output "name_of_bckt_that_triggers_next_lambda" {
-  # value = aws_s3_bucket.mod-ing-or-proc-buck.bucket
-  value = var.ing_or_proc_bucket_name
+  value = var.should_make_ing_or_proc_bucket ? aws_s3_bucket.mod-ing-or-proc-buck[0].bucket : null
+  # value = aws_s3_bucket.mod-ing-or-proc-buck[0].bucket
                                               } 
 
 
+# The next module needs this to set 
+# the lambda permission that allows
+# the lambda to be triggered by the 
+# appropriate bucket
+output "trigger_bucket_arn" {
+  value = var.should_make_ing_or_proc_bucket ? aws_s3_bucket.mod-ing-or-proc-buck[0].arn : null      
+                            }
+
+
+# The lambda function that needs
+# to be triggered:
+output "lambda_to_trigger" {
+  value = aws_lambda_function.mod_lambda
+                            }
 
 

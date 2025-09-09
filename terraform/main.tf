@@ -241,6 +241,7 @@ module "extract" {
   handler                              = "first_lambda_handler.first_lambda_handler"
   code_bucket_name                     = "totesys-code-bucket-m1x7qr0b"
   s3_key_for_zipped_lambda             = "zipped/first_lambda.zip"
+  layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
 
   # for lambda exec role policy 
   # that allows lambda to write
@@ -249,7 +250,6 @@ module "extract" {
 
 
   # for ingestion bucket:
-  # (STILL NEEDED?):
   ing_or_proc_bucket_name              = "totesys-ingestion-bucket-t8vl5n6p"
 
   # conditional vars:
@@ -259,8 +259,35 @@ module "extract" {
   # following variable but it must 
   # be set:
   name_of_read_from_bucket             = ""
-  
+
+  # this module's lambda will not 
+  # be triggered by an S3 bucket:
+  should_make_allow_s3_invoke_policy   = false
+
+  # The lambda of this invocation 
+  # of the module does not need
+  # the arn of the bucket provisioned 
+  # in the previous invocation of the 
+  # module because there was no 
+  # previous invoaction of the module
+  trigger_bucket_arn = "not-needed"
+
+  # The extract lambda of this invocation 
+  # must provision an S3 notification
+  # to llow the ingestion bucket to 
+  # trigger the transform lambda:
+  should_make_s3_notif = true
+
+
+  # The transform lambda must be
+  # triggered by the ingestion bucket:
+  lambda_to_trigger = module.transform.lambda_to_trigger
+
                                         }
+
+
+
+
 
 
 
@@ -288,6 +315,7 @@ module "transform" {
   runtime                              = "python3.13"
   handler                              = "second_lambda_handler.second_lambda_handler"
   s3_key_for_zipped_lambda             = "zipped/second_lambda.zip"
+  layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
 
   # for lambda exec role policy 
   # that allows lambda to read
@@ -295,8 +323,7 @@ module "transform" {
   # (module.<MODULE-NAME>.<OUTPUT-NAME>
   # will have value 
   # "totesys-ingestion-bucket-t8vl5n6p"):
-
-  name_of_read_from_bucket             = module.extract.name_of_bckt_that_triggers_next_lambda
+  name_of_read_from_bucket             = module.extract.name_of_bckt_that_triggers_next_lambda # an output
 
 
   # for lambda exec role policy 
@@ -314,8 +341,34 @@ module "transform" {
   should_make_ing_or_proc_bucket       = true
   should_make_s3_put_obj_policy        = true # for put obj into proc bucket
   should_make_s3_get_obj_policy        = true # for get obj from ing bucket
-  
+
+  # this module's lambda will  
+  # be triggered by an S3 bucket:
+  should_make_allow_s3_invoke_policy   = true
+
+  # The lambda of this invocation 
+  # of the child module needs the arn of 
+  # the bucket provisioned in the
+  # previous invocation of the child module 
+  trigger_bucket_arn = module.extract.trigger_bucket_arn 
+
+  # This invocation of th child module
+  # must provision an S3 notification
+  # to allow the processed bucket to 
+  # trigger the load lambda:
+  should_make_s3_notif = true
+
+
+  # The load lambda must be
+  # triggered by the processed bucket:
+  lambda_to_trigger = module.load.lambda_to_trigger
+
                                 }
+
+
+
+
+
 
 
 # The 3rd call of the module will provision:
@@ -336,11 +389,15 @@ module "load" {
   runtime                              = "python3.13"
   handler                              = "third_lambda_handler.third_lambda_handler"
   s3_key_for_zipped_lambda             = "zipped/third_lambda.zip"
+  layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
+
+  # No need to provision a cucket:
+  should_make_ing_or_proc_bucket       = false
 
   # Not needed for this call 
   # of the module but you 
   # still need to set it:
-  name_of_write_to_bucket             = ""
+  name_of_write_to_bucket              = "not-needed"
 
   # for lambda exec role policy 
   # that allows lambda to read
@@ -354,5 +411,23 @@ module "load" {
   # conditional vars:
   should_make_s3_get_obj_policy        = true # for get obj from proc bucket
   
+  # The lambda of this invocation 
+  # of the child module needs the arn of 
+  # the bucket provisioned in the
+  # previous invocation of the child module 
+  # (ie the processed bucket)
+  trigger_bucket_arn = module.transform.trigger_bucket_arn 
+
+
+  # This invocation of the child module
+  # must not provision an S3 notification
+  should_make_s3_notif = false
+
+
+  # This invocation of the child module
+  # provisions no bucket, so there is
+  # no lambda to trigger:
+  lambda_to_trigger = "not-needed"
+
 
                                 }
