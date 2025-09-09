@@ -28,11 +28,9 @@ This project includes the following directories:
 
 ## Authors (alphabetical)
 
- - Duncan Cornish
- - Neill Hallard
- - Abdulmomen Jameli
- - Mukund Pandit
- - Amar Walji
+- Mukund Pandit (created all code except the workflow.yml file for GitHub Actions)
+- Neill Hallard (created the workflow.yml file for GitHub Actions)
+
  <br><br><br>
 
 
