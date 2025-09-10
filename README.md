@@ -28,7 +28,7 @@ This project includes the following directories:
 
 ## Authors (alphabetical)
 
-- Mukund Pandit (created all code except the workflow.yml file for GitHub Actions)
+- Mukund Pandit (created everything except the workflow.yml file for GitHub Actions)
 - Neill Hallard (created the workflow.yml file for GitHub Actions)
 
  <br><br><br>

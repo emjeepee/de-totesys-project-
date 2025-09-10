@@ -87,7 +87,6 @@ variable "name_of_read_from_bucket"  {
 # aws_lambda_permission.allow_s3_invoke) 
 variable "trigger_bucket_arn" {
   type = string
-
                               }
 
 

@@ -35,6 +35,14 @@
 # IN THE ROOT MODULE (ie here):
 # -----------------------------
 # 1) The provider
+# 2) The EvenBridge Scheduler to trigger
+#    the extract lambda at some frequency.
+#    Also: an IAM execution role for the 
+#    Scheduler, a policy for it and a
+#    policy attachment.
+# 2) The lambda permission to allow the
+#    extract lambda to be invoked by 
+#    EventBridge Scheduler.
 # 2) the backend bucket (to hold the 
 #    state file)
 # 3) an s3 bucket to store the zipped lambda 
@@ -66,7 +74,7 @@
 
 
 
-
+# 1):
 terraform {
   required_providers {
     aws = {
@@ -96,6 +104,99 @@ provider "aws" {
   region = "eu-west-2"
                }
 
+
+
+
+
+# THE LAMBDA PERMISSION TO LET
+# THE EXTRACT LAMBDA BE 
+# INVOKED BY EVENTBRIDGE 
+# SCHEDULER
+# =========================
+resource "aws_lambda_permission" "allow_EventBridge_Sched" {
+  statement_id  = "AllowExecutionFromEventBridgeScheduler"
+  action        = "lambda:InvokeFunction"
+  function_name = module.extract.lambda_to_trigger.function_name # from an output
+  principal     = "events.amazonaws.com"
+  source_arn    = "arn:aws:events:eu-west-1:111122223333:rule/RunDaily"
+  
+                                                            }
+
+
+
+
+# THE EVENTBRIDGE SCHEDULER
+# AND ASSOCIATED RESOURCES
+# =========================
+
+# Execution role for the scheduler:
+resource "aws_iam_role" "EventBridge_Sched_exec_role" {
+  name = "EvntBrdg_Sched-IAM-Exec-role"
+
+# Define the trust policy to allow 
+# the EventBridge Scheduler to 
+# assume this role:
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = { Service = "scheduler.amazonaws.com" },
+      Action    = "sts:AssumeRole"
+    }]
+  })
+                                      }
+
+
+
+
+# Policy to allow the scheduler
+# to invoke a lambda function:
+resource "aws_iam_policy" "EvntBrdg_invoke_lambda" {
+
+  name   = "invoke-extract-lambda-policy"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect   = "Allow",
+      Action   = ["lambda:InvokeFunction"], # 
+      # Resource = "arn:aws:lambda:eu-west-2:891377083893:function:module.extract.<from-output>"
+      Resource = "arn:aws:lambda:eu-west-2:891377083893:function:extract-lambda"
+                }]
+  })
+                                              }
+
+
+
+# Attachment for the policy above:
+resource "aws_iam_role_policy_attachment" "EvntBrdg_invoke_lambda_attach" {
+  role       = aws_iam_role.EventBridge_Sched_exec_role.name
+  policy_arn = aws_iam_policy.EvntBrdg_invoke_lambda.arn
+                                                                          }
+
+
+
+
+# The scheduler itself:
+resource "aws_scheduler_schedule" "extract-lambda-trigger" {
+  name       = "schedule"
+  group_name = "default"
+
+  flexible_time_window {
+    # Make the scheduler fire within
+    # 15 mins after the scheduled time.
+    # AWS says this "improves the
+    # reliability of your schedule".
+    maximum_window_in_minutes = "15"
+    mode                      = "FLEXIBLE"
+                       }
+
+  schedule_expression = "rate(1 hours)"
+
+  target {
+    arn      = module.extract.lambda_to_trigger.arn # arn of extract lambda -- from output
+    role_arn = aws_iam_role.EventBridge_Sched_exec_role.arn
+        } 
+                                                            }
 
 
 

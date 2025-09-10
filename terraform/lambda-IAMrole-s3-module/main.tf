@@ -175,9 +175,7 @@ resource "aws_lambda_permission" "allow_s3_invoke" {
   function_name = aws_lambda_function.mod_lambda.function_name   # <-- attachment happens here
   principal     = "s3.amazonaws.com"
   source_arn    = var.trigger_bucket_arn
-  # source_arn    = aws_s3_bucket.my_bucket.arn # NOTE: THIS WILL COME FROM A MODULE OUTPUT
-                                              # as the bucket will be provisioned in a previous 
-                                              # invocation of the module.  
+  
                                                   }
 
 
