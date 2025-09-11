@@ -7,7 +7,9 @@
 ## Modules
 The Terraform code includes two modules: 
  - a root module <br>
- 		This provisions infrastructure that is not repeated (for example the code S3 bucket, which contains the zipped lambda handlers and the zipped layer) and calls the child module several times. 
+ 		This provisions the following infrastructure as it is not repeated:
+		S3 bucket that contains the zipped lambda handlers and the zipped layer
+		 
  - a child module <br>
 		This provisions (in successive invocations) infrastructure that is repeated.
  <br><br><br>
