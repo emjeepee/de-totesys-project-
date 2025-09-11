@@ -1,7 +1,7 @@
 # WHAT NEEDS TO BE PROVISIONED:
 # =============================
-# IN THE MODULE:
-# --------------
+# IN THE CHILD MODULE:
+# --------------------
 # 1) A lambda function
 # 2) An execution role for the lambda 
 #    function
