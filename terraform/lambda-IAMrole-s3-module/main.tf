@@ -28,8 +28,14 @@
 #    filter detects errors.
 # 10) An SNS Topic with an email subscription 
 #    so that the project sends alerts.
-# 11) asdasd asdasaasd asd asd sad sd
-#    asdasd asdasaasd asd asd sad sd.
+# 11) Policy to allow a lambda exec role to 
+#    write to CloudWatch logs. No need to create
+#    a separate resource for this as you can
+#    specify an AWS-managed policy in the 
+#    attachment
+# 12) Attachment for 11). Here set the value of 
+#     the correct key to the AWS-managed policy 
+#     mentioned in 11) 
 
 
 
@@ -65,7 +71,7 @@ resource "aws_lambda_function" "mod_lambda" {
 # NOTE: "lambda_exec" below cannot
 # be dynamic, ie you cannot include 
 # a variable value in that string!! 
-# Instead use count of for each):
+# Instead use count or for each):
 resource "aws_iam_role" "lambda_exec" {
   name = "${var.lambda_name}-IAM-role"
 
@@ -82,6 +88,13 @@ resource "aws_iam_role" "lambda_exec" {
     }]
   })
                                       }
+
+
+# 11) and 12)
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                                                                   }
 
 
 
