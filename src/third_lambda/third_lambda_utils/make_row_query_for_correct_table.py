@@ -1,5 +1,5 @@
-from src.third_lambda.third_lambda_utils.make_query_for_one_row_fact_table import make_query_for_one_row_fact_table
-from src.third_lambda.third_lambda_utils.make_query_for_one_row_dim_table import make_query_for_one_row_dim_table
+from .make_query_for_one_row_fact_table import make_query_for_one_row_fact_table
+from .make_query_for_one_row_dim_table import make_query_for_one_row_dim_table
 
 
 

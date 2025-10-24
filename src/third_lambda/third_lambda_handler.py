@@ -1,10 +1,19 @@
 import boto3
+import logging
 
-from src.third_lambda.third_lambda_utils.third_lambda_init              import third_lambda_init
-from src.third_lambda.third_lambda_utils.make_pandas_dataframe          import make_pandas_dataframe
-from src.third_lambda.third_lambda_utils.make_SQL_queries               import make_SQL_queries
-from src.third_lambda.third_lambda_utils.make_SQL_queries_to_warehouse  import make_SQL_queries_to_warehouse
-from src.third_lambda.third_lambda_utils.conn_to_db                     import conn_to_db, close_db
+from third_lambda_utils.third_lambda_init              import third_lambda_init
+from third_lambda_utils.make_pandas_dataframe          import make_pandas_dataframe
+from third_lambda_utils.make_SQL_queries               import make_SQL_queries
+from third_lambda_utils.make_SQL_queries_to_warehouse  import make_SQL_queries_to_warehouse
+from third_lambda_utils.conn_to_db                     import conn_to_db, close_db
+
+
+
+
+logger = logging.getLogger()
+
+
+
 
 
 def third_lambda_handler(event, context):
@@ -54,11 +63,19 @@ def third_lambda_handler(event, context):
     object_key = lookup['object_key']   # key under which processed bucket saved Parquet file
     table_name = lookup['table_name']   # name of table
     conn = lookup['conn']               # pg8000.native Connection object that knows about warehouse
-    close_conn = lookup['close_db']       # function to close connection to warehouse
+  
 
-    # Get the Parquet file and convert
-    # it to a pandas dataframe:
-    df = make_pandas_dataframe(proc_bucket, s3_client, object_key) 
+
+    err_msg = 'Error in third_lambda_handler'
+
+
+    try:
+        # Get the Parquet file and convert
+        # it to a pandas dataframe:
+        df = make_pandas_dataframe(proc_bucket, s3_client, object_key) 
+    except Exception:
+        logger.error(err_msg)
+
 
     # make the SQL queries from the 
     # data in the dataFrame. 
@@ -77,8 +94,8 @@ def third_lambda_handler(event, context):
 
         # Close connection to warehouse:
         close_db(conn)
-    except RuntimeError:
-        raise RuntimeError
+    except Exception:
+        logger.error(err_msg)
 
 
 

@@ -1,20 +1,22 @@
-import json
-import boto3
 
 from datetime import datetime
 
-from src.second_lambda.second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
-from src.second_lambda.second_lambda_utils.read_from_s3             import read_from_s3
-from src.second_lambda.second_lambda_utils.convert_to_parquet       import convert_to_parquet
-from src.second_lambda.second_lambda_utils.upload_to_s3             import upload_to_s3
-from src.second_lambda.second_lambda_utils.second_lambda_init       import second_lambda_init
-from src.second_lambda.second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
-from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
-from src.second_lambda.second_lambda_utils.should_make_dim_date     import should_make_dim_date
+from second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
+from second_lambda_utils.read_from_s3             import read_from_s3
+from second_lambda_utils.convert_to_parquet       import convert_to_parquet
+from second_lambda_utils.upload_to_s3             import upload_to_s3
+from second_lambda_utils.second_lambda_init       import second_lambda_init
+from second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
+from second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
+from second_lambda_utils.should_make_dim_date     import should_make_dim_date
+
+import json
+import boto3
+import logging
 
 
 
-
+logger = logging.getLogger()
 
 def second_lambda_handler(event, context):
     """
@@ -82,6 +84,10 @@ def second_lambda_handler(event, context):
     start_date = lookup['start_date'] # a datetime object for 1 Jan 2024
     num_rows = lookup['num_rows'] # an int. number of rows in dimensions table
 
+
+    err_msg = 'Error in second_lambda_handler()'
+    
+
     # Get the jsonified python list that
     # is the table that this function has 
     # just been notified about and 
@@ -89,14 +95,20 @@ def second_lambda_handler(event, context):
     try:
         # read_from_s3(s3_client from lookup, ingestion_bucket from lookup, object_key from lookup)
         table_json = read_from_s3(s3_client, ingestion_bucket, object_key) # jsonified[{...}, {...}, {...}]
-        table_python = json.loads(table_json) # [{...}, {...}, {...}]
+    except Exception:
+        logger.error(err_msg)
+    
+
+    # make a Python list version of the table:
+    table_python = json.loads(table_json) # [{...}, {...}, {...}]
 
 
-        # If this is the first ever run of the ETL 
-        # pipeline (ie if the processed bucket is 
-        # empty) make a date dimension table in 
-        # Parquet form and save it in the 
-        # processed bucket: 
+    try:
+    # If this is the first ever run of the ETL 
+    # pipeline (ie if the processed bucket is 
+    # empty) make a date dimension table in 
+    # Parquet form and save it in the 
+    # processed bucket: 
         should_make_dim_date(is_first_run_of_pipeline, 
                              create_dim_date_Parquet, 
                              upload_to_s3, 
@@ -105,34 +117,43 @@ def second_lambda_handler(event, context):
                              num_rows, 
                              proc_bucket, 
                              s3_client)
+    except Exception:
+        logger.error(err_msg)
+                    
+        
 
+    try:
         # Make either the fact table or a dimension 
         # table (whichever is appropriate) as a 
         # Python list of dictionaries:
         dim_or_fact_table = make_dim_or_fact_table(table_name, table_python, s3_client, ingestion_bucket)
 
-        # Convert the dim/fact table to Parquet form. 
-        # This preserves the order of the keys as they 
-        # were in the dictionaries (important for the 
-        # utility function of the third lambda handler 
-        # that makes SQL query strings):
-        pq_file = convert_to_parquet(dim_or_fact_table)
-
-        # Make the key (a string) under which to 
-        # save the dim/fact table in the 
-        # processed bucket (note: when you put 
-        # a datetime object in an fstring, Python 
-        # converts the object to a string):
-        # table_key = f"{timestamp_string}/fact_{table_name}.parquet" if table_name == "sales_order" else f"{timestamp_string}/dim_{table_name}.parquet"
-        table_key = f"fact_{table_name}/{timestamp_string}/.parquet" if table_name == "sales_order" else f"dim_{table_name}/{timestamp_string}.parquet"
+    except Exception:
+        logger.error(err_msg)
 
 
-        # Save the Parquet file in the processed 
-        # bucket:
+    # Convert the dim/fact table to Parquet form. 
+    # This preserves the order of the keys as they 
+    # were in the dictionaries (important for the 
+    # utility function of the third lambda handler 
+    # that makes SQL query strings):
+    pq_file = convert_to_parquet(dim_or_fact_table)
+
+    # Make the key (a string) under which to 
+    # save the dim/fact table in the 
+    # processed bucket (note: when you put 
+    # a datetime object in an fstring, Python 
+    # converts the object to a string):
+    # table_key = f"{timestamp_string}/fact_{table_name}.parquet" if table_name == "sales_order" else f"{timestamp_string}/dim_{table_name}.parquet"
+    table_key = f"fact_{table_name}/{timestamp_string}/.parquet" if table_name == "sales_order" else f"dim_{table_name}/{timestamp_string}.parquet"
+
+
+    try:
+        # Write the Parquet file in 
+        # the processed bucket:
         upload_to_s3(s3_client, proc_bucket, table_key, pq_file)
-    except RuntimeError:
-        raise RuntimeError            
-
+    except Exception:
+        logger.error(err_msg)
 
 
 

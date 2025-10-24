@@ -1,5 +1,5 @@
-from src.second_lambda.second_lambda_utils.get_latest_table      import get_latest_table
-from src.second_lambda.second_lambda_utils.func_lookup_table import func_lookup_table
+from .get_latest_table      import get_latest_table
+from .func_lookup_table import func_lookup_table
 
 
 

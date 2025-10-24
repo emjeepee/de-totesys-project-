@@ -1,7 +1,7 @@
 import os
 import boto3
 
-from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
+from .conn_to_db import conn_to_db, close_db
 
 
 

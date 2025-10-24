@@ -1,10 +1,26 @@
-from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
-from src.first_lambda.first_lambda_utils.read_table                  import read_table
-from src.first_lambda.first_lambda_utils.get_data_from_db            import get_data_from_db
-from src.first_lambda.first_lambda_utils.write_to_s3                 import write_to_s3
-from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
-from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
-from src.first_lambda.first_lambda_utils.get_env_vars                import get_env_vars
+from first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
+from first_lambda_utils.read_table                  import read_table
+from first_lambda_utils.get_data_from_db            import get_data_from_db
+from first_lambda_utils.write_to_s3                 import write_to_s3
+from first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
+from first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
+from first_lambda_utils.get_env_vars                import get_env_vars
+
+
+
+import logging
+
+
+root_logger = logging.getLogger()
+
+# Logging config.
+# Create and configure a logger 
+# that writes to a file:
+logging.basicConfig(
+    level=logging.DEBUG,                                         # Log level (includes INFO, WARNING, ERROR)
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",  # Log format
+    filemode="a"                                                 # 'a' appends; 'w' would overwrite
+                   )
 
 
 
@@ -33,7 +49,7 @@ def first_lambda_handler(event, context):
     Returns:
         None
     """
-
+    root_logger.info("First Lambda function starting anew.\n\n")
 
     if event is None:
         event = {"time": "1900-01-01 00:00:00"}
@@ -50,36 +66,50 @@ def first_lambda_handler(event, context):
 
 
 
-    # Get the timestamp saved in 
-    # in the S3 ingestion bucket
-    # and replace that timestamp 
-    # with one for the current time:
-    after_time = change_after_time_timestamp(
-       bucket_name, s3_client, "***timestamp***", "1900-01-01 00:00:00"
-                                            )
-
-
-    # Get updated row data from each table
-    # in the ToteSys database and write that 
-    # data to the bucket.
-    # data_for_s3 below looks like this:
-    # [ 
-    #   {'sales_orders'>: [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
-    #   {'design': [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
-    #   {'transactions': [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
-    #   etc        
-    # ] 
-    # Each dictionary (eg {'sales_orders'>: []}) contains only those rows that have updated data.
-    try:
-        data_for_s3 = get_data_from_db(tables, after_time, conn, read_table) # list of dicts
-        write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name)
     
-    except RuntimeError as e:
-        # CloudWatch will log the following error:
-        raise RuntimeError from e 
+    try:
+        # Get the timestamp saved in 
+        # in the S3 ingestion bucket
+        # and replace that timestamp 
+        # with one for the current time:
+        after_time = change_after_time_timestamp(
+        bucket_name, s3_client, "***timestamp***", "1900-01-01 00:00:00"
+                                            )
+    except Exception:
+        # The following line automatically logs 
+        # the full traceback of the most recent 
+        # exception.
+        root_logger.exception("Error caught in first Lambda function while trying to run change_after_time_timestamp()\n\n")      
+
+
+    try: 
+        # Get updated row data from each table
+        # in the ToteSys database.
+        # data_for_s3 below looks like this:
+        # [ 
+        #   {'sales_orders'>: [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
+        #   {'design': [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
+        #   {'transactions': [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
+        #   etc        
+        # ] 
+        # Each dictionary (eg {'sales_orders'>: []}) contains only those rows that have updated data.
+        data_for_s3 = get_data_from_db(tables, after_time, conn, read_table) # list of dicts
+    except Exception: 
+        root_logger.exception("Error caught in first_lambda_handler() while trying to run get_data_from_db()\n\n")    
+
+
+    try:
+        # write updated row data from each
+        # table to the ingestion bucket: 
+        write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name)
+    except Exception: 
+        root_logger.exception("Error caught in first_lambda_handler() while trying to run write_to_s3()\n\n")    
+    
 
     # Close connection to ToteSys database:
     close_db(conn)
+
+    
 
 
 

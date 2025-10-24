@@ -1,6 +1,10 @@
 from botocore.exceptions import ClientError
 from datetime import datetime, UTC
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
     """
@@ -44,6 +48,7 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
 
     """
 
+    err_msg = "Error in change_after_time_timestamp() during attempt to read ingestion bucket."
     
     # First create a timestamp string for the current time,
     # like this: "2025-06-04T08:28:12":
@@ -55,17 +60,33 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
     try:
         # Get previous timestamp from bucket:
         response = s3_client.get_object(Bucket=bucket_name, Key=ts_key)
-        
-        # Replace previous timestamp with 
+        # Replace previous timestamp in the bucket with 
         # new timestamp:
         s3_client.put_object(Bucket=bucket_name, Key=ts_key, Body=now_ts)
 
-        # Return the previous timestamp:
-        return response["Body"].read().decode("utf-8")
-    
-    except ClientError as e:
+
+    except ClientError: 
         # If there is an error in reading the 
         # S3 ingestion bucket return the 
         # default timestamp (which represents 
         # the year 1900):
         return default_ts
+
+
+    try:
+        # Replace previous timestamp in the bucket with 
+        # new timestamp:
+        s3_client.put_object(Bucket=bucket_name, Key=ts_key, Body=now_ts)
+
+    except ClientError:
+        # If there is an error in writing to
+        # the S3 ingestion bucket, log and 
+        # propagate the exception:
+        logger.error(err_msg)
+        logger.info("\n\n\n")
+        raise 
+
+
+    # Return the previous timestamp:
+    return response["Body"].read().decode("utf-8")
+    

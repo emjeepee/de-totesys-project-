@@ -1,4 +1,4 @@
-from src.first_lambda.first_lambda_utils.convert_cell_values_main import convert_cell_values_main
+from .convert_cell_values_main import convert_cell_values_main
 
 
 

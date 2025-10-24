@@ -1,6 +1,6 @@
 
-from src.second_lambda.second_lambda_utils.preprocess_dim_tables import preprocess_dim_tables
-from src.second_lambda.second_lambda_utils.make_curr_obj import make_curr_obj
+from .preprocess_dim_tables import preprocess_dim_tables
+from .make_curr_obj import make_curr_obj
 
 
 def transform_to_dim_currency(currency_data):

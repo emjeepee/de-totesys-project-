@@ -1,6 +1,6 @@
 
-from src.second_lambda.second_lambda_utils.create_dim_date_Parquet import create_dim_date_Parquet
-from src.second_lambda.second_lambda_utils.upload_to_s3 import upload_to_s3
+
+
 
 
 
@@ -22,8 +22,7 @@ def should_make_dim_date(ifrop, cddP, uts3, start_date, timestamp_string, num_ro
             is_first_run_of_pipeline().
         2) cddP: utility function 
             create_dim_date_Parquet().
-        3) uts3: utility function 
-            upload_to_s3().
+        3) uts3:             
         4) start_date: a datetime object 
             for the date from which the 
             date dimension table should 
@@ -54,6 +53,7 @@ def should_make_dim_date(ifrop, cddP, uts3, start_date, timestamp_string, num_ro
             # make the date dimension table and 
             # a key for it and put them in an array:
             arr = cddP(start_date, timestamp_string, num_rows)
+
             # store the date dimension table 
             # in the processed bucket under the
             # key:

@@ -1,15 +1,12 @@
-from src.first_lambda.first_lambda_utils.convert_values import convert_values
-from src.first_lambda.first_lambda_utils.make_row_dicts import make_row_dicts
-from src.first_lambda.first_lambda_utils.get_updated_rows import get_updated_rows
-from src.first_lambda.first_lambda_utils.get_column_names import get_column_names
-
-
-
+from .convert_values import convert_values
+from .make_row_dicts import make_row_dicts
+from .get_updated_rows import get_updated_rows
+from .get_column_names import get_column_names
 from pg8000.native import Connection
+
 import logging
 
-
-logger = logging.getLogger("MyLogger")
+logger = logging.getLogger(__name__)
 
 
 def read_table(table_name: str, conn: Connection, after_time: str):
@@ -72,25 +69,23 @@ def read_table(table_name: str, conn: Connection, after_time: str):
 
     """
 
-    try:
-        # Make a list of the column names of the
-        # table in question. 
-        query_result_2 = get_column_names(conn, table_name) # a list of lists,
+
+    # Make a list of the column names of the
+    # table in question. 
+    query_result_2 = get_column_names(conn, table_name) # a list of lists,
                                                             # each member list 
                                                             # containing a string
                                                             # that is a column 
                                                             # name  
-        # Get only those rows from the table
-        # that contain updated data: 
-        query_result_1 = get_updated_rows(conn, after_time, table_name)       # a list of lists, 
+    # Get only those rows from the table
+    # that contain updated data: 
+    query_result_1 = get_updated_rows(conn, after_time, table_name)       # a list of lists, 
                                                                               # each member list 
                                                                               # representing a row
                                                                               # and containing 
                                                                               # row values only
                                                                               # (without column 
                                                                               # names)
-    except RuntimeError as e:
-        raise RuntimeError from e
     
 
     # Convert query_result_2 to a 
@@ -99,13 +94,13 @@ def read_table(table_name: str, conn: Connection, after_time: str):
 
 
     # convert cell values in the 
-    # updated rows from 
+    # updated rows llike this: 
     # datetime.datetime object -> ISO string
     # Decimal value            -> float
     # json                     -> string:
     cleaned_rows = convert_values(query_result_1) 
 
-    # Make a dictionaries for each
+    # Make a dictionary for each
     # updated row where the 
     # key-value pairs of each
     # dictionary represent 

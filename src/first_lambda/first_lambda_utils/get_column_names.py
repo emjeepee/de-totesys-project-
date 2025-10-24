@@ -1,4 +1,21 @@
-from pg8000 import ProgrammingError
+
+from pg8000.native import (
+    DatabaseError,
+    InterfaceError,
+    TimeoutError    
+                         )
+
+import logging
+
+
+
+
+
+
+logger = logging.getLogger(__name__)
+
+
+
 
 def get_column_names(conn_obj, table_name: str):
     """
@@ -30,11 +47,19 @@ def get_column_names(conn_obj, table_name: str):
 
     query = f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}' ORDER BY ordinal_position"
 
+
     try: 
         response = conn_obj.run(query)
+        # log status:
+    
         return response
     
-    except ProgrammingError as e:
-        raise RuntimeError(err_Msg) from e
+    except (DatabaseError, InterfaceError, TimeoutError):
+        logger.info(err_Msg)
+        raise 
+        
+    
+
+    
         
     

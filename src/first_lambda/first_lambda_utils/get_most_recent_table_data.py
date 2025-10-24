@@ -1,10 +1,14 @@
-from datetime import datetime, timezone
 import boto3
+import logging
+
+
+from datetime import datetime, timezone
 from botocore.exceptions import ClientError
-from src.first_lambda.first_lambda_utils.get_latest_table import get_latest_table
+from .get_latest_table import get_latest_table
+from .handle_errors import handle_errors
 
 
-
+logger = logging.getLogger(__name__)
 
 
 
@@ -58,10 +62,14 @@ def get_most_recent_table_data(
 
 
     """
+
+    err_msg_1 = f"There has been an error in function \n get_most_recent_table_data(). \n Unable to read ingestion bucket \n for the latest table of name {file_location} ." 
+
     try:
         response = S3_client.list_objects_v2(Bucket=bucket_name, Prefix=file_location)
-        latest_tbl = get_latest_table(response, S3_client, bucket_name) # a Python list
-        return latest_tbl
+    except (ClientError):
+        logger.error(err_msg_1)
+        raise
 
-    except (RuntimeError, ClientError) as e:
-        raise RuntimeError from e
+    latest_tbl = get_latest_table(response, S3_client, bucket_name) # a Python list
+    return latest_tbl

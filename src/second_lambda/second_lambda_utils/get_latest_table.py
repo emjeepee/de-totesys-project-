@@ -1,8 +1,10 @@
 import json
+import logging
+
 from botocore.exceptions import ClientError
 
 
-
+logger = logging.getLogger(__name__)
 
 def get_latest_table(s3_client, bucket: str, table_name: str):
     """
@@ -22,22 +24,32 @@ def get_latest_table(s3_client, bucket: str, table_name: str):
          table_name.        
     """
 
+    err_msg_1 = 'Error occurred in get_latest_table while attempting to read the ingestion bucket'
+
     try:
         # Get a list of the objects in 
         # the bucket that have the Prefix
         # table_name:
         resp = s3_client.list_objects_v2(Bucket=bucket, Prefix=table_name)
-        # Make a list of the keys:
-        keys_list = [dict["Key"] for dict in resp.get("Contents", [])] # ['design/2025-06-02_22-17-19-2513.json', 'design/2025-05-29_22-17-19-2513.json', etc]
-        # Get the key for the latest object:
-        latest_table_key = sorted(keys_list)[ -1 ]  # 'design/2025-06-02_22-17-19-2513.json'
-        # Get the table stored under the key latest_table_key:
-        response = s3_client.get_object(Bucket=bucket, Key=latest_table_key)
-        data = response["Body"].read().decode("utf-8")
-        # Convert to Python list and return:
-        return json.loads(data)
+    except ClientError:
+        logger.error(err_msg_1)
+        raise 
 
+    # Make a list of the keys:
+    keys_list = [dict["Key"] for dict in resp.get("Contents", [])] # ['design/2025-06-02_22-17-19-2513.json', 'design/2025-05-29_22-17-19-2513.json', etc]
+    # Get the key for the latest object:
+    latest_table_key = sorted(keys_list)[ -1 ]  # 'design/2025-06-02_22-17-19-2513.json'
+    # Get the table stored under the key latest_table_key:
+    
+    try:
+        response = s3_client.get_object(Bucket=bucket, Key=latest_table_key)
     except ClientError as e:
-        raise RuntimeError('Error occurred in reading the ingestion bucket') from e
+        logger.error(err_msg_1)
+        raise 
+
+    data = response["Body"].read().decode("utf-8")
+    # Convert to Python list and return:
+    return json.loads(data)
+
 
     

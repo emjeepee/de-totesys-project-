@@ -1,4 +1,4 @@
-from src.second_lambda.second_lambda_utils.preprocess_dim_tables import preprocess_dim_tables
+from .preprocess_dim_tables import preprocess_dim_tables
 
 
 

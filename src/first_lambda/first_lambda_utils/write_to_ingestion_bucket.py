@@ -2,11 +2,11 @@ import boto3
 import json
 
 
-from src.first_lambda.first_lambda_utils.update_rows_in_table import update_rows_in_table
-from src.first_lambda.first_lambda_utils.get_most_recent_table_data import get_most_recent_table_data
-from src.first_lambda.first_lambda_utils.create_formatted_timestamp import create_formatted_timestamp
-from src.first_lambda.first_lambda_utils.save_updated_table_to_S3 import save_updated_table_to_S3
-from src.first_lambda.first_lambda_utils.update_rows_in_table import update_rows_in_table
+from .update_rows_in_table import update_rows_in_table
+from .get_most_recent_table_data import get_most_recent_table_data
+from .create_formatted_timestamp import create_formatted_timestamp
+from .save_updated_table_to_S3 import save_updated_table_to_S3
+from .update_rows_in_table import update_rows_in_table
 
 
 
@@ -62,39 +62,35 @@ def write_to_ingestion_bucket(data: list, bucket: str, file_location: str, s3_cl
         None
     """
 
-    try:
-        # From the bucket get the object that 
-        # holds the most recently updated table 
-        # whose name is given by file_location.
-        # Function get_most_recent_table_data() 
-        # could raise a RuntimeError:
-        latest_table = get_most_recent_table_data(file_location, s3_client, bucket)
-        # a python list of dictionaries.
+    # From the bucket get the object that 
+    # holds the most recently updated table 
+    # whose name is given by file_location.
+    latest_table = get_most_recent_table_data(file_location, s3_client, bucket)
+    # a python list of dictionaries.
 
 
-        # Insert the updated rows into the 
-        # retrieved whole table, replacing 
-        # the outdated ones:
-        updated_table = update_rows_in_table(data, latest_table, file_location)
+    # Insert the updated rows into the 
+    # retrieved whole table, replacing 
+    # the outdated ones:
+    updated_table = update_rows_in_table(data, latest_table, file_location)
 
-        # convert updated_table into json:
-        updated_table_json = json.dumps(updated_table)
+    # convert updated_table into json:
+    updated_table_json = json.dumps(updated_table)
 
-        # Create a formatted timestamp:
-        formatted_ts = create_formatted_timestamp()
+    # Create a formatted timestamp:
+    formatted_ts = create_formatted_timestamp()
 
-        # Make a key under which to store the 
-        # json list that represents the updated 
-        # table:
-        new_key = file_location + "/" + formatted_ts + ".json"
+    # Make a key under which to store the 
+    # json list that represents the updated 
+    # table:
+    new_key = file_location + "/" + formatted_ts + ".json"
         
-        # Store the json list that represents 
-        # the updated table in the bucket under 
-        # the newly created key. Function 
-        # save_updated_table_to_S3() could 
-        # raise a RuntimeError:
-        save_updated_table_to_S3(updated_table_json, s3_client, new_key, bucket)
+    # Store the json list that represents 
+    # the updated table in the bucket under 
+    # the newly created key. Function 
+    # save_updated_table_to_S3() could 
+    # raise a RuntimeError:
+    save_updated_table_to_S3(updated_table_json, s3_client, new_key, bucket)
 
-    except RuntimeError as e:
-        raise RuntimeError(str(e)) from e
+    
 

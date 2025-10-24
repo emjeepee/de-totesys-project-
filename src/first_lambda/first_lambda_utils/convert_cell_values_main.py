@@ -1,7 +1,7 @@
 import json
 
 from json.decoder import JSONDecodeError
-from src.first_lambda.first_lambda_utils.convert_cell_values_aux import convert_cell_values_aux
+from .convert_cell_values_aux import convert_cell_values_aux
 
 
 

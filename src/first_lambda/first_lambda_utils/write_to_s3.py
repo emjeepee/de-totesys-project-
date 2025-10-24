@@ -1,12 +1,16 @@
-from src.first_lambda.first_lambda_utils.create_formatted_timestamp import create_formatted_timestamp
+from .create_formatted_timestamp import create_formatted_timestamp
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
 import json
+import logging
+
 
 load_dotenv()
 
 
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -110,6 +114,9 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
 
     """
 
+    err_msg_1 = f"There has been an error in function write_to_s3(). \n Unable to read ingestion bucket." 
+    err_msg_2 = f"There has been an error in function write_to_s3(). \n Unable to write to ingestion bucket." 
+
     # Make timestamp that has this form:
     # '2025-06-13_13-13-13'
     timestamp = create_formatted_timestamp()
@@ -126,8 +133,9 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
             # "Contents" key):
             response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=table_name)
 
-        except ClientError as e:
-            raise RuntimeError("Error occurred in attempt to read data from the ingestion bucket") from e
+        except ClientError:
+            logger.error(err_msg_1)
+            raise 
 
         # Determine whether there are any
         # such keys (remember that the key 
@@ -143,11 +151,10 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
         if response["KeyCount"] > 0:
             # value of response["KeyCount"]
             # is 0 if no keys match.
-            try:
-                # member[table_name] is [{...}, {...}, {...}, etc]
-                write_to_ingestion_bucket(member[table_name], bucket_name, table_name, s3_client)
-            except RuntimeError as e:
-                raise RuntimeError from e
+
+            # member[table_name] is [{...}, {...}, {...}, etc]
+            write_to_ingestion_bucket(member[table_name], bucket_name, table_name, s3_client)
+
             
             # if no, then this is the very 
             # first run of the first lambda 
@@ -163,7 +170,8 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
                     Key=f"{table_name}/{timestamp}.json", # 'sales_order/2025-06-11_13-27-29.json'
                     Body=json.dumps(member[table_name]) # jsonified [{<data from one updated row>}, etc]
                 )
-            except ClientError as e:
-                raise RuntimeError("Error occurred in attempt to write a table to the ingestion bucket.") from e
+            except ClientError:
+                logger.error(err_msg_2)
+                raise 
             
             

@@ -1,6 +1,6 @@
 
-from src.second_lambda.second_lambda_utils.func_lookup_table import func_lookup_table
-from src.second_lambda.second_lambda_utils.make_staff_or_cp_dim_table import make_staff_or_cp_dim_table
+from .func_lookup_table import func_lookup_table
+from .make_staff_or_cp_dim_table import make_staff_or_cp_dim_table
 
 
 def make_dim_or_fact_table(table_name: str, table_python: list, s3_client, ingestion_bucket: str):

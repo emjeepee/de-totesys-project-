@@ -1,6 +1,6 @@
-from src.third_lambda.third_lambda_utils.make_query_for_one_row_fact_table import make_query_for_one_row_fact_table
-from src.third_lambda.third_lambda_utils.make_query_for_one_row_dim_table import make_query_for_one_row_dim_table
-from src.third_lambda.third_lambda_utils.make_row_query_for_correct_table import make_row_query_for_correct_table
+from .make_query_for_one_row_fact_table import make_query_for_one_row_fact_table
+from .make_query_for_one_row_dim_table  import make_query_for_one_row_dim_table
+from .make_row_query_for_correct_table  import make_row_query_for_correct_table
 
 
 def make_SQL_queries(df, table_name: str):

@@ -1,5 +1,12 @@
 from botocore.exceptions import ClientError
 
+import logging
+
+
+
+
+logger = logging.getLogger(__name__)
+
 
 def upload_to_s3(S3_client, bucket_name: str, key: str, body):
     """
@@ -19,10 +26,14 @@ def upload_to_s3(S3_client, bucket_name: str, key: str, body):
     Returns:
         None
     """
+
+    err_msg = "Error in upload_to_s3() while trying to write to processed bucket." 
+
     try:
         S3_client.put_object(Bucket=bucket_name, Key=key, Body=body)
-    except ClientError as e:
-        raise RuntimeError(f"Second lambda encountered an error in attempt to write to bucket {bucket_name}.") from e
+    except ClientError:
+        logger.error(err_msg)
+        raise 
 
 
 

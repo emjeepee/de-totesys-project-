@@ -1,5 +1,15 @@
 import boto3
-from botocore.exceptions import ClientError
+import logging
+
+from botocore.exceptions import BotoCoreError
+from .handle_errors import handle_errors
+
+
+
+logger = logging.getLogger(__name__)
+
+
+
 
 def save_updated_table_to_S3(
     updated_table, S3_client: boto3.client, new_key: str, bucket: str
@@ -24,8 +34,15 @@ def save_updated_table_to_S3(
         bucket: a string that is the name of the
             S3 ingestion bucket.
     """
+
+    err_msg = f"Error in function " \
+              "\n save_updated_table_to_S3()." \
+              "\n Unable to write an updated"  \
+              "\n table to the ingestion bucket." \
+
+
     try:
         S3_client.put_object(Bucket=bucket, Key=new_key, Body=updated_table)
-
-    except ClientError as e:
-        raise RuntimeError('Error occurred in attempt to write data to the ingestion bucket') from e
+        logger.info("Function save_updated_table_to_S3() successfully\n wrote an updated table to the ingestion bucket")
+    except BotoCoreError as e:
+        handle_errors(e, logger, err_msg)

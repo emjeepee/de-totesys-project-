@@ -1,4 +1,20 @@
-from pg8000 import ProgrammingError
+
+from .handle_errors import handle_errors
+from pg8000.dbapi import (
+    DatabaseError,
+    InterfaceError,
+    TimeoutError    
+                         )
+
+import logging
+
+
+
+
+
+
+logger = logging.getLogger(__name__)
+
 
 def get_updated_rows(conn_obj, after_time: str, table_name: str):
     """
@@ -42,9 +58,12 @@ def get_updated_rows(conn_obj, after_time: str, table_name: str):
 
     try: 
         response = conn_obj.run(query, after_time=after_time)
+        # log status:
+        logger.info("Function get_updated_rows() successfully\n got updated rows of table: %s", table_name)
+
         return response
     
-    except ProgrammingError as e:
-        raise RuntimeError(err_Msg) from e
+    except (DatabaseError, InterfaceError, TimeoutError) as e:
+        handle_errors(e, logger, err_Msg)
         
-    
+        

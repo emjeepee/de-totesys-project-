@@ -1,4 +1,4 @@
-from src.third_lambda.third_lambda_utils.make_parts_of_a_query_string import make_parts_of_a_query_string
+from .make_parts_of_a_query_string import make_parts_of_a_query_string
 
 
 def make_query_for_one_row_fact_table(table_name: str, cols: list, vals: list):
