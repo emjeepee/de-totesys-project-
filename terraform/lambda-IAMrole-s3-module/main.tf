@@ -29,10 +29,10 @@
 # 10) An SNS Topic with an email subscription 
 #    so that the project sends alerts.
 # 11) Policy to allow a lambda exec role to 
-#    write to CloudWatch logs. No need to create
-#    a separate resource for this as you can
-#    specify an AWS-managed policy in the 
-#    attachment
+#    write to CloudWatch logs. Actually there's 
+#    no separate resource for this as the 
+#    attachment resource will specify an 
+#    AWS-managed policy
 # 12) Attachment for 11). Here set the value of 
 #     the correct key to the AWS-managed policy 
 #     mentioned in 11) 
@@ -95,6 +95,132 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
                                                                    }
+
+
+# 13) CREATE THE CLOUDWATCH LOG GROUP
+# ===================================
+resource "aws_cloudwatch_log_group" "lambda_logs" {
+  name = "/aws/lambda/${var.lambda_name}"
+  retention_in_days = 14
+                                                  }
+
+
+# CREATE A METRIC FILTER FOR 
+# THE WORD 'ERROR' IN THE LOGS
+# ============================
+
+resource "aws_cloudwatch_log_metric_filter" "lambda_error_filter" {
+  name           = "${var.lambda_name}-error-count"
+  log_group_name = aws_cloudwatch_log_group.lambda_logs.name # log group name for the lambda
+
+  pattern = "\"ERROR\""  # match lines that contain the word ERROR
+
+  metric_transformation {
+    name      = "${var.lambda_name}-ErrorCount"
+    namespace = "TOTESYS"
+    value     = "1"  # each match increments the count by 1
+  }
+}
+
+
+# CREATE A CLOUDWATCH ALARM
+# =========================
+resource "aws_cloudwatch_metric_alarm" "lambda_error_alarm" {
+  alarm_name          = "${var.lambda_name}-error-alarm"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  period              = 300             # 300 seconds = 5 minutes
+  metric_name         = "${var.lambda_name}-ErrorCount"
+  namespace           = "TOTESYS"
+  statistic           = "Sum"
+  threshold           = 5
+  alarm_description   = "Triggered when 5 or more errors are logged by ${var.lambda_name} within 5 minutes"
+
+  # Use the passed-in SNS topic ARN here
+  alarm_actions       = [var.sns_topic_arn]
+  ok_actions          = [var.sns_topic_arn]  
+                                                          }
+
+
+
+
+# xx) SELECTIVELY PROVISION THE 
+# EVENTBRIDGE SCHEDULER AND ITS
+# ROLE/PERMISSION/ATTACHMENT
+# =============================
+
+# Only create resources if 
+# enable_schedule is true:
+
+# Cloudwatch event rule:
+resource "aws_cloudwatch_event_rule" "schedule" {
+  count              = var.enable_EvntBrdg_res ? 1 : 0
+  name               = "${var.lambda_name}-schedule"
+  schedule_expression = "rate(5 minutes)"
+}
+
+# Execution role for EventBridge
+resource "aws_iam_role" "eventbridge_invoke" {
+  count = var.enable_EvntBrdg_res ? 1 : 0
+  name  = "${var.lambda_name}-eventbridge-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = { Service = "events.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+# policy to allow EventBridge to invoke 
+# the first lambda function:
+resource "aws_iam_policy" "invoke_lambda_policy" {
+  count = var.enable_EvntBrdg_res ? 1 : 0
+  name  = "${var.lambda_name}-invoke-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "lambda:InvokeFunction"
+      Resource = aws_lambda_function.this.arn
+    }]
+  })
+}
+
+# Attach the policy above to the 
+# EventBridge execution role:
+resource "aws_iam_role_policy_attachment" "attach_policy" {
+  count      = var.enable_EvntBrdg_res ? 1 : 0
+  role       = aws_iam_role.eventbridge_invoke[0].name
+  policy_arn = aws_iam_policy.invoke_lambda_policy[0].arn
+}
+
+
+resource "aws_cloudwatch_event_target" "target" {
+  count     = var.enable_EvntBrdg_res ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.schedule[0].name
+  target_id = var.lambda_name
+  arn       = aws_lambda_function.this.arn
+  role_arn  = aws_iam_role.eventbridge_invoke[0].arn
+}
+
+# Permission to allowLambda function to 
+# be invoked from EventBridge scheduler:
+resource "aws_lambda_permission" "allow_eventbridge" {
+  count         = var.enable_EvntBrdg_res ? 1 : 0
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.this.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.schedule[0].arn
+}
+
+
+
+
 
 
 

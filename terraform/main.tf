@@ -23,9 +23,10 @@
 #    lambda or processed bucket and policy to 
 #    send events to load lambda).
 # 9) A CloudWatch Metric Filter that looks 
-#    for "RuntimeError" in the Lambda logs.
+#    for "Error" in the Lambda logs.
 #    A CloudWatch Alarm that fires if that 
-#    filter detects errors.
+#    filter detects some number of errors
+#    over some time period.
 # 10) An SNS Topic with an email subscription 
 #    so that the project sends alerts.
 # 11) asdasd asdasaasd asd asd sad sd
@@ -104,99 +105,6 @@ provider "aws" {
   region = "eu-west-2"
                }
 
-
-
-
-
-# THE LAMBDA PERMISSION TO LET
-# THE EXTRACT LAMBDA BE 
-# INVOKED BY EVENTBRIDGE 
-# SCHEDULER
-# =========================
-resource "aws_lambda_permission" "allow_EventBridge_Sched" {
-  statement_id  = "AllowExecutionFromEventBridgeScheduler"
-  action        = "lambda:InvokeFunction"
-  function_name = module.extract.lambda_to_trigger.function_name # from an output
-  principal     = "events.amazonaws.com"
-  source_arn    = "arn:aws:events:eu-west-1:111122223333:rule/RunDaily"
-  
-                                                            }
-
-
-
-
-# THE EVENTBRIDGE SCHEDULER
-# AND ASSOCIATED RESOURCES
-# =========================
-
-# Execution role for the scheduler:
-resource "aws_iam_role" "EventBridge_Sched_exec_role" {
-  name = "EvntBrdg_Sched-IAM-Exec-role"
-
-# Define the trust policy to allow 
-# the EventBridge Scheduler to 
-# assume this role:
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = { Service = "scheduler.amazonaws.com" },
-      Action    = "sts:AssumeRole"
-    }]
-  })
-                                      }
-
-
-
-
-# Policy to allow the scheduler
-# to invoke a lambda function:
-resource "aws_iam_policy" "EvntBrdg_invoke_lambda" {
-
-  name   = "invoke-extract-lambda-policy"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect   = "Allow",
-      Action   = ["lambda:InvokeFunction"], # 
-      # Resource = "arn:aws:lambda:eu-west-2:891377083893:function:module.extract.<from-output>"
-      Resource = "arn:aws:lambda:eu-west-2:891377083893:function:extract-lambda"
-                }]
-  })
-                                              }
-
-
-
-# Attachment for the policy above:
-resource "aws_iam_role_policy_attachment" "EvntBrdg_invoke_lambda_attach" {
-  role       = aws_iam_role.EventBridge_Sched_exec_role.name
-  policy_arn = aws_iam_policy.EvntBrdg_invoke_lambda.arn
-                                                                          }
-
-
-
-
-# The scheduler itself:
-resource "aws_scheduler_schedule" "extract-lambda-trigger" {
-  name       = "schedule"
-  group_name = "default"
-
-  flexible_time_window {
-    # Make the scheduler fire within
-    # 15 mins after the scheduled time.
-    # AWS says this "improves the
-    # reliability of your schedule".
-    maximum_window_in_minutes = "15"
-    mode                      = "FLEXIBLE"
-                       }
-
-  schedule_expression = "rate(1 hours)"
-
-  target {
-    arn      = module.extract.lambda_to_trigger.arn # arn of extract lambda -- from output
-    role_arn = aws_iam_role.EventBridge_Sched_exec_role.arn
-        } 
-                                                            }
 
 
 
@@ -290,8 +198,33 @@ resource "aws_lambda_layer_version" "shared-layer" {
                                                   }
 
 
+# CREATE AN SNS TOPIC AND 
+# EMAIL SUBSCRIPTION
+# =======================
+resource "aws_sns_topic" "lambda_error_topic" {
+  name = "lambda-error-alerts"
+                                              }
+
+resource "aws_sns_topic_subscription" "lambda_error_email" {
+  topic_arn = aws_sns_topic.lambda_error_topic.arn
+  protocol  = "email"
+  endpoint  = "mukund.panditman@googlemail.com" 
+                                                           }
 
 
+
+
+
+
+
+# ============================================================================
+# ============================================================================
+
+
+
+
+# CALLS OF THE MODULE
+# ===================
 
 
 # 8) in turn (via invocations of the module):
@@ -343,6 +276,7 @@ module "extract" {
   code_bucket_name                     = "totesys-code-bucket-m1x7qr0b"
   s3_key_for_zipped_lambda             = "zipped/first_lambda.zip"
   layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
+  enable_EvntBrdg_res                  = true
 
   # for lambda exec role policy 
   # that allows lambda to write
@@ -384,6 +318,9 @@ module "extract" {
   # triggered by the ingestion bucket:
   lambda_to_trigger = module.transform.lambda_to_trigger
 
+  # the sns topic:
+  sns_topic_arn = aws_sns_topic.lambda_error_topic.arn
+
                                         }
 
 
@@ -417,6 +354,7 @@ module "transform" {
   handler                              = "second_lambda_handler.second_lambda_handler"
   s3_key_for_zipped_lambda             = "zipped/second_lambda.zip"
   layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
+  enable_EvntBrdg_res                  = false
 
   # for lambda exec role policy 
   # that allows lambda to read
@@ -464,6 +402,9 @@ module "transform" {
   # triggered by the processed bucket:
   lambda_to_trigger = module.load.lambda_to_trigger
 
+  # the sns topic:
+  sns_topic_arn = aws_sns_topic.lambda_error_topic.arn
+
                                 }
 
 
@@ -491,8 +432,9 @@ module "load" {
   handler                              = "third_lambda_handler.third_lambda_handler"
   s3_key_for_zipped_lambda             = "zipped/third_lambda.zip"
   layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
+  enable_EvntBrdg_res                  = false
 
-  # No need to provision a cucket:
+  # No need to provision a bucket:
   should_make_ing_or_proc_bucket       = false
 
   # Not needed for this call 
@@ -530,5 +472,7 @@ module "load" {
   # no lambda to trigger:
   lambda_to_trigger = "not-needed"
 
+  # the sns topic:
+  sns_topic_arn = aws_sns_topic.lambda_error_topic.arn
 
                                 }

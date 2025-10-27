@@ -45,8 +45,23 @@ variable "lambda_to_trigger" {
                              }
 
 
+variable "sns_topic_arn" {
+  description = "the arn of the sns topic"
 
+}
 
+# Boolean var to allow selective 
+# provisioning of the EventBridge
+# scheduler and associated 
+# resources:
+variable "enable_EvntBrdg_res" {
+  type        = bool
+  default     = false
+  description = "Enable/disable EventBridge-related resources"
+  # Only provision the EventBridge 
+  # scheduler for the first lambda 
+  # function.
+}
 
 
 
