@@ -185,7 +185,7 @@ resource "aws_iam_policy" "invoke_lambda_policy" {
     Statement = [{
       Effect   = "Allow"
       Action   = "lambda:InvokeFunction"
-      Resource = aws_lambda_function.this.arn
+      Resource = aws_lambda_function.mod_lambda.arn
     }]
   })
 }
@@ -203,7 +203,7 @@ resource "aws_cloudwatch_event_target" "target" {
   count     = var.enable_EvntBrdg_res ? 1 : 0
   rule      = aws_cloudwatch_event_rule.schedule[0].name
   target_id = var.lambda_name
-  arn       = aws_lambda_function.this.arn
+  arn       = aws_lambda_function.mod_lambda.arn
   role_arn  = aws_iam_role.eventbridge_invoke[0].arn
 }
 
@@ -213,7 +213,7 @@ resource "aws_lambda_permission" "allow_eventbridge" {
   count         = var.enable_EvntBrdg_res ? 1 : 0
   statement_id  = "AllowExecutionFromEventBridge"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.this.function_name
+  function_name = aws_lambda_function.mod_lambda.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.schedule[0].arn
 }
