@@ -163,7 +163,10 @@ resource "aws_s3_object" "layer_zip" {
 resource "aws_s3_object" "first_lambda_zip" {
   bucket = "totesys-code-bucket-m1x7qr0b"
   key    = "zipped/first_lambda.zip"
-  source = "../zipped_files/first_lambda.zip" # must be relative to terraform dir
+  source = "../zipped_files/first_lambda.zip" # must be relative to 
+                                              # the directory that contains
+                                              # this file we are in, ie 
+                                              # directory terraform
                                             }
 
 # zipped handler for the second
@@ -347,7 +350,7 @@ module "transform" {
   # are default false
   source                               = "./lambda-IAMrole-s3-module"
 
-  # for first lambda function:
+  # for second lambda function:
   code_bucket_name                     = "totesys-code-bucket-m1x7qr0b"
   lambda_name                          = "transform-lambda"
   runtime                              = "python3.13"
@@ -373,7 +376,7 @@ module "transform" {
 
   # for processed bucket:
   # (STILL NEEDED?):
-  ing_or_proc_bucket_name              = "not-needed"
+  ing_or_proc_bucket_name              = "totesys-processed-bucket-h2z4ks9w"
 
   # conditional vars (value of a var 
   # not set here is false by default):
@@ -399,7 +402,10 @@ module "transform" {
 
 
   # The load lambda must be
-  # triggered by the processed bucket:
+  # triggered by the processed bucket
+  # (module.load.lambda_to_trigger means 
+  # the value of the output of the load 
+  # module):
   lambda_to_trigger = module.load.lambda_to_trigger
 
   # the sns topic:
@@ -425,7 +431,7 @@ module "load" {
   # default false
   source                               = "./lambda-IAMrole-s3-module"
 
-  # for first lambda function:
+  # for third lambda function:
   code_bucket_name                     = "totesys-code-bucket-m1x7qr0b"
   lambda_name                          = "load-lambda"
   runtime                              = "python3.13"
@@ -437,7 +443,7 @@ module "load" {
   # No need to provision a bucket:
   should_make_ing_or_proc_bucket       = false
 
-  # Not needed for this call 
+  # No needed for this call 
   # of the module but you 
   # still need to set it:
   name_of_write_to_bucket              = "not-needed"
@@ -460,6 +466,10 @@ module "load" {
   # previous invocation of the child module 
   # (ie the processed bucket)
   trigger_bucket_arn = module.transform.trigger_bucket_arn 
+
+
+  # No S3 bucket will trigger this module:
+  should_make_allow_s3_invoke_policy   = true
 
 
   # This invocation of the child module

@@ -40,7 +40,7 @@ variable "layer_version_arn" {
 
 
 variable "lambda_to_trigger" {
-      description = "the lambda function that must be triggered"
+      description = "the lambda function that must be triggered by a PUT operation in an S3 bucket"
       
                              }
 

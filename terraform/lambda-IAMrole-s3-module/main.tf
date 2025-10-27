@@ -232,7 +232,7 @@ resource "aws_lambda_permission" "allow_eventbridge" {
 resource "aws_iam_policy" "lambda_put_policy" {
   count = var.should_make_s3_put_obj_policy ? 1 : 0
 
-  name   = "${var.lambda_name}-policy"
+  name   = "${var.lambda_name}-write-S3-policy"
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
@@ -262,7 +262,7 @@ resource "aws_iam_role_policy_attachment" "lambda_put_attach" {
 resource "aws_iam_policy" "lambda_get_policy" {
   count = var.should_make_s3_get_obj_policy ? 1 : 0
 
-  name   = "${var.lambda_name}-policy"
+  name   = "${var.lambda_name}-read-S3-policy"
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
@@ -301,7 +301,7 @@ resource "aws_iam_role_policy_attachment" "lambda_get_attach" {
 # for this policy):
 # i)  The transform lambda needs
 #     this policy to let it be  
-#     triggered by write to the 
+#     triggered by writes to the 
 #     ingestion bucket.
 # ii) The load lambda needs
 #     this policy to let it be 

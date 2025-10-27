@@ -1,6 +1,6 @@
 
 from .handle_errors import handle_errors
-from pg8000.dbapi import (
+from pg8000.native import (
     DatabaseError,
     InterfaceError,
     TimeoutError    

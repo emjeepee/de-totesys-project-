@@ -47,9 +47,9 @@ output "trigger_bucket_arn" {
 # to be triggered (by an S3 
 # notification in the case of 
 # the transform and load lambdas 
-# and by the EventBridge 
+# ????and by the EventBridge 
 # Scheduler in the case of the 
-# extract lambda):
+# extract lambda????):
 output "lambda_to_trigger" {
   value = aws_lambda_function.mod_lambda
                             }
