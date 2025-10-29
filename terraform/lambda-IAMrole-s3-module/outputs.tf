@@ -53,5 +53,28 @@ output "trigger_bucket_arn" {
 output "lambda_to_trigger" {
   value = aws_lambda_function.mod_lambda
                             }
+# This is tricky!
+# Outputs allow one call of a module to 
+# refer to a resource in another call of
+# the same module.
+# In the call to the child module that 
+# creates the extract lambda, the ingestion 
+# bucket, etc you have to set the value 
+# of variable lambda_to_trigger to the 
+# transform lambda, which you provision 
+# in the second call to the child module.  
+# You do it with an output, like this:
+# lambda_to_trigger = module.transform.lambda_to_trigger,
+#                   ie module.<module call name>.<output name>,
+#                   which is how you  refer to outputs.
+# whose value will be 
+# aws_lambda_function.mod_lambda, where
+# 'mod_lambda' is the terraform name of
+# the lambda that you specify in the 
+# child module 'template' in these lines:
+# resource "aws_lambda_function" "mod_lambda" {
+#  function_name = var.lambda_name
+#  role          = aws_iam_role.lambda_exec.arn
+# etc
 
 

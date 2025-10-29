@@ -1,10 +1,4 @@
-
-from .handle_errors import handle_errors
-from pg8000.native import (
-    DatabaseError,
-    InterfaceError,
-    TimeoutError    
-                         )
+from pg8000.native import Error
 
 import logging
 
@@ -49,7 +43,7 @@ def get_updated_rows(conn_obj, after_time: str, table_name: str):
     """
     
 
-    err_Msg = "Error in function get_updated_rows()." \
+    err_msg = "Error in function get_updated_rows()." \
               "\nFailed to read ToteSys database" \
               "\nwhen trying to get a list of updated" \
               "\nrows for table {table_name}."
@@ -63,7 +57,8 @@ def get_updated_rows(conn_obj, after_time: str, table_name: str):
 
         return response
     
-    except (DatabaseError, InterfaceError, TimeoutError) as e:
-        handle_errors(e, logger, err_Msg)
+    except Error as e:
+        logger.error(err_msg)
+        raise RuntimeError
         
         

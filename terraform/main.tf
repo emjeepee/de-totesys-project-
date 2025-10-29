@@ -270,7 +270,7 @@ resource "aws_sns_topic_subscription" "lambda_error_email" {
 module "extract" {
  # vars that are not set here 
   # are false by default
-  source                               = "./lambda-IAMrole-s3-module/"
+  source                               = "./lambda-IAMrole-s3-module/"  # has to be a folder
 
   # for first lambda function:
   lambda_name                          = "extract-lambda"

@@ -126,7 +126,8 @@ resource "aws_cloudwatch_log_metric_filter" "lambda_error_filter" {
 # CREATE A CLOUDWATCH ALARM
 # =========================
 resource "aws_cloudwatch_metric_alarm" "lambda_error_alarm" {
-  alarm_name          = "${var.lambda_name}-error-alarm"
+  alarm_name          = "${var.lambda_name}-error-alarm" # This line ensures that a new CW metric alarm 
+                                                         # gets created each time the module is called!  
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 1
   period              = 300             # 300 seconds = 5 minutes
@@ -139,6 +140,15 @@ resource "aws_cloudwatch_metric_alarm" "lambda_error_alarm" {
   # Use the passed-in SNS topic ARN here
   alarm_actions       = [var.sns_topic_arn]
   ok_actions          = [var.sns_topic_arn]  
+
+# values of alarm_actions and ok_actions must be lists 
+# such as 
+# [var.sns_topic_arn] 
+# or
+#   alarm_actions = [
+#   var.sns_topic_arn,
+#   var.secondary_sns_topic_arn
+# ]
                                                           }
 
 
@@ -147,6 +157,9 @@ resource "aws_cloudwatch_metric_alarm" "lambda_error_alarm" {
 # xx) SELECTIVELY PROVISION THE 
 # EVENTBRIDGE SCHEDULER AND ITS
 # ROLE/PERMISSION/ATTACHMENT
+# NOTE: EventBridge and CloudWatch Events
+# are the same thing, the latter being 
+# the old name for EventBridge
 # =============================
 
 # Only create resources if 
@@ -157,9 +170,33 @@ resource "aws_cloudwatch_event_rule" "schedule" {
   count              = var.enable_EvntBrdg_res ? 1 : 0
   name               = "${var.lambda_name}-schedule"
   schedule_expression = "rate(5 minutes)"
-}
+                                                }
 
-# Execution role for EventBridge
+# Tell EventBridge what to trigger
+resource "aws_cloudwatch_event_target" "target" {
+  count     = var.enable_EvntBrdg_res ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.schedule[0].name
+  target_id = var.lambda_name
+  arn       = aws_lambda_function.mod_lambda.arn
+  role_arn  = aws_iam_role.eventbridge_invoke[0].arn
+                                                }
+
+
+# Permission to allow Lambda function to 
+# be invoked from EventBridge scheduler:
+resource "aws_lambda_permission" "allow_eventbridge" {
+  count         = var.enable_EvntBrdg_res ? 1 : 0
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.mod_lambda.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.schedule[0].arn
+                                                    }
+
+
+
+
+# Execution role that EventBridge can assume:
 resource "aws_iam_role" "eventbridge_invoke" {
   count = var.enable_EvntBrdg_res ? 1 : 0
   name  = "${var.lambda_name}-eventbridge-role"
@@ -172,10 +209,14 @@ resource "aws_iam_role" "eventbridge_invoke" {
       Action    = "sts:AssumeRole"
     }]
   })
-}
+                                            }
 
-# policy to allow EventBridge to invoke 
-# the first lambda function:
+
+
+
+# policy to allow the holder (which will be the 
+# EventBridge execution role) to invoke the 
+# first lambda function:
 resource "aws_iam_policy" "invoke_lambda_policy" {
   count = var.enable_EvntBrdg_res ? 1 : 0
   name  = "${var.lambda_name}-invoke-policy"
@@ -196,31 +237,20 @@ resource "aws_iam_role_policy_attachment" "attach_policy" {
   count      = var.enable_EvntBrdg_res ? 1 : 0
   role       = aws_iam_role.eventbridge_invoke[0].name
   policy_arn = aws_iam_policy.invoke_lambda_policy[0].arn
-}
-
-
-resource "aws_cloudwatch_event_target" "target" {
-  count     = var.enable_EvntBrdg_res ? 1 : 0
-  rule      = aws_cloudwatch_event_rule.schedule[0].name
-  target_id = var.lambda_name
-  arn       = aws_lambda_function.mod_lambda.arn
-  role_arn  = aws_iam_role.eventbridge_invoke[0].arn
-}
-
-# Permission to allowLambda function to 
-# be invoked from EventBridge scheduler:
-resource "aws_lambda_permission" "allow_eventbridge" {
-  count         = var.enable_EvntBrdg_res ? 1 : 0
-  statement_id  = "AllowExecutionFromEventBridge"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.mod_lambda.function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.schedule[0].arn
-}
+                                                           }
+# Remember that you have to use '[0]' in the two lines
+# above because code created the EventBridge execution 
+# role and the policy to attach to it using count, which 
+# makes a list of resources, even if you only create one,
+# ie aws_iam_role.eventbridge_invoke and 
+# aws_iam_policy.invoke_lambda_policy both refer to 
+# lists of resources (each list, in this case, containing
+# just one resource). 
 
 
 
 
+# ========================= ========================= =========================
 
 
 

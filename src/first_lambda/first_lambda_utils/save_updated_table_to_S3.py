@@ -45,4 +45,5 @@ def save_updated_table_to_S3(
         S3_client.put_object(Bucket=bucket, Key=new_key, Body=updated_table)
         logger.info("Function save_updated_table_to_S3() successfully\n wrote an updated table to the ingestion bucket")
     except BotoCoreError as e:
-        handle_errors(e, logger, err_msg)
+        logger.error(err_msg)
+        raise RuntimeError

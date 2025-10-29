@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timezone
 from botocore.exceptions import ClientError
 from .get_latest_table import get_latest_table
-from .handle_errors import handle_errors
+
 
 
 logger = logging.getLogger(__name__)

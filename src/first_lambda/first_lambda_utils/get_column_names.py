@@ -1,9 +1,5 @@
 
-from pg8000.native import (
-    DatabaseError,
-    InterfaceError,
-    TimeoutError    
-                         )
+from pg8000.native import Error
 
 import logging
 
@@ -54,9 +50,9 @@ def get_column_names(conn_obj, table_name: str):
     
         return response
     
-    except (DatabaseError, InterfaceError, TimeoutError):
+    except (Error):
         logger.info(err_Msg)
-        raise 
+        raise RuntimeError
         
     
 
