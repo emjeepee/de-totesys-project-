@@ -169,7 +169,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_error_alarm" {
 resource "aws_cloudwatch_event_rule" "schedule" {
   count              = var.enable_EvntBrdg_res ? 1 : 0
   name               = "${var.lambda_name}-schedule"
-  schedule_expression = "rate(5 minutes)"
+  schedule_expression = "rate(1000 days)"
                                                 }
 
 # Tell EventBridge what to trigger
