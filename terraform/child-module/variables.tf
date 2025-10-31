@@ -7,7 +7,8 @@ variable "lambda_name" {
       type        = string
                        }
 
-variable "code_bucket_name"  {
+
+variable "code_bucket"  {
       description = "AWS name of the code bucket"
       type        = string
                           }
@@ -15,12 +16,6 @@ variable "code_bucket_name"  {
 
 variable "s3_key_for_zipped_lambda"  {
       description = "key under which to store zipped lambda in code bucket"
-      type        = string
-                       }
-
-
-variable "runtime"  {
-      description = "version of Python"
       type        = string
                        }
 

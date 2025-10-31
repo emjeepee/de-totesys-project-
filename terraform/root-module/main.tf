@@ -115,8 +115,8 @@ provider "aws" {
 # THE CODE BUCKET 
 # ===============
 resource "aws_s3_bucket" "code_bucket" {
-  bucket = "totesys-code-bucket-m1x7qr0b"
-
+  # bucket = "totesys-code-bucket-m1x7qr0b"
+    bucket = var.code_bucket
                                        }
 
 # POLICY TO LET CODE BUCKET BE 
@@ -268,15 +268,20 @@ resource "aws_sns_topic_subscription" "lambda_error_email" {
 
 
 module "extract" {
- # vars that are not set here 
-  # are false by default
-  source                               = "./lambda-IAMrole-s3-module/"  # has to be a folder
+  # The following are common to all Lambdas, 
+  # hence are set in the child module file,
+  # not here:
+  # code_bucket                          = "totesys-code-bucket-m1x7qr0b"
+  # runtime                              = "python3.13"
 
+
+  # vars that are not set here 
+  # are false by default
+  source                               = "../child-module/"  # has to be a folder
+  code_bucket                          = var.code_bucket
   # for first lambda function:
   lambda_name                          = "extract-lambda"
-  runtime                              = "python3.13"
   handler                              = "first_lambda_handler.first_lambda_handler"
-  code_bucket_name                     = "totesys-code-bucket-m1x7qr0b"
   s3_key_for_zipped_lambda             = "zipped/first_lambda.zip"
   layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
   enable_EvntBrdg_res                  = true
@@ -346,18 +351,23 @@ module "extract" {
 
 
 module "transform" {
+  # The following are common to all Lambdas, 
+  # hence are set in the child module file,
+  # not here:
+  # runtime                              = "python3.13"
+
+
   # vars not set here 
   # are default false
   source                               = "./lambda-IAMrole-s3-module"
 
   # for second lambda function:
-  code_bucket_name                     = "totesys-code-bucket-m1x7qr0b"
   lambda_name                          = "transform-lambda"
-  runtime                              = "python3.13"
   handler                              = "second_lambda_handler.second_lambda_handler"
   s3_key_for_zipped_lambda             = "zipped/second_lambda.zip"
   layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
   enable_EvntBrdg_res                  = false
+  code_bucket                          = var.code_bucket
 
   # for lambda exec role policy 
   # that allows lambda to read
@@ -427,18 +437,19 @@ module "transform" {
 # 4) the attachment for 3)
 
 module "load" {
+
+
   # vars not set here are 
   # default false
   source                               = "./lambda-IAMrole-s3-module"
 
   # for third lambda function:
-  code_bucket_name                     = "totesys-code-bucket-m1x7qr0b"
   lambda_name                          = "load-lambda"
-  runtime                              = "python3.13"
   handler                              = "third_lambda_handler.third_lambda_handler"
   s3_key_for_zipped_lambda             = "zipped/third_lambda.zip"
   layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
   enable_EvntBrdg_res                  = false
+  code_bucket                          = var.code_bucket
 
   # No need to provision a bucket:
   should_make_ing_or_proc_bucket       = false

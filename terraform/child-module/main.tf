@@ -49,9 +49,9 @@
 resource "aws_lambda_function" "mod_lambda" {
   function_name = var.lambda_name
   role          = aws_iam_role.lambda_exec.arn
-  runtime       = var.runtime
+  runtime       = "python3.12"
   handler       = var.handler # format is <filename>.<function_name>
-  s3_bucket     = var.code_bucket_name # will be code bucket 
+  s3_bucket     = var.code_bucket # the bucket that holds the code
   s3_key        = var.s3_key_for_zipped_lambda # site of zipped code
 
 
@@ -393,29 +393,4 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
 
 
-
-# THE LOGGING AND ALARM SYSTEM
-# ============================
-# Provision:
-# 1) a CloudWatch Metric Filter that 
-# looks for "RuntimeError" in the 
-# Lambda logs.
-# 2) a CloudWatch Alarm that fires 
-# if that filter detects errors.
-# 3) an SNS Topic with an email 
-# subscription so that the project 
-# sends alerts.
-
-
-# # 3)
-# resource "aws_sns_topic" "error_alerts" {
-#   name = "lambda-runtime-errors"
-#                                         }
-
-# # Subscribe your email to the topic
-# resource "aws_sns_topic_subscription" "email_alert" {
-#   topic_arn = aws_sns_topic.error_alerts.arn
-#   protocol  = "email"
-#   endpoint  = "email@example.com" 
-#                                                     }
 

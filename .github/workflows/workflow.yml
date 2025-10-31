@@ -23,6 +23,7 @@ on:
   
 
 jobs:
+  # Run tests   
   run-tests:
     name: run-tests
     if: false
@@ -33,7 +34,7 @@ jobs:
         - name: Set Up Python
           uses: actions/setup-python@v5
           with:
-            python-version: '3.13'
+            python-version: '3.12'
         - name: Install make
           run: sudo apt install make -y
         - name: Install Application Requirements & Run Tests
