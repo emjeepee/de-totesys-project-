@@ -354,7 +354,7 @@ module "transform" {
 
   # vars not set here 
   # are default false
-  source                               = "./lambda-IAMrole-s3-module"
+  source                               = "../child-module/" # has to be a folder
 
   # for second lambda function:
   lambda_name                          = "transform-lambda"
@@ -436,7 +436,7 @@ module "load" {
 
   # vars not set here are 
   # default false
-  source                               = "./lambda-IAMrole-s3-module"
+  source                               = "../child-module/" # has to be a folder
 
   # for third lambda function:
   lambda_name                          = "load-lambda"
