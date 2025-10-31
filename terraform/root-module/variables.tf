@@ -13,11 +13,6 @@ description = "AWS Lambda service will have env var TF_VAR_AWS_CODE_BUCKET whose
       type        = string
                        }
 
-variable "AWS_STATE_BUCKET" {
-      description = "The AWS Lambda service will have env var TF_VAR_AWS_STATE_BUCKET whose value will be the value of this variable.  This holds the name of the state bucket"
-      type        = string
-                       }
-
                        
 variable "AWS_ALERT_EMAIL" {
       description = "The AWS Lambda service will have env var TF_VAR_AWS_ALERT_EMAIL whose value will be the value of this variable.  This holds the name of the email to which CloudWatch sends alerts"

@@ -84,21 +84,20 @@ terraform {
           }
                      }
 
-
-# Provision the S3 bucket that will
-# contain Terraform state file.backend 
-# (the 'a9fk3l2q' in the bucket name 
-# is a random 8-char substring to
-# ensure name is unique worldwide
-# within an AWS partition -- all 
-# buckets in this project are 
-# named this way):
-  backend "s3" {
-  # bucket = ""
-  bucket = var.AWS_STATE_BUCKET
-    key = "terraform/state.tfstate"
-    region = "eu-west-2"
-               }
+# I had previously provisioned the state
+# bucket here but you have to expose 
+# the name of the bucket here because
+# you can't use a 
+# env-var+terraform-variable for the 
+# value of key 'bucket' below (you 
+# would have to use the actual name of 
+# the bucket):
+  # backend "s3" {
+  # # bucket = ""
+  # bucket = var.AWS_STATE_BUCKET
+  #   key = "terraform/state.tfstate"
+  #   region = "eu-west-2"
+  #              }
          }
 
 
