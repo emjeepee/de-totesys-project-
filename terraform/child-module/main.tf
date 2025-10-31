@@ -65,8 +65,7 @@ resource "aws_lambda_function" "mod_lambda" {
      AWS_INGEST_BUCKET = var.AWS_INGEST_BUCKET
      AWS_PROCESS_BUCKET = var.AWS_PROCESS_BUCKET
      AWS_CODE_BUCKET = var.AWS_CODE_BUCKET
-     AWS_STATE_BUCKET = var.AWS_STATE_BUCKET
-
+     
      AWS_ALERT_EMAIL = var.AWS_ALERT_EMAIL
      
      AWS_TABLES_LIST = var.AWS_TABLES_LIST

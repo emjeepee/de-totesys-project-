@@ -153,36 +153,36 @@ resource "aws_s3_bucket_policy" "AWS_lambda_SERVICE_access" {
 
 # zipped layer file: 
 resource "aws_s3_object" "layer_zip" {
-  bucket = "totesys-code-bucket-m1x7qr0b" # name of the code bucket
+  bucket = var.AWS_CODE_BUCKET
   key    = "zipped/layer.zip"
-  source = "../zipped_files/layer.zip"
+  source = "../../zipped_files/layer.zip"
                                      }
 
 # zipped handler for the first
 # (extract) lambda: 
 resource "aws_s3_object" "first_lambda_zip" {
-  bucket = "totesys-code-bucket-m1x7qr0b"
+  bucket = var.AWS_CODE_BUCKET
   key    = "zipped/first_lambda.zip"
-  source = "../zipped_files/first_lambda.zip" # must be relative to 
+  source = "../../zipped_files/first_lambda.zip" # must be relative to 
                                               # the directory that contains
                                               # this file we are in, ie 
-                                              # directory terraform
+                                              # directory terraform/root-module
                                             }
 
 # zipped handler for the second
 # (transform) lambda: 
 resource "aws_s3_object" "second_lambda_zip" {
-  bucket = "totesys-code-bucket-m1x7qr0b"
+  bucket = var.AWS_CODE_BUCKET
   key    = "zipped/second_lambda.zip"
-  source = "../zipped_files/second_lambda.zip"  # must be relative to terraform dir
+  source = "../../zipped_files/second_lambda.zip"  # must be relative to terraform dir
                                               }
 
 # zipped handler for the third
 # (load) lambda: 
 resource "aws_s3_object" "third_lambda_zip" {
-  bucket = "totesys-code-bucket-m1x7qr0b"
+  bucket = var.AWS_CODE_BUCKET
   key    = "zipped/third_lambda.zip"
-  source = "../zipped_files/third_lambda.zip"  # must be relative to terraform dir
+  source = "../../zipped_files/third_lambda.zip"  # must be relative to terraform dir
                                             }
 
 
@@ -254,20 +254,29 @@ resource "aws_sns_topic_subscription" "lambda_error_email" {
 # 4) the attachment for the policy
 # 5) an s3 bucket (ingestion)
 
-# VARS TO SRET:
-# lambda_name
-# runtime
-# handler
-# code_bucket_name
-# s3_key_for_zipped_lambda
-# should_make_s3_put_obj_policy
-# name_of_write_to_bucket
-# should_make_ing_or_proc_bucket
-# ing_or_proc_bucket_name
-# 
+
 
 
 module "extract" {
+
+
+TOTE_SYS_DB_HOST = var.TOTE_SYS_DB_HOST
+TOTE_SYS_DB_USER = var.TOTE_SYS_DB_USER
+TOTE_SYS_DB_PASSWORD = var.TOTE_SYS_DB_PASSWORD
+TOTE_SYS_DB_DB = var.TOTE_SYS_DB_DB
+TOTE_SYS_DB_PORT = var.TOTE_SYS_DB_PORT
+WAREHOUSE_DB_USER = var.WAREHOUSE_DB_USER
+WAREHOUSE_DB_PASSWORD = var.WAREHOUSE_DB_PASSWORD
+WAREHOUSE_DB_DB = var.WAREHOUSE_DB_DB
+WAREHOUSE_DB_PORT = var.WAREHOUSE_DB_PORT
+WAREHOUSE_DB_HOST = var.WAREHOUSE_DB_HOST
+AWS_INGEST_BUCKET = var.AWS_INGEST_BUCKET
+AWS_PROCESS_BUCKET = var.AWS_PROCESS_BUCKET
+AWS_ALERT_EMAIL = var.AWS_ALERT_EMAIL
+AWS_CODE_BUCKET = var.AWS_CODE_BUCKET
+AWS_TABLES_LIST = var.AWS_TABLES_LIST
+
+
 
 
   # vars that are not set here 
@@ -345,11 +354,22 @@ module "extract" {
 
 
 module "transform" {
-  # The following are common to all Lambdas, 
-  # hence are set in the child module file,
-  # not here:
-  # runtime                              = "python3.13"
 
+TOTE_SYS_DB_HOST = var.TOTE_SYS_DB_HOST
+TOTE_SYS_DB_USER = var.TOTE_SYS_DB_USER
+TOTE_SYS_DB_PASSWORD = var.TOTE_SYS_DB_PASSWORD
+TOTE_SYS_DB_DB = var.TOTE_SYS_DB_DB
+TOTE_SYS_DB_PORT = var.TOTE_SYS_DB_PORT
+WAREHOUSE_DB_USER = var.WAREHOUSE_DB_USER
+WAREHOUSE_DB_PASSWORD = var.WAREHOUSE_DB_PASSWORD
+WAREHOUSE_DB_DB = var.WAREHOUSE_DB_DB
+WAREHOUSE_DB_PORT = var.WAREHOUSE_DB_PORT
+WAREHOUSE_DB_HOST = var.WAREHOUSE_DB_HOST
+AWS_INGEST_BUCKET = var.AWS_INGEST_BUCKET
+AWS_PROCESS_BUCKET = var.AWS_PROCESS_BUCKET
+AWS_ALERT_EMAIL = var.AWS_ALERT_EMAIL
+AWS_CODE_BUCKET = var.AWS_CODE_BUCKET
+AWS_TABLES_LIST = var.AWS_TABLES_LIST
 
   # vars not set here 
   # are default false
@@ -432,6 +452,22 @@ module "transform" {
 
 module "load" {
 
+TOTE_SYS_DB_HOST = var.TOTE_SYS_DB_HOST
+TOTE_SYS_DB_USER = var.TOTE_SYS_DB_USER
+TOTE_SYS_DB_PASSWORD = var.TOTE_SYS_DB_PASSWORD
+TOTE_SYS_DB_DB = var.TOTE_SYS_DB_DB
+TOTE_SYS_DB_PORT = var.TOTE_SYS_DB_PORT
+WAREHOUSE_DB_USER = var.WAREHOUSE_DB_USER
+WAREHOUSE_DB_PASSWORD = var.WAREHOUSE_DB_PASSWORD
+WAREHOUSE_DB_DB = var.WAREHOUSE_DB_DB
+WAREHOUSE_DB_PORT = var.WAREHOUSE_DB_PORT
+WAREHOUSE_DB_HOST = var.WAREHOUSE_DB_HOST
+AWS_INGEST_BUCKET = var.AWS_INGEST_BUCKET
+AWS_PROCESS_BUCKET = var.AWS_PROCESS_BUCKET
+AWS_ALERT_EMAIL = var.AWS_ALERT_EMAIL
+AWS_CODE_BUCKET = var.AWS_CODE_BUCKET
+AWS_TABLES_LIST = var.AWS_TABLES_LIST
+
 
   # vars not set here are 
   # default false
@@ -443,8 +479,7 @@ module "load" {
   s3_key_for_zipped_lambda             = "zipped/third_lambda.zip"
   layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
   enable_EvntBrdg_res                  = false
-  code_bucket                          = var.AWS_CODE_BUCKET
-
+  
   # No need to provision a bucket:
   should_make_ing_or_proc_bucket       = false
 
