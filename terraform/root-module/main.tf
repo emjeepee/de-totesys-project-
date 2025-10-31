@@ -269,17 +269,11 @@ resource "aws_sns_topic_subscription" "lambda_error_email" {
 
 
 module "extract" {
-  # The following are common to all Lambdas, 
-  # hence are set in the child module file,
-  # not here:
-  # code_bucket                          = "totesys-code-bucket-m1x7qr0b"
-  # runtime                              = "python3.13"
 
 
   # vars that are not set here 
   # are false by default
   source                               = "../child-module/"  # has to be a folder
-  code_bucket                          = var.AWS_CODE_BUCKET
   # for first lambda function:
   lambda_name                          = "extract-lambda"
   handler                              = "first_lambda_handler.first_lambda_handler"
@@ -368,7 +362,7 @@ module "transform" {
   s3_key_for_zipped_lambda             = "zipped/second_lambda.zip"
   layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
   enable_EvntBrdg_res                  = false
-  code_bucket                          = var.AWS_CODE_BUCKET
+  # code_bucket                          = var.AWS_CODE_BUCKET
 
   # for lambda exec role policy 
   # that allows lambda to read

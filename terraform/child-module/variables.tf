@@ -1,7 +1,3 @@
-# input variables for 
-# lambda functions:
-# ===================
-
 variable "AWS_INGEST_BUCKET" {
       description = "The AWS Lambda service will have env var TF_VAR_AWS_INGEST_BUCKET whose value will be the value of this variable.  This holds the name of the ingestion bucket"
       type        = string
