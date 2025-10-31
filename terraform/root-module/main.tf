@@ -94,7 +94,8 @@ terraform {
 # buckets in this project are 
 # named this way):
   backend "s3" {
-  bucket = "totesys-state-bucket-a9fk3l2q"
+  # bucket = ""
+  bucket = var.AWS_STATE_BUCKET
     key = "terraform/state.tfstate"
     region = "eu-west-2"
                }
@@ -116,7 +117,7 @@ provider "aws" {
 # ===============
 resource "aws_s3_bucket" "code_bucket" {
   # bucket = "totesys-code-bucket-m1x7qr0b"
-    bucket = var.code_bucket
+    bucket = var.AWS_CODE_BUCKET
                                        }
 
 # POLICY TO LET CODE BUCKET BE 
@@ -195,7 +196,7 @@ resource "aws_s3_object" "third_lambda_zip" {
 # =============================
 resource "aws_lambda_layer_version" "shared-layer" {
   layer_name          = "layer-shared-by_all_lambdas"
-  s3_bucket           = "totesys-code-bucket-m1x7qr0b"
+  s3_bucket           = var.AWS_CODE_BUCKET
   s3_key              = aws_s3_object.layer_zip.key
   compatible_runtimes = ["python3.13"]
                                                   }
@@ -211,7 +212,7 @@ resource "aws_sns_topic" "lambda_error_topic" {
 resource "aws_sns_topic_subscription" "lambda_error_email" {
   topic_arn = aws_sns_topic.lambda_error_topic.arn
   protocol  = "email"
-  endpoint  = "mukund.panditman@googlemail.com" 
+  endpoint  = var.AWS_ALERT_EMAIL
                                                            }
 
 
@@ -278,7 +279,7 @@ module "extract" {
   # vars that are not set here 
   # are false by default
   source                               = "../child-module/"  # has to be a folder
-  code_bucket                          = var.code_bucket
+  code_bucket                          = var.AWS_CODE_BUCKET
   # for first lambda function:
   lambda_name                          = "extract-lambda"
   handler                              = "first_lambda_handler.first_lambda_handler"
@@ -289,11 +290,11 @@ module "extract" {
   # for lambda exec role policy 
   # that allows lambda to write
   # to ingestion bucket:
-  name_of_write_to_bucket              = "totesys-ingestion-bucket-t8vl5n6p"
+  name_of_write_to_bucket              = var.AWS_INGEST_BUCKET
 
 
   # for ingestion bucket:
-  ing_or_proc_bucket_name              = "totesys-ingestion-bucket-t8vl5n6p"
+  ing_or_proc_bucket_name              = var.AWS_INGEST_BUCKET
 
   # conditional vars:
   should_make_ing_or_proc_bucket       = true
@@ -367,26 +368,26 @@ module "transform" {
   s3_key_for_zipped_lambda             = "zipped/second_lambda.zip"
   layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
   enable_EvntBrdg_res                  = false
-  code_bucket                          = var.code_bucket
+  code_bucket                          = var.AWS_CODE_BUCKET
 
   # for lambda exec role policy 
   # that allows lambda to read
   # from ingestion bucket
   # (module.<MODULE-NAME>.<OUTPUT-NAME>
-  # will have value 
-  # "totesys-ingestion-bucket-t8vl5n6p"):
-  name_of_read_from_bucket             = module.extract.name_of_bckt_that_triggers_next_lambda # an output
+  name_of_read_from_bucket             = var.AWS_INGEST_BUCKET
+  # previously I used this:
+  # name_of_read_from_bucket             = module.extract.name_of_bckt_that_triggers_next_lambda # an output
 
 
   # for lambda exec role policy 
   # that allows lambda to read
   # from ingestion bucket:
-  name_of_write_to_bucket             = "totesys-processed-bucket-h2z4ks9w"
+  name_of_write_to_bucket             = var.AWS_PROCESS_BUCKET
 
 
   # for processed bucket:
   # (STILL NEEDED?):
-  ing_or_proc_bucket_name              = "totesys-processed-bucket-h2z4ks9w"
+  ing_or_proc_bucket_name              = var.AWS_PROCESS_BUCKET
 
   # conditional vars (value of a var 
   # not set here is false by default):
@@ -449,7 +450,7 @@ module "load" {
   s3_key_for_zipped_lambda             = "zipped/third_lambda.zip"
   layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
   enable_EvntBrdg_res                  = false
-  code_bucket                          = var.code_bucket
+  code_bucket                          = var.AWS_CODE_BUCKET
 
   # No need to provision a bucket:
   should_make_ing_or_proc_bucket       = false
@@ -462,7 +463,10 @@ module "load" {
   # for lambda exec role policy 
   # that allows lambda to read
   # from processed bucket:
-  name_of_read_from_bucket             = module.transform.name_of_bckt_that_triggers_next_lambda
+
+  name_of_read_from_bucket            =  var.AWS_PROCESS_BUCKET
+  # previously I had this:
+  # name_of_read_from_bucket             = module.transform.name_of_bckt_that_triggers_next_lambda
 
   # for processed bucket.
   # not needed:
