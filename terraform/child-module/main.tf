@@ -387,7 +387,6 @@ resource "aws_s3_bucket" "mod-ing-or-proc-buck" {
                                     }
 
 
-
 # 8 i) Provision the notification 
 # by the ingestion/processed 
 # bucket to the transform/load
