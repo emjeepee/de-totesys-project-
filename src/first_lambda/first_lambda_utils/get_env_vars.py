@@ -34,10 +34,10 @@ def get_env_vars():
     tables_list_string = os.environ['AWS_TABLES_LIST'] # 'design, sales_order, ...etc'
     tables_list = [item.strip() for item in tables_list_string.split(",")]
 
-    lookup['tables'] = tables_list                             # names of all tables of interest (a list): [<table_name_string>, <table_name_string>, ... etc  ]
+    lookup['tables'] = tables_list # names of all tables of interest (a list): [<table_name_string>, <table_name_string>, ... etc  ]
     lookup['s3_client'] = boto3.client("s3")
     lookup['bucket_name'] = os.environ['AWS_INGEST_BUCKET']     # Name of ingestion S3 bucket, a string  
-    lookup['conn'] = conn_to_db(os.environ['AWS_OLTP_NAME'])    # A string
+    lookup['conn'] = conn_to_db(os.environ['OLTP_NAME'])    # A string
     lookup['close_db'] = close_db 
 
 

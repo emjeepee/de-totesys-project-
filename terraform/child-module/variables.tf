@@ -1,3 +1,13 @@
+variable "OLTP_NAME" {
+      description = "Holds the name of the oltp database"
+      type        = string
+                }
+
+variable "WAREHOUSE_NAME" {
+      description = "Holds the name of the warehouse"
+      type        = string
+                }
+
 variable "AWS_INGEST_BUCKET" {
       description = "The AWS Lambda service will have env var AWS_INGEST_BUCKET whose value will be the value of this variable.  This holds the name of the ingestion bucket"
       type        = string
@@ -35,7 +45,7 @@ variable "TOTE_SYS_DB_PASSWORD" {
                        }
 
 variable "TOTE_SYS_DB_DB" {
-      description = "The AWS Lambda service will have env var TOTE_SYS_DB_DB whose value will be the value of this variable. This holds the database of the ToteSys database"
+      description = "The AWS Lambda service will have env var TOTE_SYS_DB_DB whose value will be the value of this variable. This holds the name of the OLTP database (ToteSys database)"
       type        = string
                        }
 

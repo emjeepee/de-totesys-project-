@@ -1,3 +1,13 @@
+variable "OLTP_NAME" {
+      description = "Holds the name of the oltp database"
+      type        = string
+                }
+
+variable "WAREHOUSE_NAME" {
+      description = "Holds the name of the warehouse"
+      type        = string
+                }
+                
 variable "AWS_INGEST_BUCKET" {
       description = "The AWS Lambda service will have env var AWS_INGEST_BUCKET whose value will be the value of this variable.  This holds the name of the ingestion bucket"
       type        = string

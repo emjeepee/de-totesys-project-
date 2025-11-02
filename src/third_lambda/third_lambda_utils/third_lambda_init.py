@@ -1,4 +1,4 @@
-
+import os
 
 
 
@@ -76,7 +76,7 @@ def third_lambda_init(event, conn_to_db, close_db, s3_client):
         'object_key': object_key,                                   # key for Parquet file in processed bucket 
         'proc_bucket': event["Records"][0]["s3"]["bucket"]["name"], # name of processed bucket
         'table_name': object_key.split("/")[0],                     # name of Parquet file in processed bucket
-        'conn': conn_to_db('WAREHOUSE'),                            # pg8000.native Connection object
+        'conn': conn_to_db(os.environ('WAREHOUSE_NAME')),                            # pg8000.native Connection object
         'close_db': close_db                                        # function to close connection to warehouse
              }
 

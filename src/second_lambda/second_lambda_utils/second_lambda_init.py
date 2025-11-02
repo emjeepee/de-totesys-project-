@@ -1,3 +1,4 @@
+import os
 
 
 def second_lambda_init(event, s3_client, dt_now, dt_start, num_rows):
@@ -77,7 +78,7 @@ def second_lambda_init(event, s3_client, dt_now, dt_start, num_rows):
         'timestamp_string' : dt_now.strftime("%Y-%m-%d_%H-%M-%S"), # string of format "2025-08-14_12-33-27"
         'ingestion_bucket': event["Records"][0]["s3"]["bucket"]["name"], # name of ingestion bucket   
         'object_key': object_key, # # key for object in ingestion bucket, eg sales_order/2025-06-04_09-21-32.json
-        'proc_bucket': "11-processed-bucket", # name of processed bucket:
+        'proc_bucket': os.environ['AWS_PROCESS_BUCKET'], # name of processed bucket:
         'table_name': object_key.split("/")[0], # name of table, eg 'sales_order'
         'start_date': dt_start, # datetime object for 1 Jan 2024 (includes time info for midnight)
         'num_rows' : num_rows # a datetime object for 1 Jan 2024

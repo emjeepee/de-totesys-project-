@@ -53,6 +53,7 @@ resource "aws_lambda_function" "mod_lambda" {
   handler       = var.handler # format is <filename>.<function_name>
   s3_bucket     = var.AWS_CODE_BUCKET # the bucket that holds the code
   s3_key        = var.s3_key_for_zipped_lambda # site of zipped code
+  timeout       = 30  # give the Lambda function this time in seconds to run (AWS default is 3)
 
 
   layers = [
@@ -62,25 +63,42 @@ resource "aws_lambda_function" "mod_lambda" {
 
   environment {
     variables = {
-     AWS_INGEST_BUCKET = var.AWS_INGEST_BUCKET
-     AWS_PROCESS_BUCKET = var.AWS_PROCESS_BUCKET
-     AWS_CODE_BUCKET = var.AWS_CODE_BUCKET
-     
-     AWS_ALERT_EMAIL = var.AWS_ALERT_EMAIL
-     
-     AWS_TABLES_LIST = var.AWS_TABLES_LIST
-     
-     TOTE_SYS_DB_USER = var.TOTE_SYS_DB_USER
-     TOTE_SYS_DB_PASSWORD = var.TOTE_SYS_DB_PASSWORD
-     TOTE_SYS_DB_DB = var.TOTE_SYS_DB_DB
-     TOTE_SYS_DB_PORT = var.TOTE_SYS_DB_PORT
-     TOTE_SYS_DB_HOST = var.TOTE_SYS_DB_HOST
-     
-     WAREHOUSE_DB_USER = var.WAREHOUSE_DB_USER
-     WAREHOUSE_DB_PASSWORD = var.WAREHOUSE_DB_PASSWORD
-     WAREHOUSE_DB_DB = var.WAREHOUSE_DB_DB
-     WAREHOUSE_DB_PORT = var.WAREHOUSE_DB_PORT
-     WAREHOUSE_DB_HOST = var.WAREHOUSE_DB_HOST
+    # The S3 bucket names:  
+    AWS_INGEST_BUCKET  = var.AWS_INGEST_BUCKET # used in get_env_vars() 
+    AWS_PROCESS_BUCKET = var.AWS_PROCESS_BUCKET # used in second_lambda_init() 
+    AWS_CODE_BUCKET    = var.AWS_CODE_BUCKET # used above
+
+    # The alert email:
+    AWS_ALERT_EMAIL = var.AWS_ALERT_EMAIL
+    
+    # The list of tables:
+    AWS_TABLES_LIST = var.AWS_TABLES_LIST
+
+    # The info that pg.8000.native needs
+    # to connect ot the OLTP database
+    # (used by conn_to_db()): 
+    TOTE_SYS_DB_DB       = var.TOTE_SYS_DB_DB
+    TOTE_SYS_DB_HOST     = var.TOTE_SYS_DB_HOST
+    TOTE_SYS_DB_PASSWORD = var.TOTE_SYS_DB_PASSWORD
+    TOTE_SYS_DB_PORT     = var.TOTE_SYS_DB_PORT
+    TOTE_SYS_DB_USER     = var.TOTE_SYS_DB_USER    
+    
+    # The info that pg.8000.native needs
+    # to connect to the dta warehouse
+    # (used by conn_to_db()):
+    WAREHOUSE_DB_DB       = var.WAREHOUSE_DB_DB
+    WAREHOUSE_DB_HOST     = var.WAREHOUSE_DB_HOST
+    WAREHOUSE_DB_PASSWORD = var.WAREHOUSE_DB_PASSWORD
+    WAREHOUSE_DB_PORT     = var.WAREHOUSE_DB_PORT
+    WAREHOUSE_DB_USER     = var.WAREHOUSE_DB_USER
+
+    # More info that pg.8000.native needs
+    # to connect to the dta warehouse
+    # (each used in different calls to 
+    # by conn_to_db()):
+    OLTP_NAME                  = var.OLTP_NAME
+    WAREHOUSE_NAME             = var.WAREHOUSE_NAME
+
                 }
               }
                                             }

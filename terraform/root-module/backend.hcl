@@ -4,6 +4,6 @@
 # installed VS Code extension 
 # HashiCorp Terraform.
 
-bucket         = env("TF_STATE_BUCKET")
+bucket         = env("AWS_STATE_BUCKET")
 key            = "terraform/state.tfstate"
 region         = "eu-west-2"
