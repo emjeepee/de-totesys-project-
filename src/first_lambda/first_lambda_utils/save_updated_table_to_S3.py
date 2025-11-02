@@ -2,7 +2,7 @@ import boto3
 import logging
 
 from botocore.exceptions import BotoCoreError
-from .handle_errors import handle_errors
+
 
 
 
