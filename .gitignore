@@ -12,7 +12,6 @@ temp/
 **/*pycache
 *coverage*
 venv/
-*.zip
 **/.terraform*
 *.tfstate*
 *.tfstate.backup
