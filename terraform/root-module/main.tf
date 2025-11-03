@@ -151,7 +151,8 @@ resource "aws_s3_bucket_policy" "AWS_lambda_SERVICE_access" {
 # HANDLERS INTO THE CODE BUCKET
 #===============================
 
-# zipped layer file: 
+# Put the zipped layer file
+# in the code bucket: 
 resource "aws_s3_object" "layer_zip" {
   bucket = var.AWS_CODE_BUCKET
   key    = "zipped/layer.zip"
@@ -197,7 +198,7 @@ resource "aws_lambda_layer_version" "shared-layer" {
   layer_name          = "layer-shared-by_all_lambdas"
   s3_bucket           = var.AWS_CODE_BUCKET
   s3_key              = aws_s3_object.layer_zip.key
-  compatible_runtimes = ["python3.13"]
+  compatible_runtimes = ["python3.12"]
                                                   }
 
 

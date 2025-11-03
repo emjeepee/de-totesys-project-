@@ -1,5 +1,4 @@
 import pandas as pd
-import pyarrow
 import logging
 
 from io import BytesIO

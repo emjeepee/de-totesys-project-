@@ -1,4 +1,3 @@
-# What needs to be provisioned:
 
 # IN THE MODULE (ie here):
 # 1) A lambda function DONE

@@ -45,8 +45,8 @@ fork this GitHub repository: https://github.com/emjeepee/de-totesys-project- and
 
  - CI/CD: GitHub Actions
  - Code: Python 3.13
- - Python modules pg8000.native, pandas, pyarrow, io, botocore, datetime, os, logging, json, dotenv, currency_codes and decimal
- - Testing: Python modules Pytest, coverage, unittest and moto 
+ - Python libraries pg8000, pg8000.native, pandas, pyarrow, io, botocore, datetime, os, logging, json, dotenv, currency_codes, calendar and decimal
+ - Testing: Python libraries Pytest, coverage, unittest and moto 
  - Provisioning of cloud services: Terraform
  - AWS cloud services: S3, Lambda, EventBridge and CloudWatch
  <br><br><br>
