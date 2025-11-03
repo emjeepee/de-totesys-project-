@@ -39,31 +39,9 @@
 
 
 
-
-
-
-
-
-# 1) A LAMBDA FUNCTION
-# ====================
-resource "aws_lambda_function" "mod_lambda" {
-  function_name = var.lambda_name
-  role          = aws_iam_role.lambda_exec.arn
-  runtime       = "python3.12"
-  handler       = var.handler # format is <filename>.<function_name>
-  s3_bucket     = var.AWS_CODE_BUCKET # the bucket that holds the code
-  s3_key        = var.s3_key_for_zipped_lambda # site of zipped code
-  timeout       = 30  # give the Lambda function this time in seconds to run (AWS default is 3)
-
-
-  layers = [
-    var.layer_version_arn
-    # aws_lambda_layer_version.shared-layer.arn
-           ]
-
-  environment {
-    variables = {
-    # The S3 bucket names:  
+locals {
+  common_env_vars = {
+        # The S3 bucket names:  
     AWS_INGEST_BUCKET  = var.AWS_INGEST_BUCKET # used in get_env_vars() 
     AWS_PROCESS_BUCKET = var.AWS_PROCESS_BUCKET # used in second_lambda_init() 
     AWS_CODE_BUCKET    = var.AWS_CODE_BUCKET # used above
@@ -98,18 +76,55 @@ resource "aws_lambda_function" "mod_lambda" {
     # by conn_to_db()):
     OLTP_NAME                  = var.OLTP_NAME
     WAREHOUSE_NAME             = var.WAREHOUSE_NAME
+      }
 
-                }
+# The first call of the child module will 
+# set Terraform variable stage to 
+# "extract", the second to "transform" 
+# and the third to "load". This allows
+# the conditional setting of the lambda 
+# execution role permissions Statement
+# values:
+  is_extract   = var.stage == "extract" 
+  is_transform = var.stage == "transform"
+  is_load      = var.stage == "load"
+                              }
+
+
+
+
+
+# 1) A LAMBDA FUNCTION
+# ====================
+resource "aws_lambda_function" "mod_lambda" {
+  function_name = var.lambda_name
+  role          = aws_iam_role.lambda_exec.arn
+  runtime       = "python3.12"
+  handler       = var.handler # format is <filename>.<function_name>
+  s3_bucket     = var.AWS_CODE_BUCKET # the bucket that holds the code
+  s3_key        = var.s3_key_for_zipped_lambda # site of zipped code
+  timeout       = 30  # give the Lambda function this time in seconds to run (AWS default is 3)
+
+
+  layers = [
+    var.layer_version_arn
+    # aws_lambda_layer_version.shared-layer.arn
+           ]
+
+  environment {
+    variables = local.common_env_vars
               }
                                             }
 
 
 # 2) IAM EXECUTION ROLE OF LAMBDA
 # ===============================
-# NOTE: "lambda_exec" below cannot
-# be dynamic, ie you cannot include 
-# a variable value in that string!! 
-# Instead use count or for each):
+# NOTE: where you have "lambda_exec" 
+# below you cannot include a 
+# variable value – use count or 
+# for each instead. The policy 
+# included in this resource lets
+# AWS Lambda assume the role:
 resource "aws_iam_role" "lambda_exec" {
   name = "${var.lambda_name}-IAM-role"
 
@@ -129,10 +144,104 @@ resource "aws_iam_role" "lambda_exec" {
 
 
 # 11) and 12)
+# The policy listed as the value of attribute 
+# policy_arn only grants CloudWatch logging 
+# permissions.
 resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
                                                                    }
+
+
+# Policy to attach to the Lambda 
+# execution role to let the Lambda 
+# function list objects, get 
+# objects and put objects into the 
+# ingestion bucket:
+resource "aws_iam_policy" "lambda_s3_access" {
+  name = "${var.lambda_name}-s3-access-policy"
+  description = "Allows Lambdas to list, get and put objects in ingestion/processed bucket. The permissions are set here conditionally depending on which Lambda function is being provisioned"
+
+policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = concat(
+      # give extract Lambda permission to 
+      # list, get and put objects in
+      # ingestion bucket:
+      local.is_extract ? [
+        {
+          Effect   = "Allow"
+          Action   = ["s3:ListBucket"]
+          Resource = "arn:aws:s3:::${var.AWS_INGEST_BUCKET}"
+        },
+        {
+          Effect   = "Allow"
+          Action   = ["s3:GetObject", "s3:PutObject"]
+          Resource = "arn:aws:s3:::${var.AWS_INGEST_BUCKET}/*"
+        }
+      ] : [],
+
+      # give transform Lambda permission to 
+      # list and get objects in ingestion 
+      # bucket and to list and put objects
+      # into processed bucket:
+      local.is_transform ? [
+        {
+          Effect   = "Allow"
+          Action   = ["s3:ListBucket"]
+          Resource = "arn:aws:s3:::${var.AWS_INGEST_BUCKET}"
+        },
+        {
+          Effect   = "Allow"
+          Action   = ["s3:GetObject"]
+          Resource = "arn:aws:s3:::${var.AWS_INGEST_BUCKET}/*"
+        },
+       {
+          Effect   = "Allow"
+          Action   = ["s3:ListBucket"]
+          Resource = "arn:aws:s3:::${var.AWS_PROCESS_BUCKET}"
+        },
+        {
+          Effect   = "Allow"
+          Action   = ["s3:PutObject"]
+          Resource = "arn:aws:s3:::${var.AWS_PROCESS_BUCKET}/*"
+        }
+      ] : [],
+
+      # give load Lambda permission
+      # to list and get objects in
+      # processed bucket:
+      local.is_load ? [
+        {
+          Effect   = "Allow"
+          Action   = ["s3:ListBucket"]
+          Resource = "arn:aws:s3:::${var.AWS_PROCESS_BUCKET}"
+        },
+        {
+          Effect   = "Allow"
+          Action   = ["s3:GetObject"]
+          Resource = "arn:aws:s3:::${var.AWS_PROCESS_BUCKET}/*"
+        }
+      ] : []
+    )
+  })
+}
+
+# Attach the policy that lets the three Lambdas 
+# access the ingestion and processed buckets to
+# the Lambda execution role: 
+resource "aws_iam_role_policy_attachment" "attach_lambda_s3_access" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.lambda_s3_access.arn
+}
+
+
+
+
+
+
+
+
 
 
 # 13) CREATE THE CLOUDWATCH LOG GROUP

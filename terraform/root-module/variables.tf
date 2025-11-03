@@ -1,3 +1,9 @@
+variable "stage" {
+  description = "stage of the pipeline. will be either extract, transform or load."
+  type        = string
+}
+
+
 variable "OLTP_NAME" {
       description = "Holds the name of the oltp database"
       type        = string

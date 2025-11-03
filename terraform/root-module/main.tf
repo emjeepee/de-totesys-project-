@@ -280,7 +280,11 @@ module "extract" {
   OLTP_NAME                  = var.OLTP_NAME
   WAREHOUSE_NAME             = var.WAREHOUSE_NAME
 
-
+  # conditionally used to set the 
+  # permissions for the Lambdas to 
+  # access the ingestion/processed 
+  # bucket:
+  stage = "extract" 
 
   # vars that are not set here 
   # are false by default
@@ -381,6 +385,11 @@ module "transform" {
   OLTP_NAME                  = var.OLTP_NAME
   WAREHOUSE_NAME             = var.WAREHOUSE_NAME
 
+  # conditionally used to set the 
+  # permissions for the Lambdas to 
+  # access the ingestion/processed 
+  # bucket:
+  stage = "transform" 
 
   # vars not set here 
   # are default false
@@ -485,7 +494,11 @@ module "load" {
   OLTP_NAME                  = var.OLTP_NAME
   WAREHOUSE_NAME             = var.WAREHOUSE_NAME
 
-
+  # conditionally used to set the 
+  # permissions for the Lambdas to 
+  # access the ingestion/processed 
+  # bucket:
+  stage = "load" 
 
   # vars not set here are 
   # default false
