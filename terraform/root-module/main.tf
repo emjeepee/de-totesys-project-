@@ -147,18 +147,26 @@ resource "aws_s3_bucket_policy" "AWS_lambda_SERVICE_access" {
 
 
 
-# LOAD THE ZIPPED LAYER FILE AND 
+# LOAD THE ZIPPED LAYER FILES AND 
 # THE ZIPPED LAMBDA FUNCTION 
 # HANDLERS INTO THE CODE BUCKET
 #===============================
 
 # Put the zipped layer files
 # in the code bucket: 
-resource "aws_s3_object" "data_layer_zip" {
+resource "aws_s3_object" "data_layer1_zip" {
   bucket = var.AWS_CODE_BUCKET
-  key    = "zipped/data_layer.zip"
-  source = "../../zipped_files/data_layer.zip"
+  key    = "zipped/data_layer1.zip"
+  source = "../../zipped_files/data_layer1.zip"
                                      }
+
+
+resource "aws_s3_object" "data_layer2_zip" {
+  bucket = var.AWS_CODE_BUCKET
+  key    = "zipped/data_layer2.zip"
+  source = "../../zipped_files/data_layer2.zip"
+                                     }
+
 
 resource "aws_s3_object" "util_layer_zip" {
   bucket = var.AWS_CODE_BUCKET
@@ -201,21 +209,38 @@ resource "aws_s3_object" "third_lambda_zip" {
 
 
 
-# CREATE TWO LAMBDA LAYER VERSIONS
-# (SHARED BY THE THREE LAMBDAS)
+# CREATE THREE LAMBDA LAYER VERSIONS
+# (ALL SHARED BY THE THREE LAMBDAS)
 # =============================
-resource "aws_lambda_layer_version" "shared-data-layer" {
-  layer_name          = "Data-layer-shared-by-all-lambdas"
+resource "aws_lambda_layer_version" "shared-data-layer1" {
+  layer_name          = "Data-layer1-shared-by-all-lambdas"
   s3_bucket           = var.AWS_CODE_BUCKET
-  s3_key              = aws_s3_object.data_layer_zip.key
+  s3_key              = aws_s3_object.data_layer1_zip.key
   compatible_runtimes = ["python3.12"]
   # NOTE: instead of creating resource 
-  # aws_s3_object.data_layer_zip.key
+  # aws_s3_object.data_layer1_zip.key
   # above and referring to it here 
   # you could simply have the 
   # following line here instead:
-  # filename = "${path.module}/../layers/data_layer.zip"
+  # filename = "${path.module}/../layers/data_layer1.zip"
                                                   }
+
+
+
+resource "aws_lambda_layer_version" "shared-data-layer2" {
+  layer_name          = "Data-layer2-shared-by-all-lambdas"
+  s3_bucket           = var.AWS_CODE_BUCKET
+  s3_key              = aws_s3_object.data_layer2_zip.key
+  compatible_runtimes = ["python3.12"]
+  # NOTE: instead of creating resource 
+  # aws_s3_object.data_layer2_zip.key
+  # above and referring to it here 
+  # you could simply have the 
+  # following line here instead:
+  # filename = "${path.module}/../layers/data_layer2.zip"
+                                                  }
+
+
 
 
 resource "aws_lambda_layer_version" "shared-util-layer" {
@@ -326,7 +351,8 @@ module "extract" {
   handler                              = "first_lambda_handler.first_lambda_handler"
   s3_key_for_zipped_lambda             = "zipped/first_lambda.zip"
   # layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
-  data_layer_arn = aws_lambda_layer_version.shared-data-layer.arn
+  data_layer1_arn = aws_lambda_layer_version.shared-data-layer1.arn
+  data_layer2_arn = aws_lambda_layer_version.shared-data-layer2.arn
   util_layer_arn = aws_lambda_layer_version.shared-util-layer.arn
   enable_EvntBrdg_res                  = true
 
@@ -434,8 +460,10 @@ module "transform" {
   handler                              = "second_lambda_handler.second_lambda_handler"
   s3_key_for_zipped_lambda             = "zipped/second_lambda.zip"
   # layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
-  data_layer_arn = aws_lambda_layer_version.shared-data-layer.arn
+  data_layer1_arn = aws_lambda_layer_version.shared-data-layer1.arn
+  data_layer2_arn = aws_lambda_layer_version.shared-data-layer2.arn
   util_layer_arn = aws_lambda_layer_version.shared-util-layer.arn
+
   enable_EvntBrdg_res                  = false
   # code_bucket                          = var.AWS_CODE_BUCKET
 
@@ -545,7 +573,8 @@ module "load" {
   handler                              = "third_lambda_handler.third_lambda_handler"
   s3_key_for_zipped_lambda             = "zipped/third_lambda.zip"
   # layer_version_arn                    = aws_lambda_layer_version.shared-layer.arn
-  data_layer_arn = aws_lambda_layer_version.shared-data-layer.arn
+  data_layer1_arn = aws_lambda_layer_version.shared-data-layer1.arn
+  data_layer2_arn = aws_lambda_layer_version.shared-data-layer2.arn
   util_layer_arn = aws_lambda_layer_version.shared-util-layer.arn
   enable_EvntBrdg_res                  = false
   

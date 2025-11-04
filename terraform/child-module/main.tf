@@ -110,7 +110,8 @@ resource "aws_lambda_function" "mod_lambda" {
   #   # aws_lambda_layer_version.shared-layer.arn
   #          ]
   layers = [
-    var.data_layer_arn,
+    var.data_layer1_arn,
+    var.data_layer2_arn,
     var.util_layer_arn
   			]           
 

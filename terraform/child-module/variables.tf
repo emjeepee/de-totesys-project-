@@ -111,10 +111,17 @@ variable "handler"  {
                    }
 
 
-variable "data_layer_arn" {
-      description = "arn of the data-layer aws lambda layer version created in root module"
+variable "data_layer1_arn" {
+      description = "arn of the data-layer1 aws lambda layer version created in root module"
       type        = string
                              }
+
+
+variable "data_layer2_arn" {
+      description = "arn of the data-layer2 aws lambda layer version created in root module"
+      type        = string
+                             }
+
 
 
 variable "util_layer_arn" {
