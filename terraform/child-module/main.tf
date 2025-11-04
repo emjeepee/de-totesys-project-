@@ -105,10 +105,14 @@ resource "aws_lambda_function" "mod_lambda" {
   timeout       = 30  # give the Lambda function this time in seconds to run (AWS default is 3)
 
 
+  # layers = [
+  #   var.layer_version_arn
+  #   # aws_lambda_layer_version.shared-layer.arn
+  #          ]
   layers = [
-    var.layer_version_arn
-    # aws_lambda_layer_version.shared-layer.arn
-           ]
+    var.data_layer_arn,
+    var.util_layer_arn
+  			]           
 
   environment {
     variables = local.common_env_vars
