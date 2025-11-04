@@ -1,0 +1,5 @@
+pandas
+pyarrow
+pg8000
+python-dotenv
+currency-codes
