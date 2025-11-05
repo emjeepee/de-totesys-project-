@@ -2,7 +2,7 @@ import boto3
 import logging
 
 from third_lambda_utils.third_lambda_init              import third_lambda_init
-from third_lambda_utils.make_pandas_dataframe          import make_pandas_dataframe
+from third_lambda_utils.make_dataframe                 import make_dataframe
 from third_lambda_utils.make_SQL_queries               import make_SQL_queries
 from third_lambda_utils.make_SQL_queries_to_warehouse  import make_SQL_queries_to_warehouse
 from third_lambda_utils.conn_to_db                     import conn_to_db, close_db
@@ -83,7 +83,7 @@ def third_lambda_handler(event, context):
     try:
         # Get the Parquet file and convert
         # it to a pandas dataframe:
-        df = make_pandas_dataframe(proc_bucket, s3_client, object_key) 
+        df = make_dataframe(proc_bucket, s3_client, object_key) 
     except Exception:
         logger.error(err_msg)
 
@@ -107,38 +107,4 @@ def third_lambda_handler(event, context):
         close_db(conn)
     except Exception:
         logger.error(err_msg)
-
-
-
-
-
-
-
-
-# OLD CODE:
-# ingestion_bckt = "11-ingestion-bucket"
-#     processed_bckt = event["detail"]["name"]
-
-#     # create a dictionary that contains the
-#     # pandas files relating to tables in
-#     # the warehouse dictionary:
-#     dataFrames_dict = get_pandas_dataFrames(
-#         processed_bckt, ingestion_bckt, s3_client, "***timestamp***"
-#     )
-
-#     # dataFrames_dict will look
-#     # like this:
-#     # {
-#     # 'dim_date': dim_table.parquet,
-#     # ... ,
-#     # 'facts_sales_order': facts_sales_order.parquet
-#     # }, where each key is the name of a table
-#     # in the warehouse database.
-
-#     # get the data out of each of the
-#     # files in the dictionary above and
-#     # put the data in them into the
-#     # warehouse database:
-#     make_SQL_queries_to_warehouse(dataFrames_dict)
-
 

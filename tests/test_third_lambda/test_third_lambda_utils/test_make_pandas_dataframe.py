@@ -10,7 +10,7 @@ from moto import mock_aws
 from unittest.mock import Mock, patch, call
 from datetime import datetime, timedelta
 
-from src.third_lambda.third_lambda_utils.make_pandas_dataframe import make_pandas_dataframe
+from third_lambda.third_lambda_utils.make_dataframe import make_pandas_dataframe
 from src.second_lambda.second_lambda_utils.convert_to_parquet import convert_to_parquet
 
 

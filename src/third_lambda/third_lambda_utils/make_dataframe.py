@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def make_pandas_dataframe(proc_bucket, S3_client, object_key):
+def make_dataframe(proc_bucket, S3_client, object_key):
     """This function:
         1) is the first function that the 
             third lambda function calls. The 
@@ -63,6 +63,19 @@ def make_pandas_dataframe(proc_bucket, S3_client, object_key):
     # creates query strings) requires 
     # that to be the case):
     return pl.read_parquet(parquet_buffer)
+
+
+
+
+
+
+
+
+
+
+
+
+
     # return pd.read_parquet(parquet_buffer, engine="pyarrow")
 
 
