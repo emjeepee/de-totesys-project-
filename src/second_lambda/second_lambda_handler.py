@@ -72,7 +72,7 @@ def second_lambda_handler(event, context):
 
     # Get lookup table that contains 
     # values this handler requires:
-    lookup = second_lambda_init(event, boto3.client("s3"), datetime.now(), datetime(2024, 1, 1))
+    lookup = second_lambda_init(event, boto3.client("s3"), datetime.now(), datetime(2024, 1, 1), 2557)
     
     # Set vars to values in lookup table: 
     s3_client = lookup['s3_client'] # boto3 S3 client object,
@@ -131,7 +131,7 @@ def second_lambda_handler(event, context):
         # or a dimension table (whichever 
         # is appropriate) that looks 
         # like this:
-        # [{<row data>}, {<row data>}, etc]
+        # [{<row data>}, {<row data>}, etc]source bin/activate
         # where {<row data>} is, eg,
         # {
         # 'design_id': 123, 
