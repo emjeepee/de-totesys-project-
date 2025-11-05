@@ -22,7 +22,15 @@ def convert_to_parquet(data):
     Args:
         data: A Python list of dictionaries
          that represents either the fact table 
-         or a dimension table.
+         or a dimension table. Takes this form:
+            [{<row data>}, {<row data>}, etc]
+            where {<row data>} is, eg,
+            {
+                'design_id': 123, 
+                'abcdef': 'xxx', 
+                'design_name': 'yyy', 
+                etc
+            }                                         
 
     Returns:         
         a Parquet version of either the fact

@@ -1,6 +1,6 @@
-import pandas as pd
+# import pandas as pd
 import logging
-
+import polars as pl
 from io import BytesIO
 from botocore.exceptions import ClientError
 
@@ -12,26 +12,32 @@ logger = logging.getLogger(__name__)
 
 def make_pandas_dataframe(proc_bucket, S3_client, object_key):
     """This function:
-        1) is the first function that the third lambda 
-            function calls. The third lambda function 
-            runs in response to an event sent from the 
-            processed bucket that tells it that a table
-            has been stored there (as a Parquet file)
-        2) gets the Parquet file just stored in the 
-            processed bucket.
-        3) create a Pandas dataframe from the Paruet 
-            file.                             
+        1) is the first function that the 
+            third lambda function calls. The 
+            third lambda function runs in 
+            response to an event sent from 
+            the processed bucket that tells 
+            it that a table has been stored 
+            there (as a Parquet file)
+        2) gets the Parquet file just stored 
+            in the processed bucket.
+        3) creates a polars dataframe from 
+            that Parquet file.                             
 
             
     Args:
-        proc_bucket: a string for the name of the processed 
-         S3 bucket.
+        proc_bucket: a string for the name of 
+         the processed S3 bucket.
+        
         S3_client: the boto3 S3 client object.
-        object_key: the key under which the processed 
-         bucket stores the Parquet file.
+        
+        object_key: the key under which the 
+         processed bucket stores the Parquet 
+         file.
 
     Returns:
-        A pandas dataframe that contains the data from a table.
+        A polars dataframe that contains the 
+        data from a table.
     """
 
     err_msg = 'An error occurred in make_pandas_dataframe() while trying to read from the processed bucket'
@@ -46,7 +52,7 @@ def make_pandas_dataframe(proc_bucket, S3_client, object_key):
 
     pq_bytes_file = response["Body"].read()
     parquet_buffer = BytesIO(pq_bytes_file)
-    # make the pandas dataframe 
+    # make the polars dataframe 
     # and return it (the first column
     # in the dataframe is the primary 
     # key as that was the case in the 
@@ -56,7 +62,8 @@ def make_pandas_dataframe(proc_bucket, S3_client, object_key):
     # third lambda handler (that 
     # creates query strings) requires 
     # that to be the case):
-    return pd.read_parquet(parquet_buffer, engine="pyarrow")
+    return pl.read_parquet(parquet_buffer)
+    # return pd.read_parquet(parquet_buffer, engine="pyarrow")
 
 
     

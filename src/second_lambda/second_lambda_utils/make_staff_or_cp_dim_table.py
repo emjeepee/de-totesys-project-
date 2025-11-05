@@ -22,11 +22,11 @@ def make_staff_or_cp_dim_table(
             the department table, which 
             it retrieves from the 
             ingestion bucket. 
-        3) achieves 1)ii) To create 
-            the counterparty dimension 
-            table, this function requires 
-            data from the address table, 
-            which it retrieves from 
+        3) achieves 1)ii) by getting from 
+            the address table the data 
+            the counterparty dimensions 
+            table requires. This function 
+            gets the address table from 
             the ingestion bucket.
 
     Args:

@@ -1,4 +1,5 @@
 from .create_formatted_timestamp import create_formatted_timestamp
+
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
@@ -17,97 +18,68 @@ logger = logging.getLogger(__name__)
 def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: str):
     """
     This function:
-        1) Either: 
-            i) Saves data from each member of 
-            data_list to the ingestion bucket if 
-            this is the first ever run of the 
-            first lambda function as that would 
-            mean the member contains a whole 
-            table read from the ToteSys 
-            database.
-            or
-            ii) passes each member of data_list to 
-            function write_to_ingestion_bucket()
-            if this is the 2nd-plus run of the 
-            first lambda function, as this would 
-            mean the member contains only the 
-            updated rows of a table, not 
-            necessarily all of them.
-            write_to_ingestion_bucket() updates
-            the rows of an existing table in
-            the ingestion bucket.
-        2) performs i) and ii) above by looping 
-            through the passed-in python list,
-            each of whose members is a dictionary 
-            that contains either a list of 
-            updated rows of one table or all of 
-            the rows of a table that has not been 
-            updated, and gets the name of the 
-            table from each dictionary.
-        3) looks in the ingestion bucket to determine
-            whether one or more keys exist with
-            the name of the table at the beginning
-            (eg 'transactions'), then
-            i) if no such key exists that means this 
-             is the first ever run of the first 
-             lambda function and the table in 
-             question has not yet been saved in the 
-             ingestion bucket (meaning that the
-             dictionary contains data from every
-             row of the table). This function then 
-             creates an appropriate key
-             (eg 'design/<*timestamp-here*>')
-             and saves the whole table to the
-             S3 ingestion bucket under that key.
-            ii) if one or more such keys exist this 
-             means that this is the 2nd-plus run of
-             the first lambda function, so versions 
-             of the table already exists in the
-             ingestion bucket. This this function 
-             then reads and copies the latest table, 
-             updates its outdated rows and saves it 
-             in the bucket as a new version of the 
-             table with a new timestamp.
+        deals with two scenarios:
+        1) data_list contains all tables and
+         all rows of all tables because this 
+         is the first ever run of this project.
+         This function then saves each table 
+         and all of its rows in the ingestion 
+         bucket under a key that looks like 
+         this: 'design/<timestamp-here>'
+
+        2) data_list contains only those tables
+         that the ToteSys database has updated.
+         Each of those tables contains only 
+         updated rows.
+         In this case this function creates a 
+         copy of a table that already exists in 
+         the ingestion bucket, updates the 
+         appropriate rows in the copy and saves 
+         the table under a new key that looks 
+         like this: 'design/<timestamp-here>'.
+         The original table in the ingestion 
+         bucket remains unchanged.
 
     Args:
-        1) data_list: a python list that looks like this:
+        1) data_list: a list containing tables 
+            and their rows. This list contains 
+            member dictionaries, each of which 
+            represents one table. data_list 
+            looks like this, for example:
             [
-                {
-                'design': [ {<data from one row>}, 
-                            {<data from next row>}, 
-                            etc
-                          ] 
-                },
-                {
-                'transactions': [ {<data from one row>}, 
-                                  {<data from next row>}, 
-                                  etc
-                                ] 
-                },
-                etc
-            ]
-            Each member dictionary of the list relates 
-            to one table.
-            On the very first run of the first lambda 
-            function the list contains all tables and all 
+            {'design': [{row data>}, {row data>}, etc]},   
+            {'sales': [{row data>}, {row data>}, etc]},   
+            etc,
+            etc
+            ].
+            where keys 'design', 'sales', etc are the
+             names of tables and where 
+             {<row data>} is, for example: 
+            {
+                'design_id': 123,       
+                'created_at': 'xxx',    
+                'design_name': 'yyy',   
+                etc                     
+            }
+            On the very first run of this project
+            data_list contains all tables and all 
             of the rows for each table.
-            On subsequent runs of the first lambda 
-            function the list is more likely to 
-            contain fewer than all of the tables and 
-            each table will most likely contain only 
-            some of its rows (as only some are likely to
-            have been updated in the ToteSys database).
+            On subsequent runs data_list is more 
+            likely to contain fewer than all of 
+            the tables and each table will most 
+            likely contain only some of its rows. 
         2) s3_client: the boto3 client.
-        3) write_to_ingestion_bucket: a utility function.
-            If a member dictionary of data_list represents
-            only updated rows of a table this function 
-            calls write_to_ingestion_bucket() to replace 
-            the outdated rows of a table in the ingestion 
-            bucket with the updated rows in the member 
-            dictionary, saving the new updated table under 
-            a new key and leaving the previous table that 
-            has the outdated rows in the bucket.
-        4) bucket_name: name of the S3 ingestion bucket.
+        3) write_to_ingestion_bucket: a utility 
+            function. If the member dictionaries 
+            of data_list are updated tables then 
+            write_to_s3() calls 
+            write_to_ingestion_bucket(), which 
+            creates new tables with updated rows 
+            and saves them in the ingestion bucket, 
+            leaving the previous outdated table
+            there too.
+        4) bucket_name: name of the S3 ingestion 
+            bucket.
 
     Returns:
         None
@@ -121,11 +93,14 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
     # '2025-06-13_13-13-13'
     timestamp = create_formatted_timestamp()
 
-    for member in data_list:  # typical member: {'design': [{<data from one updated row>}, {<data from one updated row>}, etc]}
+
+    # data_list is, eg, [{'design': [{<row data>}, {<row data>}, etc]}, {'sales': [{<row data>}, {<row data>}, etc]}, etc]
+    # where {<row data>>} is, eg, {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
+    for member in data_list: # {'design': [{<updated-row data>}, {<updated-row data>}, etc]}
         table_name = list(member.keys())[0]  # 'design'
 
         try:
-            # get keys for all objects saved 
+            # get keys for all objects  
             # in the ingestion bucket that 
             # have a prefix of table_name
             # (if no keys match then response
@@ -138,37 +113,36 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
             raise 
 
         # Determine whether there are any
-        # such keys (remember that the key 
-        # in its entirety looks like this: 
+        # such keys (which look like this:
         # 'design/2025-05-28_15-45-03.json').
         # If yes, then member in data_list
-        # represents only the updated rows 
-        # of a table, so pass member's 
-        # data to function 
+        # represents a table with updated 
+        # rows, so pass the member's rows
+        # and table name to function 
         # write_to_ingestion_bucket(),
-        # which will update the appropriate 
-        # table in the ingestion bucket:    
+        # which will update that table
+        # in the ingestion bucket:    
         if response["KeyCount"] > 0:
             # value of response["KeyCount"]
             # is 0 if no keys match.
 
-            # member[table_name] is [{...}, {...}, {...}, etc]
+            # member[table_name] is [{<updated-row data>}, {<updated-row data>}, etc]
             write_to_ingestion_bucket(member[table_name], bucket_name, table_name, s3_client)
 
             
             # if no, then this is the very 
-            # first run of the first lambda 
-            # function and data_list is a 
-            # whole table, so make a new 
-            # key and write the table data 
-            # to the ingestion bucket under 
-            # that key:
+            # first run of the project
+            # and data_list contains every 
+            # table and every row of every 
+            # table, so make a new key and 
+            # write the table data to the 
+            # ingestion bucket under that key:
         else:
             try: 
                 s3_client.put_object(
                     Bucket=bucket_name,
                     Key=f"{table_name}/{timestamp}.json", # 'sales_order/2025-06-11_13-27-29.json'
-                    Body=json.dumps(member[table_name]) # jsonified [{<data from one updated row>}, etc]
+                    Body=json.dumps(member[table_name]) # jsonified [{<updated-row data>}, {<updated-row data>}, etc]
                 )
             except ClientError:
                 logger.error(err_msg_2)

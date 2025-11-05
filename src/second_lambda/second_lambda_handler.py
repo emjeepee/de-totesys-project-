@@ -56,14 +56,14 @@ def second_lambda_handler(event, context):
             "2025-08-14_12-33-27".
         4) creates a date dimension table (in the form 
             of a Python list) if this is the first ever 
-            run of this lambda function, converts that 
-            table to Parquet form and saves it to the 
+            run of this project, converts that table
+            to Parquet form and saves it to the 
             processed bucket.
 
     Args:
         event: the event object sent to this lambda 
          handler by AWS EventBridge in response to the 
-         first lambda handler storing a table in the 
+         first lambda handler storing one table in the 
          ingestion bucket.
 
     Returns:
@@ -89,18 +89,22 @@ def second_lambda_handler(event, context):
     
 
     # Get the jsonified python list that
-    # is the table that this function has 
-    # just been notified about and 
-    # convert it to a python list:
+    # is the single table that this 
+    # function has just been notified 
+    # about and convert it to a python 
+    # list:
     try:
-        # read_from_s3(s3_client from lookup, ingestion_bucket from lookup, object_key from lookup)
-        table_json = read_from_s3(s3_client, ingestion_bucket, object_key) # jsonified[{...}, {...}, {...}]
+        table_json = read_from_s3(s3_client, ingestion_bucket, object_key) # jsonified [{<row data>}, {<row data>}, etc]
+                                                                           # where {<row data>} is, eg,
+                                                                           # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}        
     except Exception:
         logger.error(err_msg)
     
 
     # make a Python list version of the table:
-    table_python = json.loads(table_json) # [{...}, {...}, {...}]
+    table_python = json.loads(table_json) # [{<row data>}, {<row data>}, etc]
+                                          # where {<row data>} is, eg,
+                                          # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}        
 
 
     try:
@@ -123,28 +127,43 @@ def second_lambda_handler(event, context):
         
 
     try:
-        # Make either the fact table or a dimension 
-        # table (whichever is appropriate) as a 
-        # Python list of dictionaries:
-        dim_or_fact_table = make_dim_or_fact_table(table_name, table_python, s3_client, ingestion_bucket)
+        # Make either the fact table 
+        # or a dimension table (whichever 
+        # is appropriate) that looks 
+        # like this:
+        # [{<row data>}, {<row data>}, etc]
+        # where {<row data>} is, eg,
+        # {
+        # 'design_id': 123, 
+        # 'abcdef': 'xxx', 
+        # 'design_name': 'yyy', 
+        # etc
+        # }        
+        dim_or_fact_table = make_dim_or_fact_table(table_name, 
+                                                   table_python, 
+                                                   s3_client, 
+                                                   ingestion_bucket)
 
     except Exception:
         logger.error(err_msg)
 
 
-    # Convert the dim/fact table to Parquet form. 
-    # This preserves the order of the keys as they 
-    # were in the dictionaries (important for the 
-    # utility function of the third lambda handler 
-    # that makes SQL query strings):
-    pq_file = convert_to_parquet(dim_or_fact_table)
+    # Convert the dim/fact table to a 
+    # Parquet file in a buffer. 
+    # This preserves the order of 
+    # the keys as they were in the 
+    # dictionaries (important for the 
+    # utility function of the third 
+    # lambda handler that makes SQL 
+    # query strings):
+    pq_file = convert_to_parquet(dim_or_fact_table) # a buffer
 
-    # Make the key (a string) under which to 
-    # save the dim/fact table in the 
-    # processed bucket (note: when you put 
-    # a datetime object in an fstring, Python 
-    # converts the object to a string):
-    # table_key = f"{timestamp_string}/fact_{table_name}.parquet" if table_name == "sales_order" else f"{timestamp_string}/dim_{table_name}.parquet"
+    # Create the key (a string) under 
+    # which to save the dim/fact table 
+    # in the processed bucket (note: 
+    # when you put a datetime object 
+    # in an fstring, Python converts 
+    # the object to a string):
     table_key = f"fact_{table_name}/{timestamp_string}/.parquet" if table_name == "sales_order" else f"dim_{table_name}/{timestamp_string}.parquet"
 
 

@@ -32,27 +32,21 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
                 and get a table's updated rows from it.
 
     Returns:
-        a python list. Each member of the list is a 
-         python dictionary that represents a table
-         and its updated rows only. 
+        a python list of dictionaries, each dictionary 
+         representing a table and its updated rows only. 
          Each dictionary has one key, the name of a table.
          The value of the key is a list of dictionaries,
-         each of which is an updated row of that table. 
+         each of those dictionaries representing an 
+         updated row of that table. The keys of that 
+         dictionary are the column names and the values 
+         are the row values under those columns.
 
     """
-    # read_table() below returns a dictionary, for example
-    # {'sales': [{<data from one row>}, {<data from one row>}, etc]},
-    # where {<data from one row>} is an updated row.
 
     data_list = []
     for table in table_names:
-        result = read_table(table, conn, after_time)  # {'design': [{<data from one row>}, {<data from one row>}, etc]}
-        data_list.append(result)
-        # data_list is a python list. Each member of that list is 
-        # this type of dictionary: 
-        # {'<table_name_here>': [{<data from one row>}, {<data from one row>}, etc]}.
-        # The dictionary has one key, the name of a table. 
-        # The value of that key is a list of dictionaries, each dictionary representing
-        # an updated row of that table. The keys of that dictionary are column names and 
-        # their values are the values in that row.
+        result = read_table(table, conn, after_time)  # {'design': [{<updated-row data>}, {<updated-row data>}, etc]}
+        
+        data_list.append(result) # [{'design': [{<updated-row data>}, etc]}, {'sales': [{<updated-row data>}, etc]}, etc].
+                                 # where {<updated-row data>} is eg {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
     return data_list

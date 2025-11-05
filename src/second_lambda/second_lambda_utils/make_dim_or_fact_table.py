@@ -6,25 +6,44 @@ from .make_staff_or_cp_dim_table import make_staff_or_cp_dim_table
 def make_dim_or_fact_table(table_name: str, table_python: list, s3_client, ingestion_bucket: str):
     """
     This function:
-        Makes either a dimension table or the fact 
-        table in the form of a list of dictionaries,
-        where each dictionary represents a row of 
+        Makes either a dimension table or 
+        the fact table in the form of a 
+        list of dictionaries, where each 
+        dictionary represents a row of 
         the table.
         
     Args:
         table_name: the name of a table.
-        table_python: a list that represents a table
-            from the ingestion bucket (unjsonified first)
-        s3_client: a boto3 S3 client object.
-        ingestion_bucket: the name of the ingestion bucket.
+
+        table_python: a list that 
+        represents a table from the 
+        ingestion bucket and that looks 
+        like this:
+         [{<row data>}, {<row data>}, etc]
+         where {<row data>} is, eg,
+         {
+           'design_id': 123, 
+           'created_at': 'xxx', 
+           'design_name': 'yyy', 
+            etc 
+         }
+
+        s3_client: a boto3 S3 client 
+        object.
+
+        ingestion_bucket: the name of the 
+        ingestion bucket.
 
     Returns:
-        Either a dimension table or the fact table in the
-        form of a list of dictionaries, where each 
-        dictionary represents a row of the table. The 
-        first key in each dictionary is always the primary 
-        key (important for later utility function uesd by
-        third lambda handler).      
+        Either a dimension table or the 
+        fact table in the form of a list 
+        of dictionaries, where each dictionary 
+        represents a row of the table. The 
+        first key in each dictionary is 
+        always the primary key of the table 
+        (important for later utility 
+        function used by the third lambda 
+        handler).      
     """
     if table_name == 'staff' or table_name == 'counterparty':
         # If the table name is 'staff' 

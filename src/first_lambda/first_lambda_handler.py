@@ -83,17 +83,11 @@ def first_lambda_handler(event, context):
 
 
     try: 
-        # Get updated row data from each table
-        # in the ToteSys database.
-        # data_for_s3 below looks like this:
-        # [ 
-        #   {'sales_orders'>: [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
-        #   {'design': [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
-        #   {'transactions': [{<data-from-an-updated-row>}, {<data-from-an-updated-row>}, etc]},
-        #   etc        
-        # ] 
-        # Each dictionary (eg {'sales_orders'>: []}) contains only those rows that have updated data.
-        data_for_s3 = get_data_from_db(tables, after_time, conn, read_table) # list of dicts
+        # Find only those tables in the ToteSys 
+        # database that have updated rows.
+        data_for_s3 = get_data_from_db(tables, after_time, conn, read_table) 
+            # [{'design': [{<updated-row data>}, etc]}, {'sales': [{<updated-row data>}, etc]}, etc].
+            # where {<updated-row data>} is eg {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
     except Exception: 
         root_logger.exception("Error caught in first_lambda_handler() while trying to run get_data_from_db()\n\n")    
 
