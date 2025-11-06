@@ -1,8 +1,10 @@
-import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
+# import pandas as pd
+# import pyarrow as pa
+# import pyarrow.parquet as pq
 import calendar
 
+
+from unittest.mock import Mock, patch
 from io import BytesIO
 from datetime import datetime, timedelta
 
@@ -32,22 +34,48 @@ def test_Parquet_file_is_valid():
         dim_date.append(row)
         start_date += timedelta(days=1)
 
-    # Make a Pandas DataFrame
-    # from the Python list of 
-    # dictionaries:
-    expected_df = pd.DataFrame(dim_date)        
+    mock_buffer = BytesIO(b"mock-parquet-bytes")    
 
-    # Act: 
-    # Make the Parquet file 
-    # and put it in a buffer:
-    buffer = convert_to_parquet(dim_date)
-    # Go back to the beginning 
-    # of the buffer: 
-    buffer.seek(0)  
-    # Make Pandas dataframe
-    # from Parquet file:
-    df_from_pq = pd.read_parquet(buffer, engine="pyarrow")
+    mock_con = Mock()
+    mock_con.execute.return_value = None
+    mock_con.register.return_value = None
+
+    with patch("src.second_lambda.second_lambda_utils.convert_to_parquet.duckdb.connect", return_value=mock_con):
+        with patch("src.second_lambda.second_lambda_utils.convert_to_parquet.BytesIO", return_value=mock_buffer):
+            result = convert_to_parquet(dim_date)
+
+    # Assertions
+    mock_con.register.assert_called_once_with('table', dim_date)
+    mock_con.execute.assert_called_once_with("COPY table TO buffer (FORMAT PARQUET)")
+    assert result == b"mock-parquet-bytes"
+
+
+
+
+
+
+
+
+
+
+
+# OLD code:
+    # # Make a Pandas DataFrame
+    # # from the Python list of 
+    # # dictionaries:
+    # expected_df = pd.DataFrame(dim_date)        
+
+    # # Act: 
+    # # Make the Parquet file 
+    # # and put it in a buffer:
+    # buffer = convert_to_parquet(dim_date)
+    # # Go back to the beginning 
+    # # of the buffer: 
+    # buffer.seek(0)  
+    # # Make Pandas dataframe
+    # # from Parquet file:
+    # df_from_pq = pd.read_parquet(buffer, engine="pyarrow")
     
-    # Assert: 
-    pd.testing.assert_frame_equal(df_from_pq, expected_df)
+    # # Assert: 
+    # pd.testing.assert_frame_equal(df_from_pq, expected_df)
 

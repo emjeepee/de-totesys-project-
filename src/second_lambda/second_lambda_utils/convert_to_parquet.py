@@ -52,7 +52,7 @@
 
 
 
-import polars as pl
+import duckdb
 
 from io import BytesIO
     
@@ -90,12 +90,24 @@ def convert_to_parquet(data):
     
     """
 
-    df = pl.DataFrame(data)
+    # df = pl.DataFrame(data)
+
+    # buffer = BytesIO()
+
+    # df.write_parquet(buffer)
+
+    # buffer.seek(0)
+
+    # return buffer
+
+
+    con = duckdb.connect(database=':memory:')  # In-memory database
+    con.register('table', data)             # Register data as a virtual table
 
     buffer = BytesIO()
 
-    df.write_parquet(buffer)
-
+    con.execute("COPY table TO buffer (FORMAT PARQUET)")
+    
     buffer.seek(0)
 
-    return buffer
+    return buffer.read()
