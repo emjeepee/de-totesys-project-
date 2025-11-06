@@ -131,7 +131,7 @@ def second_lambda_handler(event, context):
         # or a dimension table (whichever 
         # is appropriate) that looks 
         # like this:
-        # [{<row data>}, {<row data>}, etc]source bin/activate
+        # [{<row data>}, {<row data>}, etc] 
         # where {<row data>} is, eg,
         # {
         # 'design_id': 123, 
@@ -164,7 +164,7 @@ def second_lambda_handler(event, context):
     # when you put a datetime object 
     # in an fstring, Python converts 
     # the object to a string):
-    table_key = f"fact_{table_name}/{timestamp_string}/.parquet" if table_name == "sales_order" else f"dim_{table_name}/{timestamp_string}.parquet"
+    table_key = f"fact_{table_name}/{timestamp_string}.parquet" if table_name == "sales_order" else f"dim_{table_name}/{timestamp_string}.parquet"
 
 
     try:
