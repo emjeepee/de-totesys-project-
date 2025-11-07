@@ -22,33 +22,26 @@ def third_lambda_handler(event, context):
             the processed bucket when the 
             second lambda function stores 
             a dimension table or the fact 
-            table there as a Parquet file.
-        2) responds to the event by 
-            getting the Parquet file from 
+            table there as a Parquet file
+            in a buffer.
+        2) gets the Parquet file from the
             the processed bucket and 
-            converting it to a Pandas 
-            dataFrame.
-        3) then extracts data for a row 
-            from the dataFrame and converts 
-            that data into an SQL query 
-            string, appending each query 
-            string to a list. 
-            Each query string will write a 
-            row to the appropriate table in 
-            the warehouse. 
+            creates a list of SQL queries
+            where each query will write 
+            one row of the table into the 
+            data warehouse.
             The query strings for dimension 
             tables ensure updated row data 
             replaces outdated row data in the 
-            warehouse. However, query strings
-            for the fact table add updated 
-            rows to the fact table in the 
-            warehouse, ensuring the outdated 
-            rows remain.
-        4) connects to the data warehouse 
+            warehouse. Query strings for the
+            fact table add updated rows to
+            the fact table in the warehouse, 
+            ensuring the outdated rows remain.
+        3) connects to the data warehouse 
             and loops through the list of 
             query strings to make the queries 
             to the warehouse.
-        5) closes the connection to the 
+        4) closes the connection to the 
             warehouse.            
 
     Args:
