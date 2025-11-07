@@ -48,11 +48,10 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
             looks like this, for example:
             [
             {'design': [{row data>}, {row data>}, etc]},   
-            {'sales': [{row data>}, {row data>}, etc]},   
-            etc,
+            {'sales_orders': [{row data>}, {row data>}, etc]},   
             etc
             ].
-            where keys 'design', 'sales', etc are the
+            where keys 'design', 'sales_orders', etc are the
              names of tables and where 
              {<row data>} is, for example: 
             {
@@ -96,7 +95,7 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
 
     # data_list is, eg, [{'design': [{<row data>}, {<row data>}, etc]}, {'sales': [{<row data>}, {<row data>}, etc]}, etc]
     # where {<row data>>} is, eg, {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
-    for member in data_list: # {'design': [{<updated-row data>}, {<updated-row data>}, etc]}
+    for member in data_list: # member is, eg, {'design': [{<updated-row data>}, {<updated-row data>}, etc]}
         table_name = list(member.keys())[0]  # 'design'
 
         try:

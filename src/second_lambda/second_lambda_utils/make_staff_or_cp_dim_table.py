@@ -6,7 +6,6 @@ from .func_lookup_table import func_lookup_table
 def make_staff_or_cp_dim_table(
         table_name: str, 
         table_python: list, 
-        function_lookup_table, 
         ingestion_bucket: str, 
         aux_table_name: str, 
         s3_client):
@@ -30,21 +29,16 @@ def make_staff_or_cp_dim_table(
             the ingestion bucket.
 
     Args:
-        1) table_name: the name of the 
-            table (will be either 
-            'staff' or 'counterparty').
+        1) table_name: will be either 
+            'staff' or 'counterparty'.
         2) table_python: the staff or 
             counterparty table as 
-            retrieved from the ingestion 
+            read from the ingestion 
             bucket and converted to a 
             python list.
-        3) function_lookup_table: a 
-            lookup table of functions that
-            do the actual creation of 
-            dimension tables. 
-        4) ingestion_bucket: the name of 
+        3) ingestion_bucket: the name of 
             the ingestion bucket
-        5) aux_table_name: the name of an 
+        4) aux_table_name: the name of an 
             auxilliary table this function 
             will retrieve from the 
             ingestion bucket to help it
@@ -53,21 +47,18 @@ def make_staff_or_cp_dim_table(
             Its value is 'department' if
             this function has to make the
             staff dimension table and 
-            'address' for the counterparty 
-            dimension table.
-        6) s3_client: a boto3 S3 client 
+            'address' if it has to make 
+            the counterparty dimension 
+            table.
+        5) s3_client: a boto3 S3 client 
             object.
 
     Returns:
         The staff or counterparty 
-         dimension table as a 
-         Python list of dictionaries.                        
+         dimension table as a list
+         list of dictionaries.                        
     """
 
-    # get_latest_table() returns the
-    # latest table of name 
-    # aux_table_name as a python list 
-    # of dictionaries. 
     # If aux_table_name is 'department'
     # get the latest department table. 
     # If aux_table_name is 'address'

@@ -77,7 +77,7 @@ def convert_to_parquet(data):
          where {<row data>} is, eg,
             {
                 'design_id': 123, 
-                'created_at': 'xxx', 
+                'xyz': 'xxx', 
                 'design_name': 'yyy', 
                     etc 
             }
@@ -90,6 +90,40 @@ def convert_to_parquet(data):
     
     """
 
+
+    con = duckdb.connect(database=':memory:')  # In-memory database
+    
+    # Get column names from the table dict:
+    columns = list(data[0].keys())
+    col_defs = ', '.join([f"{col} TEXT" for col in columns])
+
+    # Create a temp table:
+    con.execute(f"CREATE TABLE dim_or_fact_table ({col_defs});")
+
+    # Insert each row:
+    for row in data:
+        placeholders = ', '.join(['?'] * len(columns))
+        con.execute(f"INSERT INTO table VALUES ({placeholders});", tuple(str(v) for v in row.values()))
+
+    buffer = BytesIO()
+
+    con.execute("COPY dim_or_fact_table TO buffer (FORMAT PARQUET)")
+    
+    buffer.seek(0)
+
+    return buffer.getvalue()
+
+
+
+
+
+
+
+
+
+# ================================================================================
+# OLD CODE (employed when this project used 
+# Pandas and Pyarrow)
     # df = pl.DataFrame(data)
 
     # buffer = BytesIO()
@@ -99,15 +133,3 @@ def convert_to_parquet(data):
     # buffer.seek(0)
 
     # return buffer
-
-
-    con = duckdb.connect(database=':memory:')  # In-memory database
-    con.register('table', data)             # Register data as a virtual table
-
-    buffer = BytesIO()
-
-    con.execute("COPY table TO buffer (FORMAT PARQUET)")
-    
-    buffer.seek(0)
-
-    return buffer.read()

@@ -2,8 +2,7 @@ import boto3
 import logging
 
 from third_lambda_utils.third_lambda_init              import third_lambda_init
-from third_lambda_utils.make_dataframe                 import make_dataframe
-from third_lambda_utils.make_SQL_queries               import make_SQL_queries
+from third_lambda_utils.make_SQL_query_list            import make_SQL_query_list
 from third_lambda_utils.make_SQL_queries_to_warehouse  import make_SQL_queries_to_warehouse
 from third_lambda_utils.conn_to_db                     import conn_to_db, close_db
 
@@ -68,43 +67,91 @@ def third_lambda_handler(event, context):
 
     # Get lookup table that contains 
     # values this lambda handler requires:
+    # lookup['proc_bucket'] -- name of processed bucket
+    # lookup['s3_client']      -- boto3 S3 client object
+    # lookup['object_key']    -- key under which processed bucket saved Parquet file
+    # lookup['table_name']    -- name of table
+    # lookup['conn']                -- pg8000.native Connection object that knows about warehouse
     lookup = third_lambda_init(event, conn_to_db, close_db, boto3.client('s3'))   
-    proc_bucket = lookup['proc_bucket'] # name of processed bucket
-    s3_client = lookup['s3_client']     # boto3 S3 client object
-    object_key = lookup['object_key']   # key under which processed bucket saved Parquet file
-    table_name = lookup['table_name']   # name of table
-    conn = lookup['conn']               # pg8000.native Connection object that knows about warehouse
-  
 
 
+
+    # CHANGE TO MAKE: Have third_lambda_init return this
+    # plus maybe a few other error messages:
     err_msg = 'Error in third_lambda_handler'
 
 
     try:
-        # Get the Parquet file and convert
-        # it to a pandas dataframe:
-        df = make_dataframe(proc_bucket, s3_client, object_key) 
+        # Get the buffer that contains 
+        # the Parquet file that represents
+        # the diension table or facts table:
+        pq_buff = lookup['s3_client'].get_object(Key=lookup['object_key'], Bucket=lookup['proc_bucket'])
     except Exception:
         logger.error(err_msg)
 
 
     # make the SQL queries from the 
-    # data in the dataFrame. 
-    # queries_list will take one 
-    # form when table_name is 
-    # 'sales_order' and another 
-    # form when table_name is, for 
-    # example, 'design':
-    queries_list = make_SQL_queries(df, table_name)  
+    # data in the Parquet file in 
+    # the buffer:
+    queries_list = make_SQL_query_list(pq_buff, lookup['table_name'])  
+    
 
     try:
         # Make SQL queries to the data 
         # warehouse to insert data into
         # the table there:
-        make_SQL_queries_to_warehouse(queries_list, conn)  
+        make_SQL_queries_to_warehouse(queries_list, lookup['conn'])  
 
         # Close connection to warehouse:
-        close_db(conn)
+        close_db(lookup['conn'])
     except Exception:
         logger.error(err_msg)
+
+
+
+
+
+# =========================================================================
+# OLD CODE (preFri7Nov25:)
+    # # Get lookup table that contains 
+    # # values this lambda handler requires:
+    # lookup = third_lambda_init(event, conn_to_db, close_db, boto3.client('s3'))   
+    # proc_bucket = lookup['proc_bucket'] # name of processed bucket
+    # s3_client = lookup['s3_client']     # boto3 S3 client object
+    # object_key = lookup['object_key']   # key under which processed bucket saved Parquet file
+    # table_name = lookup['table_name']   # name of table
+    # conn = lookup['conn']               # pg8000.native Connection object that knows about warehouse
+  
+
+
+    # err_msg = 'Error in third_lambda_handler'
+
+
+    # try:
+    #     # Get the Parquet file and convert
+    #     # it to a pandas dataframe:
+    #     df = make_dataframe(proc_bucket, s3_client, object_key) 
+    # except Exception:
+    #     logger.error(err_msg)
+
+
+    # # make the SQL queries from the 
+    # # data in the dataFrame. 
+    # # queries_list will take one 
+    # # form when table_name is 
+    # # 'sales_order' and another 
+    # # form when table_name is, for 
+    # # example, 'design':
+    # queries_list = make_SQL_queries(df, table_name)  
+
+    # try:
+    #     # Make SQL queries to the data 
+    #     # warehouse to insert data into
+    #     # the table there:
+    #     make_SQL_queries_to_warehouse(queries_list, conn)  
+
+    #     # Close connection to warehouse:
+    #     close_db(conn)
+    # except Exception:
+    #     logger.error(err_msg)
 

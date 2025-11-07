@@ -2,6 +2,7 @@
 # import pyarrow as pa
 # import pyarrow.parquet as pq
 import calendar
+import pytest
 
 
 from unittest.mock import Mock, patch
@@ -12,8 +13,9 @@ from src.second_lambda.second_lambda_utils.convert_to_parquet import convert_to_
 
 
 
-def test_Parquet_file_is_valid():
-    # Arrange: 
+# Set up a mock table:
+@pytest.fixture(scope="function")
+def setup():
     # Make a mock dimension date 
     # table as a Python list
     # of dictionaries:
@@ -34,19 +36,24 @@ def test_Parquet_file_is_valid():
         dim_date.append(row)
         start_date += timedelta(days=1)
 
-    mock_buffer = BytesIO(b"mock-parquet-bytes")    
+    yield dim_date
 
-    mock_con = Mock()
-    mock_con.execute.return_value = None
-    mock_con.register.return_value = None
 
-    with patch("src.second_lambda.second_lambda_utils.convert_to_parquet.duckdb.connect", return_value=mock_con):
-        with patch("src.second_lambda.second_lambda_utils.convert_to_parquet.BytesIO", return_value=mock_buffer):
-            result = convert_to_parquet(dim_date)
 
-    # Assertions
-    mock_con.register.assert_called_once_with('table', dim_date)
-    mock_con.execute.assert_called_once_with("COPY table TO buffer (FORMAT PARQUET)")
+
+def test_function_returns_parquet_object(setup):
+    # Arrange:
+    mock_buffer = BytesIO(b"mock-parquet-bytes")
+
+    with patch("src.second_lambda.second_lambda_utils.convert_to_parquet.duckdb.connect"), \
+         patch("src.second_lambda.second_lambda_utils.convert_to_parquet.BytesIO", return_value=mock_buffer):
+
+        # Act
+        result = convert_to_parquet(setup)
+
+    
+    # Assert:
+    assert isinstance(result, (bytes, bytearray))
     assert result == b"mock-parquet-bytes"
 
 
@@ -54,11 +61,28 @@ def test_Parquet_file_is_valid():
 
 
 
+def test_function_calls_correct_methods(setup):
+    # Arrange: 
+    mock_buffer = BytesIO(b"mock-parquet-bytes")    
+
+    mock_con = Mock()
+    mock_con.execute.return_value = None
+
+    with patch("src.second_lambda.second_lambda_utils.convert_to_parquet.duckdb.connect", return_value=mock_con):
+        with patch("src.second_lambda.second_lambda_utils.convert_to_parquet.BytesIO", return_value=mock_buffer):
+            result = convert_to_parquet(setup)
+
+    # Assert:
+    # check that COPY command was called at least once with correct SQL
+    mock_con.execute.assert_any_call('COPY dim_or_fact_table TO buffer (FORMAT PARQUET)')
 
 
 
 
 
+
+
+# ========================================================================================
 # OLD code:
     # # Make a Pandas DataFrame
     # # from the Python list of 
