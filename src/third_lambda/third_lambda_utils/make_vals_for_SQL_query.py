@@ -16,10 +16,10 @@ def make_vals_for_SQL_query(row):
         query string.  
     
     Args:
-        row: a row from a DuckDB
-        dataframe that represents
-        a dimension table or the
-        facts table.
+        row: a list that represents 
+        a row from a dimension 
+        table or the facts table,
+        eg [13, None, 'cabbage'].
 
     Returns:
         A string made up of the 

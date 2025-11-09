@@ -3,7 +3,7 @@ from datetime import datetime
 
 from second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
 from second_lambda_utils.read_from_s3             import read_from_s3
-from second_lambda_utils.convert_to_parquet       import convert_to_parquet
+from zz_to_dump.convert_to_parquetOLD       import convert_to_parquet
 from second_lambda_utils.upload_to_s3             import upload_to_s3
 from second_lambda_utils.second_lambda_init       import second_lambda_init
 from second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
@@ -158,7 +158,7 @@ def second_lambda_handler(event, context):
     # utility function of the third 
     # lambda handler that makes SQL 
     # query strings):
-    pq_file = convert_to_parquet(dim_or_fact_table) # a buffer
+    pq_file = convert_to_parquet(dim_or_fact_table, table_name) # a buffer
 
     # Create the key (a string) under 
     # which to save the dim/fact table 

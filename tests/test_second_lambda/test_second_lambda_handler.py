@@ -19,7 +19,7 @@ from datetime import datetime
 from botocore.exceptions import ClientError
 
 from src.second_lambda.second_lambda_handler import second_lambda_handler
-from src.second_lambda.second_lambda_utils.convert_to_parquet import convert_to_parquet
+from zz_to_dump.convert_to_parquetOLD import convert_to_parquet
 
 
 

@@ -1,4 +1,4 @@
-from .preprocess_buffer       import preprocess_buffer
+from .preprocess_buffer_1       import preprocess_buffer
 from .make_vals_for_SQL_query import make_vals_for_SQL_query
 from .make_SQL_query          import make_SQL_query
 
@@ -29,7 +29,7 @@ def make_SQL_query_list(buffer, table_name):
 
     lst = preprocess_buffer(buffer, table_name)
     queries = []
-    
+
     for row in lst[0]:
         # Make that part of the query 
         # string that contains the 

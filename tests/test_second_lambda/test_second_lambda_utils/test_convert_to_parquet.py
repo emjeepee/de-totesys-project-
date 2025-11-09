@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch
 from io import BytesIO
 from datetime import datetime, timedelta
 
-from src.second_lambda.second_lambda_utils.convert_to_parquet import convert_to_parquet
+from zz_to_dump.convert_to_parquetOLD import convert_to_parquet
 
 
 
@@ -54,6 +54,7 @@ def test_function_returns_parquet_object(setup):
     
     # Assert:
     assert isinstance(result, (bytes, bytearray))
+
     assert result == b"mock-parquet-bytes"
 
 
@@ -74,7 +75,7 @@ def test_function_calls_correct_methods(setup):
 
     # Assert:
     # check that COPY command was called at least once with correct SQL
-    mock_con.execute.assert_any_call('COPY dim_or_fact_table TO buffer (FORMAT PARQUET)')
+    mock_con.execute.assert_any_call('COPY setup TO buffer (FORMAT PARQUET)')
 
 
 

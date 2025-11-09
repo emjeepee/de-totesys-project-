@@ -1,135 +1,71 @@
-# import pandas as pd
-# import pyarrow as pa
-# import pyarrow.parquet as pq
-# from io import BytesIO
+import tempfile
+
+from .write_parquet_to_buffer   import write_parquet_to_buffer
+from .make_column_defs          import make_column_defs
+from .make_insert_statements    import make_insert_statements
+from .put_pq_table_in_temp_file import put_pq_table_in_temp_file
 
 
 
 
-# def convert_to_parquet(data):
-#     """
-#     This function:
-#         1) creates a pandas dataframe from the 
-#             passed-in Python list of 
-#             dictionaries.
-#         2) creates a buffer in memory
-#         3) creates a pyarrow table from the
-#             Pandas dataframe.
-#         4) writes the pyarrow table to the 
-#             buffer as a Parquet file.
-#         5) Returns the buffer file.
-
-#     Args:
-#         data: A Python list of dictionaries
-#          that represents either the fact table 
-#          or a dimension table. Takes this form:
-#             [{<row data>}, {<row data>}, etc]
-#             where {<row data>} is, eg,
-#             {
-#                 'design_id': 123, 
-#                 'abcdef': 'xxx', 
-#                 'design_name': 'yyy', 
-#                 etc
-#             }                                         
-
-#     Returns:         
-#         a Parquet version of either the fact
-#         table or a dimension table in a 
-#         buffer in memory.
-#     """
-
-#     df = pd.DataFrame(data)
-
-#     buffer = BytesIO()
-
-#     table = pa.Table.from_pandas(df)
-#     pq.write_table(table, buffer)
-
-#     buffer.seek(0)
-
-#     return buffer
-
-
-
-
-import duckdb
-
-from io import BytesIO
-    
-    
-def convert_to_parquet(data):    
+def convert_to_parquet(data: list, table_name: str):
     """
     This function:
-        1) creates a Parquet file from 
-         a list that represents either 
-         a fact table or a dimension 
-         table (minus the headers) 
-        2) puts the Parquet file into 
-         a buffer 
-        3) returns the buffer.
-
-    Args:
-        data: a table that represents 
-        either a fact table or a 
-        dimension table and has this
-        form:
-            [{<row data>}, {<row data>}, etc]
-         where {<row data>} is, eg,
-            {
-                'design_id': 123, 
-                'xyz': 'xxx', 
-                'design_name': 'yyy', 
-                    etc 
-            }
-
-    Returns:
-        a buffer that contains a 
-        Parquet-file version of the 
-        passed-in fact table or  
-        dimension table.  
+        converts a table in the 
+        form of a list of dictionaries 
+        into a table in Parquet format
+        in a BytesIO buffer.
     
+    Args:
+        data: a list of dictionaries
+        representing a table, where 
+        each dictionary represents a 
+        row and whose key-value pairs 
+        represent columnname-cellvalue 
+        pairs.
+
+        table_name: the name of the 
+        table
+        
+    Returns:
+        a BytesIO buffer that contains
+        the table in Parquet format.
     """
 
+    # make a string of column names:
+    col_defs = make_column_defs(data)
 
-    con = duckdb.connect(database=':memory:')  # In-memory database
+    # makes parts of the insert 
+    # statements that will insert 
+    # row data (from the table 
+    # passed in) into the duckdb
+    # Parquet file that this 
+    # function will make:
+    ph_and_v_list = make_insert_statements(data)
+    values_list  = ph_and_v_list[1]
+    placeholders = ph_and_v_list[0]
     
-    # Get column names from the table dict:
-    columns = list(data[0].keys())
-    col_defs = ', '.join([f"{col} TEXT" for col in columns])
-
-    # Create a temp table:
-    con.execute(f"CREATE TABLE dim_or_fact_table ({col_defs});")
-
-    # Insert each row:
-    for row in data:
-        placeholders = ', '.join(['?'] * len(columns))
-        con.execute(f"INSERT INTO table VALUES ({placeholders});", tuple(str(v) for v in row.values()))
-
-    buffer = BytesIO()
-
-    con.execute("COPY dim_or_fact_table TO buffer (FORMAT PARQUET)")
+    # Create a temporary file with a 
+    # .parquet extension, put the file
+    # in tmp_path. The location will 
+    # be similar to '/tmp/xyz123.parquet'.
+    # Don't delete the temporary file 
+    # when the with block ends:
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.parquet') as tmp:
+        tmp_path = tmp.name
     
-    buffer.seek(0)
+    # make a duckdb table in Parquet 
+    # format. the duckdb table column 
+    # names and rows come from the 
+    # passed-in list (arg data) that 
+    # represents a dimension table or 
+    # the fact table:
+    put_pq_table_in_temp_file(table_name, col_defs, values_list, placeholders, tmp_path)
 
-    return buffer.getvalue()
+    pq_buffer = write_parquet_to_buffer(tmp_path)
+
+    return pq_buffer
+    
 
 
 
-
-
-
-
-
-
-# ================================================================================
-# OLD CODE (employed when this project used 
-# Pandas and Pyarrow)
-    # df = pl.DataFrame(data)
-
-    # buffer = BytesIO()
-
-    # df.write_parquet(buffer)
-
-    # buffer.seek(0)
-
-    # return buffer
