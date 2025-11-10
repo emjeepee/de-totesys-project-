@@ -32,6 +32,4 @@ def make_row_dicts(col_names: list, row_values: list):
     for i in range(num_of_rows): 
         list_to_return.append(dict([(col_names[j], row_values[i][j]) for j in range(num_of_cols)]))
 
-    # print(f'In make_row_dicts() and list_to_return is {list_to_return}')            
-
     return list_to_return

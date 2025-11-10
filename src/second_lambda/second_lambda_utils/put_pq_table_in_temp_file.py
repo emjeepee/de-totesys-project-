@@ -9,10 +9,11 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
         elsewhere to recreate the 
         table in Parquet format
         in duckdb. 
-        The original table was in 
-        list form, the table being 
+        The original table was 
         either a dimension table 
-        or the fact table.
+        or the fact table, either 
+        in list form.
+        
         This function: 
         1. opens a duckdb connection
         2. makes a duckdb table, starting
@@ -28,8 +29,12 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
         
         col_defs: a string of the 
             column names of the table.
-        values_list: 
-        placeholders: 
+        values_list: a list of lists,
+        the member lists containing 
+        row values in tring form.
+        placeholders: a string of ?s
+        equal in number to the number 
+        of columns in the table.
         tmp_path: the path to the 
             temporary file.
 

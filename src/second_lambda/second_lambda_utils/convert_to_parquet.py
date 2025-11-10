@@ -1,9 +1,9 @@
 import tempfile
 
-from .write_parquet_to_buffer   import write_parquet_to_buffer
-from .make_column_defs          import make_column_defs
-from .make_insert_statements    import make_insert_statements
-from .put_pq_table_in_temp_file import put_pq_table_in_temp_file
+from .write_parquet_to_buffer            import write_parquet_to_buffer
+from .make_column_defs                   import make_column_defs
+from .make_parts_of_insert_statements    import make_parts_of_insert_statements
+from .put_pq_table_in_temp_file          import put_pq_table_in_temp_file
 
 
 
@@ -41,7 +41,7 @@ def convert_to_parquet(data: list, table_name: str):
     # passed in) into the duckdb
     # Parquet file that this 
     # function will make:
-    ph_and_v_list = make_insert_statements(data)
+    ph_and_v_list = make_parts_of_insert_statements(data)
     values_list  = ph_and_v_list[1]
     placeholders = ph_and_v_list[0]
     

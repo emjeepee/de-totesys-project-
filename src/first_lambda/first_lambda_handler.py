@@ -29,12 +29,12 @@ def first_lambda_handler(event, context):
     This function:
         1) runs every five minutes in response to
             an AWS EventBridge trigger.
-        2) makes SQL queries to ToteSys database 
+        2) makes SQL queries to totesys database 
             to get updated row data for every
             table that has had its row data updated 
-            in the ToteSys database.
+            in the totesys database.
         3) for each table that has had rows updated 
-            in the ToteSys database goes to the 
+            in the totesys database goes to the 
             ingestion bucket and gets the previously 
             saved table of the same name and updates 
             it with the new row data.
@@ -44,7 +44,7 @@ def first_lambda_handler(event, context):
 
     Args:
         1) event: object received from ????? 
-        2) context: ????
+        2) context: meta data
     
     Returns:
         None

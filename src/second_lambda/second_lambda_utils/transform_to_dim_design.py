@@ -7,8 +7,8 @@ def transform_to_dim_design(design_data):
     This function:
         transforms the design table's data 
         as read from the ingestion bucket 
-        (and converted into a python list) 
-        into a design dimension table.
+        (and converted into a list) into
+        a design dimension table.
 
     Args:
         design_data: a list of dictionaries 

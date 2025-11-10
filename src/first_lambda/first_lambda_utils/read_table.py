@@ -24,7 +24,7 @@ def read_table(table_name: str, conn: Connection, after_time: str):
          2) makes the dictionary above by getting
             i) updated rows from the table in the 
             form of a list of lists, each member 
-            list containing cell values only for 
+            list containing only cell values for 
             an updated row (ie no column names)
             ii) the column names for the table in the
             form of a list of lists. Each member list

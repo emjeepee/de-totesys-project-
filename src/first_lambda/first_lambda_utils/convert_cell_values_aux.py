@@ -12,11 +12,13 @@ def convert_cell_values_aux(val):
             values will be of the 
             correct form so that 
             when code puts them 
-            into dictionaries 
-            that become members of 
-            a list, the list can be 
-            converted to json without 
-            problem. 
+            into dictionaries that
+            represent table rows 
+            and puts the 
+            dictionaries into a 
+            list, the list can be 
+            converted to json 
+            without problem. 
         2) gets called by function 
          convert_cell_values_main().
         3) converts a passed-in:
@@ -35,12 +37,12 @@ def convert_cell_values_aux(val):
                 'FALSE'     
         4) returns unchanged a 
          passed-in:
-         i)   a non-json string
-         ii)  an int
+         i)  non-json string
+         ii) int
 
     Args:
-        val: this will be one of 
-         these five types:
+        val: will be one of 
+         these types:
          i)   a datetime object
          ii)  a decimal.Decimal
               object

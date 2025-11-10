@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def get_column_names(conn_obj, table_name: str):
     """
     This function:
-        Makes an SQL query to the ToteSys
+        Makes an SQL query to the totesys
          database to get the column names 
          of a table.
     

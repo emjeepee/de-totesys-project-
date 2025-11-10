@@ -8,22 +8,16 @@ from .convert_cell_values_aux import convert_cell_values_aux
 def convert_cell_values_main(val):
     """
     This function:
-        converts a passed-in value into 
-        another type depending on the 
-        type of the passed-in value.
-        It converts the passed-in value 
-        to a string if the passed-in 
-        value is 
+        Converts the passed-in value
+        into another type:
+        1. Converts these vlaues into  
+        a string: 
          i)   a datetime object.
          ii)  a json string.
-         If the passed-in value is 
-         a decimal.Decimal object
-         this function returns 
-         a float.
-         If the passed-in value is a 
-         non-json string or an int
-         this function returns the 
-         passed-in value unchanged.         
+        2. Converts a decimal.Decimal 
+        object into a float.
+        3. Leaves a non-json string 
+        or an int unchanged.         
 
     Args:
         val: is either
@@ -31,7 +25,7 @@ def convert_cell_values_main(val):
          ii)  a json string
          iii) a Decimal object
          iv)  a non-json string
-         v)   an int  
+         v)   an int
          vi)  None
 
     Return:
@@ -45,17 +39,12 @@ def convert_cell_values_main(val):
     """
 
     # if val is a string
-    # i)  if it is a json string then 
+    # i)  if it's a json string then 
     #     unjsonify it
     # ii) if other type of string pass 
     #     it to 
-    #     convert_cell_values_aux()
-
+    #     convert_cell_values_aux():
     if isinstance(val, str): 
-        # If val is a json string
-        # return it otherwise
-        # call 
-        # convert_cell_values_aux(val):
         try:
             return_val = json.loads(val)
             return return_val
