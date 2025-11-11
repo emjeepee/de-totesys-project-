@@ -34,7 +34,7 @@ def write_parquet_to_buffer(tmp_path):
     # this function with a mock 
     # tmp_path (ie when the file 
     # path is not real):
-    if os.path.exists(tmp_path):   
+    if os.path.exists(tmp_path):
         # Open the temp file in 
         # read-binary ('rb') mode and 
         # write it to the buffer:
@@ -47,4 +47,6 @@ def write_parquet_to_buffer(tmp_path):
         # at path tmp_path:          
         os.remove(tmp_path)
     
-    return buffer
+        return buffer
+    
+    

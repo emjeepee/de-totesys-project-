@@ -1,106 +1,94 @@
-# import pandas as pd
-# import pyarrow as pa
-# import pyarrow.parquet as pq
-import calendar
 import pytest
 
-
 from unittest.mock import Mock, patch
-from io import BytesIO
-from datetime import datetime, timedelta
-
-from zz_to_dump.convert_to_parquetOLD import convert_to_parquet
 
 
+from src.second_lambda.second_lambda_utils.convert_to_parquet               import convert_to_parquet
+from src.second_lambda.second_lambda_utils.make_column_defs                 import make_column_defs
+from src.second_lambda.second_lambda_utils.make_parts_of_insert_statements  import make_parts_of_insert_statements
+from src.second_lambda.second_lambda_utils.put_pq_table_in_temp_file        import put_pq_table_in_temp_file
+from src.second_lambda.second_lambda_utils.write_parquet_to_buffer          import write_parquet_to_buffer
 
-# Set up a mock table:
+
+
 @pytest.fixture(scope="function")
 def setup():
-    # Make a mock dimension date 
-    # table as a Python list
-    # of dictionaries:
-    start_date = datetime(24, 1, 1)
-    dim_date = []
-    for i in range(3):
-        row = {                                                          # 19Aug25 --HAVE CHECKED THESE:
-                "date_id": start_date.date(),                            # is datetime.date object. In warehouse, must be SQL date
-                "year": start_date.year,                                 # is int. In warehouse, must be SQL INT
-                "month": start_date.month,                               # is int (1 for January). In warehouse, must be SQL INT
-                "day": start_date.day,                                   # is int. In warehouse, must be SQL INT
-                "day_of_week": start_date.weekday() + 1,                 # is int (1 for Monday). In warehouse, must be SQL INT
-                "day_name": calendar.day_name[start_date.weekday()],     # is str (eg 'Monday'). In warehouse, must be SQL VARCHAR
-                "month_name": calendar.month_name[start_date.month],     # is str (eg 'January'). In warehouse, must be SQL VARCHAR
-                "quarter": (start_date.month - 1) // 3 + 1               # is int. In warehouse, must be SQL INT
-              }
+    # Define a simple class
+    class Mock_tmp_class:
+        def __init__(self):
+            self.name = "Bathsheba"
 
-        dim_date.append(row)
-        start_date += timedelta(days=1)
+    # Create an instance
+    mock_tmp_obj = Mock_tmp_class()
 
-    yield dim_date
+    yield mock_tmp_obj
 
 
 
+def test_calls_all_functions_correctly(setup):
 
-def test_function_returns_parquet_object(setup):
     # Arrange:
-    mock_buffer = BytesIO(b"mock-parquet-bytes")
+    expected = 'buffer'
+    expected_fail = 'expected_fail'
 
-    with patch("src.second_lambda.second_lambda_utils.convert_to_parquet.duckdb.connect"), \
-         patch("src.second_lambda.second_lambda_utils.convert_to_parquet.BytesIO", return_value=mock_buffer):
-
-        # Act
-        result = convert_to_parquet(setup)
+    mock_tmp_obj = setup
 
     
-    # Assert:
-    assert isinstance(result, (bytes, bytearray))
-
-    assert result == b"mock-parquet-bytes"
-
-
-
-
-
-
-def test_function_calls_correct_methods(setup):
-    # Arrange: 
-    mock_buffer = BytesIO(b"mock-parquet-bytes")    
-
-    mock_con = Mock()
-    mock_con.execute.return_value = None
-
-    with patch("src.second_lambda.second_lambda_utils.convert_to_parquet.duckdb.connect", return_value=mock_con):
-        with patch("src.second_lambda.second_lambda_utils.convert_to_parquet.BytesIO", return_value=mock_buffer):
-            result = convert_to_parquet(setup)
-
-    # Assert:
-    # check that COPY command was called at least once with correct SQL
-    mock_con.execute.assert_any_call('COPY setup TO buffer (FORMAT PARQUET)')
+    mock_table = [{}, {}, {} ] # mock the 1st arg of convert_to_parquet()
+    mock_table_name = 'mock_table_name'
+    # mock_mcd_return = Mock()
+    mock_vl = 'mock_vl'
+    mock_ph = 'mock_ph'
+    mock_ph_v_list = [mock_ph, mock_vl]
+    mock_tmp = Mock()
+    mock_path = 'mock_path'
+    mock_tmp.name = mock_path
+    # Following two lines do not work (hence the two after them)!!!
+    # mock_tmp.__enter__.return_value = mock_tmp
+    # mock_tmp.__exit__.return_value = None
+    mock_tmp.__enter__ = Mock(return_value=mock_tmp)
+    mock_tmp.__exit__ = Mock(return_value=None)
 
 
 
+    with patch('src.second_lambda.second_lambda_utils.convert_to_parquet.make_column_defs') as mock_mcd, \
+         patch('src.second_lambda.second_lambda_utils.convert_to_parquet.make_parts_of_insert_statements') as mock_mpois, \
+         patch('src.second_lambda.second_lambda_utils.convert_to_parquet.put_pq_table_in_temp_file') as mock_pptitf, \
+         patch('src.second_lambda.second_lambda_utils.convert_to_parquet.write_parquet_to_buffer') as mock_wtpb, \
+         patch("src.second_lambda.second_lambda_utils.convert_to_parquet.tempfile.NamedTemporaryFile", return_value=mock_tmp) as mock_ntf:
+        mock_mcd.return_value = 'mock_mcd_return'
+        mock_mpois.return_value = mock_ph_v_list
+        mock_wtpb.return_value = 'buffer'
+        
+
+        # Act:
+        result = convert_to_parquet(mock_table, mock_table_name)
+
+        # Assert:
+        # Ensure test can fail:            
+        # mock_mcd.assert_called_once_with('xxx')                         
+        mock_mcd.assert_called_once_with(mock_table)                         
+        # Ensure test can fail:            
+        # mock_mpois.assert_called_once_with('xxx')
+        mock_mpois.assert_called_once_with(mock_table)
+        # Ensure test can fail:            
+        # mock_mpois.assert_called_once_with('xxx')
+        mock_mpois.assert_called_once_with(mock_table)
+        # Ensure test can fail:            
+        # mock_ntf.assert_called_once_with('xxx')
+        mock_ntf.assert_called_once_with(delete=False, suffix='.parquet')
+        # Ensure test can fail:            
+        # mock_pptitf.assert_called_once_with('xxx')
+        mock_pptitf.assert_called_once_with(mock_table_name, 'mock_mcd_return', mock_vl, mock_ph, mock_path)
+        # Ensure test can fail:            
+        # mock_wtpb.assert_called_once_with('xxx')
+        mock_wtpb.assert_called_once_with(mock_path)
+        # Ensure test can fail:            
+        # assert result == expected_fail
+        assert result == expected
 
 
 
 
-# ========================================================================================
-# OLD code:
-    # # Make a Pandas DataFrame
-    # # from the Python list of 
-    # # dictionaries:
-    # expected_df = pd.DataFrame(dim_date)        
 
-    # # Act: 
-    # # Make the Parquet file 
-    # # and put it in a buffer:
-    # buffer = convert_to_parquet(dim_date)
-    # # Go back to the beginning 
-    # # of the buffer: 
-    # buffer.seek(0)  
-    # # Make Pandas dataframe
-    # # from Parquet file:
-    # df_from_pq = pd.read_parquet(buffer, engine="pyarrow")
-    
-    # # Assert: 
-    # pd.testing.assert_frame_equal(df_from_pq, expected_df)
 

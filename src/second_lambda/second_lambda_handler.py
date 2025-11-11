@@ -151,21 +151,12 @@ def second_lambda_handler(event, context):
 
 
     # Convert the dim/fact table to a 
-    # Parquet file in a buffer. 
-    # This preserves the order of 
-    # the keys as they were in the 
-    # dictionaries (important for the 
-    # utility function of the third 
-    # lambda handler that makes SQL 
-    # query strings):
+    # Parquet file in a buffer: 
     pq_file = convert_to_parquet(dim_or_fact_table, table_name) # a buffer
 
     # Create the key (a string) under 
     # which to save the dim/fact table 
-    # in the processed bucket (note: 
-    # when you put a datetime object 
-    # in an fstring, Python converts 
-    # the object to a string):
+    # in the processed bucket:
     table_key = f"fact_{table_name}/{timestamp_string}.parquet" if table_name == "sales_order" else f"dim_{table_name}/{timestamp_string}.parquet"
 
 
