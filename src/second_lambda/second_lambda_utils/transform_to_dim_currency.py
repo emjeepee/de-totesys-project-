@@ -6,24 +6,35 @@ from .make_curr_obj import make_curr_obj
 def transform_to_dim_currency(currency_data):
     """
     This function:
-        1) transforms the currency table data that came from the 
-            ingestion bucket (and is now unjsonified) into the 
-            currency dimension table. In doing so it gets rid of
-            those key-value pairs that the dimension table
-            does not require and adds key-value pair
+        1) transforms the currency 
+            table data that came 
+            from the ingestion bucket 
+            into the currency 
+            dimension table. In doing 
+            so it gets rid of 
+            unnecessary key-value 
+            pairs and adds one 
+            key-value pair:
             'currency_name': <name-of-currency>.
 
     Args:
-        currency_data: a list of dictionaries that came from 
-        the ingestion bucket and represents the currency 
-        table. Each dictionary represents a row.
+        currency_data: a list of d
+        ictionaries that came from 
+        the ingestion bucket and 
+        represents the currency 
+        table. Each dictionary 
+        represents a row.
 
     Returns:
-        A list of dictionaries that is the currency dimension 
+        A list of dictionaries that 
+        is the currency dimension 
         table.    
     """
 
-
+    # Make a preprocessed dimension 
+    # currency table (pp_curr_dim_table)
+    # by removing unwanted columns and 
+    # their cell values:
     pp_curr_dim_table = preprocess_dim_tables(currency_data, ['created_at', 'last_updated'])
     
     try:
@@ -32,9 +43,14 @@ def transform_to_dim_currency(currency_data):
             curr_name = curr_obj.name
             row_dict['currency_name'] = curr_name
 
-        # preproc_currency_dim_table is 
+        # pp_curr_dim_table is 
         # now the finished currency 
-        # dimension table. Return it:
+        # dimension table. 
+        # Its columns are: 'currency_id', 'currency_code', 'currency_name'
+        # 
+        # 
+        # 
+        # Return it:
         return pp_curr_dim_table
     except:
         raise(RuntimeError)

@@ -59,10 +59,9 @@ def make_staff_or_cp_dim_table(
          list of dictionaries.                        
     """
 
-    # If aux_table_name is 'department'
-    # get the latest department table. 
-    # If aux_table_name is 'address'
-    # get the latest address table.  
+    # aux_python will be either 
+    # the latest address table 
+    # or latest department table:  
     aux_python = get_latest_table(s3_client, ingestion_bucket, aux_table_name)
 
     # call function_lookup_table(), 

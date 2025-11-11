@@ -31,5 +31,8 @@ def transform_to_dim_design(design_data):
 
     # design_dim_table is 
     # now the finished design
-    # dimension table. Return it:
+    # dimension table. 
+    # Its columns are: 'design_id', 'design_name', 'file_location', 'file_name' 
+    # 
+    # Return it:
     return design_dim_table

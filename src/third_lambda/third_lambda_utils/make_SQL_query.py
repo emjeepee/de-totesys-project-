@@ -10,10 +10,8 @@ def make_SQL_query(table_name:str, cols_str: str, vals_str:str, cols):
     """
     This function:
         Makes an SQL query string
-        that another function will 
-        use to write data from a 
-        dimension table or the fact 
-        table to the data warehouse. 
+        for one row of a dimension 
+        table or of the fact table. 
 
     Args:
         table_name: the name of the 
@@ -34,17 +32,18 @@ def make_SQL_query(table_name:str, cols_str: str, vals_str:str, cols):
          ['design_id', 'xxx', 'yyy']
 
     Returns:
-
+        query: the SQL query string.
     
     """
 
-    # If the table is the facts 
-    # table:
+    # If the table is the 
+    # facts table:
     if table_name == "facts_sales_order":
             query = f"INSERT INTO {table_name} ({cols_str}) VALUES ({vals_str});"
     
-    # If the table is a dimensions
-    # table:
+    
+    # If the table is a 
+    # dimensions table:
     else:
             pk = cols[0]
             update_pairs = ", ".join(f"{c} = EXCLUDED.{c}" for c in cols if c != pk)

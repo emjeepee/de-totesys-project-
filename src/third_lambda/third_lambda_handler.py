@@ -78,23 +78,22 @@ def third_lambda_handler(event, context):
     try:
         # Get the buffer that contains 
         # the Parquet file that represents
-        # the diension table or facts 
-        # table:
+        # the dimension table/facts table:
         pq_buff = lookup['s3_client'].get_object(Key=lookup['object_key'], Bucket=lookup['proc_bucket'])
     except Exception:
         logger.error(err_msg)
 
 
-    # make the SQL queries from the 
-    # data in the Parquet file in 
-    # the buffer:
+    # create SQL query strings from
+    # the data in the Parquet file 
+    # in the buffer:
     queries_list = make_SQL_query_list(pq_buff, lookup['table_name'])  
     
 
     try:
-        # Make SQL queries to the data 
-        # warehouse to insert data into
-        # the table there:
+        # Use the SQL queries to put
+        # table data into the 
+        # warehouse:
         make_SQL_queries_to_warehouse(queries_list, lookup['conn'])  
 
         # Close connection to warehouse:

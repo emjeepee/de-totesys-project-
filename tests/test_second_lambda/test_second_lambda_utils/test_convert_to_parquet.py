@@ -26,7 +26,12 @@ def setup():
 
 
 def test_calls_all_functions_correctly(setup):
-
+    """
+    Also tests that convert_to_parquet() 
+    returns the buffer created by the 
+    last function that convert_to_parquet()
+    calls. 
+    """
     # Arrange:
     expected = 'buffer'
     expected_fail = 'expected_fail'

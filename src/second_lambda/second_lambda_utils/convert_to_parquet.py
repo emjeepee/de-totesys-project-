@@ -37,31 +37,36 @@ def convert_to_parquet(data: list, table_name: str):
 
     # makes parts of the insert 
     # statements that will insert 
-    # row data (from the table 
-    # passed in) into the duckdb
-    # Parquet file that this 
-    # function will make:
+    # row data from the table
+    # into the duckdb Parquet 
+    # file that this function 
+    # will make:
     ph_and_v_list = make_parts_of_insert_statements(data)
     values_list  = ph_and_v_list[1]
     placeholders = ph_and_v_list[0]
     
-    # Create a temporary file with a 
-    # .parquet extension, put the file
+    # Create a temporary file with  
+    # extension .parquet, put the file
     # in tmp_path. The location will 
-    # be similar to '/tmp/xyz123.parquet'.
-    # Don't delete the temporary file 
-    # when the with block ends:
+    # be similar to '/tmp/xyz123.parquet'
+    # (where library tempfile generates 
+    # random character string instead of 
+    # xyz123. Don't delete the temporary 
+    # file when the with block ends:
     with tempfile.NamedTemporaryFile(delete=False, suffix='.parquet') as tmp:
         tmp_path = tmp.name
     
     # make a duckdb table in Parquet 
-    # format. the duckdb table column 
-    # names and rows come from the 
-    # passed-in list (arg data) that 
-    # represents a dimension table or 
-    # the fact table:
+    # format and save it to the temp
+    # location:
     put_pq_table_in_temp_file(table_name, col_defs, values_list, placeholders, tmp_path)
 
+    # Write the Parquet file in the 
+    # temporary location to a BytesIO
+    # buffer and permanently delete 
+    # the temporary Parquet file 
+    # at path tmp_path:          
+ 
     pq_buffer = write_parquet_to_buffer(tmp_path)
 
     return pq_buffer

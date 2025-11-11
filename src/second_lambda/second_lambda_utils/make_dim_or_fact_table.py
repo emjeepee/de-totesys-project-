@@ -40,10 +40,7 @@ def make_dim_or_fact_table(table_name: str, table_python: list, s3_client, inges
         of dictionaries, where each dictionary 
         represents a row of the table. The 
         first key in each dictionary is 
-        always the primary key of the table 
-        (important for later utility 
-        function used by the third lambda 
-        handler).      
+        always the primary key.      
     """
     if table_name == 'staff' or table_name == 'counterparty':
         # If the table name is 'staff' 

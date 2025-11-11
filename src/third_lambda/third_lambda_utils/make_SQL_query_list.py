@@ -1,6 +1,9 @@
-from .preprocess_buffer_1       import preprocess_buffer
+from .preprocess_buffer_1     import preprocess_buffer_1
 from .make_vals_for_SQL_query import make_vals_for_SQL_query
 from .make_SQL_query          import make_SQL_query
+
+
+
 
 
 
@@ -13,7 +16,7 @@ def make_SQL_query_list(buffer, table_name):
         the fact table. 
 
     Args:
-        buffer: a IOBytes object that 
+        buffer: a BytesIO object that 
         contains a Parquet file that 
         represents the dimension table
         or fact table.
@@ -27,7 +30,7 @@ def make_SQL_query_list(buffer, table_name):
     """
 
 
-    lst = preprocess_buffer(buffer, table_name)
+    lst = preprocess_buffer_1(buffer, table_name)
     queries = []
 
     for row in lst[0]:
