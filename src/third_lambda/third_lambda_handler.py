@@ -1,10 +1,10 @@
 import boto3
 import logging
 
-from third_lambda_utils.third_lambda_init              import third_lambda_init
-from third_lambda_utils.make_SQL_query_list            import make_SQL_query_list
-from third_lambda_utils.make_SQL_queries_to_warehouse  import make_SQL_queries_to_warehouse
-from third_lambda_utils.conn_to_db                     import conn_to_db, close_db
+from third_lambda_utils.third_lambda_init                import third_lambda_init
+from third_lambda_utils.make_insert_queries_from_parquet import make_insert_queries_from_parquet
+from third_lambda_utils.make_SQL_queries_to_warehouse    import make_SQL_queries_to_warehouse
+from third_lambda_utils.conn_to_db                       import conn_to_db, close_db
 
 logger = logging.getLogger()
 
@@ -29,8 +29,8 @@ def third_lambda_handler(event, context):
             warehouse.
         3) connects to the data warehouse 
             and loops through the list of 
-            query strings to make the queries 
-            to the warehouse.
+            query strings to make the 
+            queries to the warehouse.
             The query strings for dimension 
             tables ensure updated row data 
             replaces outdated row data in the 
@@ -87,7 +87,7 @@ def third_lambda_handler(event, context):
     # create SQL query strings from
     # the data in the Parquet file 
     # in the buffer:
-    queries_list = make_SQL_query_list(pq_buff, lookup['table_name'])  
+    queries_list = make_insert_queries_from_parquet(pq_buff, lookup['table_name'])
     
 
     try:

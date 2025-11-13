@@ -6,21 +6,35 @@ from .preprocess_dim_tables import preprocess_dim_tables
 def transform_to_dim_location(address_data: list):
     """
     This function:
-        1) transforms the address table data as read from the 
-         ingestion bucket (and converted into a python list) 
-         into a location dimension table.
-        2) carries out 1) above by changing key 'address_id' 
-          to 'location_id'   
+        1) transforms the address 
+            table data as read from 
+            the ingestion bucket 
+            into a location 
+            dimension table.
+        2) carries out 1) above by 
+            changing key 
+            'address_id' to 
+            'location_id'   
 
     Args:
-        address_data: a list of dictionaries that represents 
-         the address table. Each dictionary represents a row
-         (and its key-value pairs represent columnName-cellValue
-         pairs). This list is the unjsonified address table 
-         that the ingestion bucket stored.
+        address_data: a list 
+         of dictionaries that 
+         represents the address 
+         table. Each dictionary 
+         represents a row (and 
+         its key-value pairs 
+         represent 
+         columnName-cellValue
+         pairs). This list is 
+         the unjsonified 
+         address table that 
+         the ingestion bucket 
+         stored.
 
     Returns:
-        A list of dictionaries that is the location dimension 
+        A list of dictionaries 
+        that is the location 
+        dimension 
         table.    
     """
 
