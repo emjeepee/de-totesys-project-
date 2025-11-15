@@ -17,8 +17,8 @@ def format_value(value):
           None to 'NULL',
           string xyz to 'xyz',
           string O'Rourke to 'O''Rourke',
-          True to 'TRUE',
-          False to 'FALSE',  
+          Boolean True to 'TRUE',
+          Boolean False to 'FALSE',  
         
     Args:
         value: the Python value 
@@ -32,15 +32,17 @@ def format_value(value):
     """
     
     if value is None:
-        return 'NULL'
+        return '"NULL"'
     elif isinstance(value, str):
         # escape single quotes 
         # by doubling them (as SQL 
         # requires), then put the 
         # resulting value between 
-        # single quotes:
-        return f"'{value.replace("'", "''")}'"
+        # double quotes (so that
+        # 'O'Rourke' becomes 
+        # "O''Rourke"):
+        return f'"{value.replace("'", "''")}"'
     elif isinstance(value, bool):
-        return 'TRUE' if value else 'FALSE'
+        return '"TRUE"' if value else '"FALSE"'
     else:
         return str(value)

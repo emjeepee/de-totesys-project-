@@ -1,19 +1,19 @@
-
-from datetime import datetime
-
-from second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
-from second_lambda_utils.read_from_s3             import read_from_s3
-from zz_to_dump.convert_to_parquetOLD       import convert_to_parquet
-from second_lambda_utils.upload_to_s3             import upload_to_s3
-from second_lambda_utils.second_lambda_init       import second_lambda_init
-from second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
-from second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
-from second_lambda_utils.should_make_dim_date     import should_make_dim_date
-
-
 import json
 import boto3
 import logging
+
+from datetime import datetime
+
+from src.second_lambda.second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
+from src.second_lambda.second_lambda_utils.read_from_s3             import read_from_s3
+from src.second_lambda.second_lambda_utils.convert_to_parquet       import convert_to_parquet
+from src.second_lambda.second_lambda_utils.upload_to_s3             import upload_to_s3
+from src.second_lambda.second_lambda_utils.second_lambda_init       import second_lambda_init
+from src.second_lambda.second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
+from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
+from src.second_lambda.second_lambda_utils.should_make_dim_date     import should_make_dim_date
+
+
 
 
 
@@ -101,6 +101,16 @@ def second_lambda_handler(event, context):
                                                                            # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}        
     except Exception:
         logger.error(err_msg)
+        # Need the raise below
+        # otherwise when read_from_s3 
+        # raises an exception and 
+        # the error message is logged 
+        # the line below 
+        # (json.loads(table_json))
+        # will run too, but table_json
+        # will not have been set! 
+        # Could also use a return:
+        raise
     
 
     # make a Python list version of the table:
@@ -125,6 +135,7 @@ def second_lambda_handler(event, context):
                              s3_client)
     except Exception:
         logger.error(err_msg)
+        raise
                     
         
 
@@ -148,6 +159,11 @@ def second_lambda_handler(event, context):
 
     except Exception:
         logger.error(err_msg)
+        # following line needed 
+        # to ensure code stops
+        # running (could also 
+        # have used a return):
+        raise 
 
 
     # Convert the dim/fact table to a 
@@ -166,6 +182,7 @@ def second_lambda_handler(event, context):
         upload_to_s3(s3_client, proc_bucket, table_key, pq_file)
     except Exception:
         logger.error(err_msg)
+        raise
 
 
 

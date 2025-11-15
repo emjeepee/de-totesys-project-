@@ -5,10 +5,13 @@ import duckdb
 def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, placeholders, tmp_path: str):
     """
     This function:
-        Uses table data extracted 
-        elsewhere to recreate the 
-        table in Parquet format
-        in duckdb. 
+        Uses table data (extracted 
+        elsewhere from the 
+        ingestion bucket and 
+        converted into a list of 
+        dictionaries) to recreate 
+        the table in Parquet 
+        format in duckdb. 
         The original table was 
         either a dimension table 
         or the fact table, either 

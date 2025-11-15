@@ -42,7 +42,7 @@ def make_list_of_formatted_row_values(row):
         # format each value to 
         # allow it to be part of 
         # an SQL query string:
-        frmttd_val = format_value(value) # 5 or 'xyx' or 75.5 or '2020-01-15' or NULL or 'TRUE', etc
-        formatted_values.append(frmttd_val) # [5, 'xyx', 75.5, '2020-01-15']    
+        frmttd_val = format_value(value) # 5 or "xyx" or 75.5 or "2020-01-15" or "NULL" or "TRUE", etc
+        formatted_values.append(frmttd_val) # ['5', '"xyz"', '75.5', '"TRUE"', '"NULL"']    
 
     return formatted_values

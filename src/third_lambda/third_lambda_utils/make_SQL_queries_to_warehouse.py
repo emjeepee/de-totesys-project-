@@ -1,7 +1,6 @@
 from pg8000.native import (
     DatabaseError,
-    InterfaceError,
-    TimeoutError    
+    InterfaceError  
                          )
 
 import logging

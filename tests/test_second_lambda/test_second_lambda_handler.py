@@ -1,15 +1,8 @@
-import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
-import calendar
 import pytest
 import os
 import json
 import boto3
-import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
-from io import BytesIO
+
 
 
 from moto import mock_aws
@@ -77,7 +70,6 @@ def general_setup():
                   ]
                 }   
 
-
         mock_py_tbl = [
              {'design_id': 1, 
               'created_at': '2025-8-12-12-11-10-73000)', 
@@ -105,10 +97,6 @@ def general_setup():
         
         mock_pq = convert_to_parquet(mock_mdoft_return)
 
-
-        mock_sli_return = {}
-
-
         object_key = mock_event["Records"][0]["s3"]["object"]["key"]
 
         mock_sli_return = {
@@ -120,11 +108,9 @@ def general_setup():
         'table_name': object_key.split("/")[0], # name of table, eg 'sales_order'
         'start_date': datetime(24, 1, 1), # datetime object for 1 Jan 2024 (includes time info for midnight)
         'num_rows' : 3 # a datetime object for 1 Jan 2024
-            }
+                            }
         
         mock_ts = "dim_design/2025-08-22_15-30-00.parquet"
-
-
 
         yield mock_event, mock_py_tbl, mock_json_tbl, mock_mdoft_return, mock_pq, mock_sli_return, mock_ts 
 
@@ -158,15 +144,16 @@ def test_integrates_all_utility_functions(general_setup):
          patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
          patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
          patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
-         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
          patch('src.second_lambda.second_lambda_handler.is_first_run_of_pipeline') as mock_ifrop, \
          patch('src.second_lambda.second_lambda_handler.create_dim_date_Parquet') as mock_cddP:     
             mock_sli.return_value = mock_sli_return
             mock_rfs3.return_value = mock_json_tbl
             mock_mdoft.return_value = mock_mdoft_return
             mock_ctp.return_value = mock_pq
+
+            # Act:
             second_lambda_handler(mock_event, 'context')
-            mock_sli.assert_called_once_with(mock_event, mock_mb3c("s3"), ANY, datetime(2024, 1, 1))
+            mock_sli.assert_called_once_with(mock_event, mock_mb3c("s3"), ANY, datetime(2024, 1, 1), 2557)
             # read_from_s3(s3_client from lookup, ingestion_bucket from lookup, object_key from lookup)
             mock_rfs3.assert_called_once_with(mock_sli_return['s3_client'],  mock_sli_return['ingestion_bucket'],  mock_sli_return['object_key'] )
 
@@ -180,7 +167,7 @@ def test_integrates_all_utility_functions(general_setup):
             mock_mdoft.assert_called_once_with(mock_sli_return['table_name'], mock_py_tbl, mock_sli_return['s3_client'], mock_sli_return['ingestion_bucket'])
 
             # convert_to_parquet(dim_or_fact_table--return of mdoft)
-            mock_ctp.assert_called_once_with(mock_mdoft_return)
+            mock_ctp.assert_called_once_with(mock_mdoft_return, mock_sli_return['table_name'])
 
             # upload_to_s3(s3_client, proc_bucket, table_key, pq_file)
             mock_uts3.assert_called_once_with(mock_sli_return['s3_client'], mock_sli_return['proc_bucket'], mock_ts, mock_pq)
@@ -195,20 +182,16 @@ def test_raises_RuntimeError_when_read_from_s3_fails(general_setup):
     
 
     with patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
-         patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
-         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
-         patch('src.second_lambda.second_lambda_handler.boto3.client') as mock_mb3c, \
-         patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
-         patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
-         patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
-         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
-         patch('src.second_lambda.second_lambda_handler.is_first_run_of_pipeline') as mock_ifrop, \
-         patch('src.second_lambda.second_lambda_handler.create_dim_date_Parquet') as mock_cddP:     
+         patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3,\
+         patch('src.second_lambda.second_lambda_handler.json.loads') as mock_jl: 
+         # patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
+         # patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp:     
+            mock_jl.return_value = [{}, {}]
             mock_sli.return_value = mock_sli_return
-            # mock_rfs3.return_value = mock_json_tbl
+            mock_rfs3.return_value = mock_json_tbl
             mock_rfs3.side_effect = RuntimeError()
-            mock_mdoft.return_value = mock_mdoft_return
-            mock_ctp.return_value = mock_pq
+            # mock_mdoft.return_value = mock_mdoft_return
+            # mock_ctp.return_value = mock_pq
             with pytest.raises(RuntimeError):
                 # return
                 second_lambda_handler(mock_event, 'context')
@@ -227,28 +210,33 @@ def test_raises_RuntimeError_when_smdd_fails(general_setup):
 
     with patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
          patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
-         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
-         patch('src.second_lambda.second_lambda_handler.boto3.client') as mock_mb3c, \
-         patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
-         patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
-         patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
-         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
-         patch('src.second_lambda.second_lambda_handler.is_first_run_of_pipeline') as mock_ifrop, \
-         patch('src.second_lambda.second_lambda_handler.create_dim_date_Parquet') as mock_cddP:     
+         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd:     
             mock_sli.return_value = mock_sli_return
             mock_rfs3.return_value = mock_json_tbl
             mock_smdd.side_effect = RuntimeError()
-            # mock_mdoft.return_value = mock_mdoft_return
-            # mock_ctp.return_value = mock_pq
-            
-            # mock_mdoft.return_value = mock_mdoft_return
-            # mock_ctp.return_value = mock_pq
             with pytest.raises(RuntimeError):
-                # return
                 second_lambda_handler(mock_event, 'context')
 
 
 
+# @pytest.mark.skip
+def test_raises_RuntimeError_when_mdoft_fails(general_setup):
+    """
+    mdoft is utility function make_dim_or_fact_table().
+    """
+    # Arrange:
+    (mock_event, mock_py_tbl, mock_json_tbl, mock_mdoft_return, mock_pq, mock_sli_return, mock_ts ) = general_setup
+    with patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
+         patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
+         patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
+         patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft:
+        mock_smdd.return_value = "mock_smdd_return_value"
+        mock_rfs3.return_value = mock_json_tbl
+        mock_sli.return_value = mock_sli_return
+        mock_mdoft.side_effect = RuntimeError()
+        with pytest.raises(RuntimeError):
+                second_lambda_handler(mock_event, 'context')
+        
 
 
 # @pytest.mark.skip
@@ -260,22 +248,15 @@ def test_raises_RuntimeError_when_uts3_fails(general_setup):
     (mock_event, mock_py_tbl, mock_json_tbl, mock_mdoft_return, mock_pq, mock_sli_return, mock_ts ) = general_setup
     
 
-    with patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
+    with patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
          patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
-         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
-         patch('src.second_lambda.second_lambda_handler.boto3.client') as mock_mb3c, \
+         patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
          patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
-         patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
-         patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
-         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
-         patch('src.second_lambda.second_lambda_handler.is_first_run_of_pipeline') as mock_ifrop, \
-         patch('src.second_lambda.second_lambda_handler.create_dim_date_Parquet') as mock_cddP:     
-            mock_sli.return_value = mock_sli_return
-            mock_rfs3.return_value = mock_json_tbl
-            mock_mdoft.return_value = mock_mdoft_return
-            mock_ctp.return_value = mock_pq
+         patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_pq, \
+         patch('src.second_lambda.second_lambda_handler.json.loads') as mock_jl, \
+         patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3:   
+            mock_pq.return_value = 'mock_pq_return_value'  
             mock_uts3.side_effect = RuntimeError()
-            
             with pytest.raises(RuntimeError):
                 # return
                 second_lambda_handler(mock_event, 'context')

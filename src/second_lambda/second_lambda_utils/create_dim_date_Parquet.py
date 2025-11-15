@@ -1,5 +1,5 @@
 from .make_dim_date_python import make_dim_date_python
-from ....zz_to_dump.convert_to_parquetOLD import convert_to_parquet
+from .convert_to_parquet import convert_to_parquet
 
 
 
@@ -49,7 +49,10 @@ def create_dim_date_Parquet(start_date, timestamp_string: str, num_rows: int):
     # rows in the table from start_date: 
     dim_date_py = make_dim_date_python(start_date, num_rows) # a list of dictionaries
     
-    # Convert the list to Parquet form: 
+    # convert_to_parquet() converts the 
+    # list to Parquet form, puts the 
+    # Parquet file in a BytessIO buffer 
+    # returns the buffer: 
     dim_date_pq = convert_to_parquet(dim_date_py)
     
     # Make a key under which to store 

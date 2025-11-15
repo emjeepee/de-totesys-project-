@@ -26,9 +26,9 @@ def make_list_of_query_strings(rows, table_name, column_str):
         in the form of a list 
         of tuples, like this: 
         # [
-        #   (1,  'xxx',   75.50,   datetime.date(2020, 1, 15) ),
-        #   (2,  'yyy',   82.00,   datetime.date(2019, 6, 10) ),
-        #   (3,  'zzz',   69.75,   datetime.date(2021, 3, 22) ),
+        #   (1,  "xxx",   75.50,   None, True ),
+        #   (2,  "yyy",   82.00,   None, False),
+        #   (3,  "zzz",   69.75,   None, True),
         #    etc
         # ]
 
@@ -42,7 +42,8 @@ def make_list_of_query_strings(rows, table_name, column_str):
         containing all of the 
         column names of the 
         dimension table or facts 
-        table.
+        table, eg:
+        'some_id, col_a, col_b, col_c'.
 
     Returns:
         A list of SQL query 
@@ -59,14 +60,16 @@ def make_list_of_query_strings(rows, table_name, column_str):
     # and put them in a list: 
     queries = []
     for row in rows:
-        # formatted_values will hold 
-        # the formatted values for 
-        # one row:
-        formatted_values = make_list_of_formatted_row_values(row)
+        # form_vals_list will be 
+        # a list containing the 
+        # formatted values for 
+        # one row, like this:
+        # ['5', '"xyz"', '75.5', '"TRUE"', '"NULL"']
+        form_vals_list = make_list_of_formatted_row_values(row) # ['5', '"xyz"', '75.5', '"TRUE"', '"NULL"']
         # make a list of query 
         # strings:
-        queries = make_query_string_for_one_row(formatted_values, queries, table_name, column_str)
-
+        query_str = make_query_string_for_one_row(form_vals_list, table_name, column_str)
+        queries.append(query_str)
 
     return queries
     

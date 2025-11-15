@@ -66,7 +66,6 @@ def convert_to_parquet(data: list, table_name: str):
     # buffer and permanently delete 
     # the temporary Parquet file 
     # at path tmp_path:          
- 
     pq_buffer = write_parquet_to_buffer(tmp_path)
 
     return pq_buffer

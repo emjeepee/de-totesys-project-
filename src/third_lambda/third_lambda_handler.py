@@ -1,10 +1,10 @@
 import boto3
 import logging
 
-from third_lambda_utils.third_lambda_init                import third_lambda_init
-from third_lambda_utils.make_insert_queries_from_parquet import make_insert_queries_from_parquet
-from third_lambda_utils.make_SQL_queries_to_warehouse    import make_SQL_queries_to_warehouse
-from third_lambda_utils.conn_to_db                       import conn_to_db, close_db
+from src.third_lambda.third_lambda_utils.third_lambda_init                import third_lambda_init
+from src.third_lambda.third_lambda_utils.make_insert_queries_from_parquet import make_insert_queries_from_parquet
+from src.third_lambda.third_lambda_utils.make_SQL_queries_to_warehouse    import make_SQL_queries_to_warehouse
+from src.third_lambda.third_lambda_utils.conn_to_db                       import conn_to_db, close_db
 
 logger = logging.getLogger()
 
@@ -82,11 +82,15 @@ def third_lambda_handler(event, context):
         pq_buff = lookup['s3_client'].get_object(Key=lookup['object_key'], Bucket=lookup['proc_bucket'])
     except Exception:
         logger.error(err_msg)
+        raise
 
 
     # create SQL query strings from
     # the data in the Parquet file 
-    # in the buffer:
+    # in the buffer. Each query string 
+    # is for inserting one row of a 
+    # table into that table in the 
+    # warehouse:
     queries_list = make_insert_queries_from_parquet(pq_buff, lookup['table_name'])
     
 
@@ -100,6 +104,7 @@ def third_lambda_handler(event, context):
         close_db(lookup['conn'])
     except Exception:
         logger.error(err_msg)
+        raise
 
 
 
