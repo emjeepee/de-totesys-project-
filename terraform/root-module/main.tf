@@ -179,7 +179,7 @@ resource "aws_s3_object" "first_lambda_zip" {
 resource "aws_s3_object" "second_lambda_zip" {
   bucket = var.AWS_CODE_BUCKET
   key    = "zipped/second_lambda.zip"
-  source = "../../zipped_files/second_lambda.zip"  # must be relative to terraform dir
+  source = "../../zipped_files/second_lambda.zip"  # must be relative to dir terraform/root-module
                                               }
 
 # zipped handler for the third
@@ -187,7 +187,7 @@ resource "aws_s3_object" "second_lambda_zip" {
 resource "aws_s3_object" "third_lambda_zip" {
   bucket = var.AWS_CODE_BUCKET
   key    = "zipped/third_lambda.zip"
-  source = "../../zipped_files/third_lambda.zip"  # must be relative to terraform dir
+  source = "../../zipped_files/third_lambda.zip"  # must be relative to dir terraform/root-module
                                             }
 
 
