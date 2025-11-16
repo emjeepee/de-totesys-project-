@@ -70,9 +70,16 @@ locals {
     WAREHOUSE_DB_USER     = var.WAREHOUSE_DB_USER
 
     # More info that pg.8000.native needs
-    # to connect to the dta warehouse
-    # (each used in different calls to 
-    # by conn_to_db()):
+    # to connect to the data warehouse
+    # (conn_to_db() looks like this:
+    # def conn_to_db(DB_NAME: str):
+    #    ...
+    # host     = os.environ[f"{DB_NAME}_DB_HOST"]
+    # ), and in the call to conn_to_db(), code
+    # makes the arg the value of var OLTP_NAME,  
+    # for example, and host gets set to 
+    # the value of the env var whose name is made 
+    # up like this <value of env var OLTP_NAME>_DB_HOST:
     OLTP_NAME                  = var.OLTP_NAME
     WAREHOUSE_NAME             = var.WAREHOUSE_NAME
       }
