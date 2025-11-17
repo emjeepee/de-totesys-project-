@@ -1,10 +1,10 @@
 import boto3
 import logging
 
-from src.third_lambda.third_lambda_utils.third_lambda_init                import third_lambda_init
-from src.third_lambda.third_lambda_utils.make_insert_queries_from_parquet import make_insert_queries_from_parquet
-from src.third_lambda.third_lambda_utils.make_SQL_queries_to_warehouse    import make_SQL_queries_to_warehouse
-from src.third_lambda.third_lambda_utils.conn_to_db                       import conn_to_db, close_db
+from third_lambda_utils.third_lambda_init                import third_lambda_init
+from third_lambda_utils.make_insert_queries_from_parquet import make_insert_queries_from_parquet
+from third_lambda_utils.make_SQL_queries_to_warehouse    import make_SQL_queries_to_warehouse
+from third_lambda_utils.conn_to_db                       import conn_to_db, close_db
 
 logger = logging.getLogger()
 

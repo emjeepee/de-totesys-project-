@@ -4,14 +4,14 @@ import logging
 
 from datetime import datetime
 
-from src.second_lambda.second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
-from src.second_lambda.second_lambda_utils.read_from_s3             import read_from_s3
-from src.second_lambda.second_lambda_utils.convert_to_parquet       import convert_to_parquet
-from src.second_lambda.second_lambda_utils.upload_to_s3             import upload_to_s3
-from src.second_lambda.second_lambda_utils.second_lambda_init       import second_lambda_init
-from src.second_lambda.second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
-from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
-from src.second_lambda.second_lambda_utils.should_make_dim_date     import should_make_dim_date
+from second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
+from second_lambda_utils.read_from_s3             import read_from_s3
+from second_lambda_utils.convert_to_parquet       import convert_to_parquet
+from second_lambda_utils.upload_to_s3             import upload_to_s3
+from second_lambda_utils.second_lambda_init       import second_lambda_init
+from second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
+from second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
+from second_lambda_utils.should_make_dim_date     import should_make_dim_date
 
 
 
