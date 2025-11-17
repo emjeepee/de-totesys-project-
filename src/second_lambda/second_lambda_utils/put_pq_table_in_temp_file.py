@@ -45,7 +45,7 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
     Returns:
          None       
     """
-
+    print(f"MY_INFO >>>>> In function put_pq_table_in_temp_file(). About to run conn = duckdb.connect(':memory:')")
     # Create a database in RAM and
     # create object conn to allow
     # interaction with it:
@@ -53,23 +53,30 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
 
     # make a table, starting with 
     # the column names:
+    print(f"MY_INFO >>>>> In function put_pq_table_in_temp_file(). About to run conn.execute with f string with CREATE TABLE. The table is {table_name} and col_defs is {col_defs};")
     conn.execute(f"CREATE TABLE {table_name} ({col_defs});")
 
     # Insert the table's rows
     # one at a time:
     for values in values_list:
-        conn.execute(f'INSERT INTO {table_name} VALUES ({placeholders})', values)
-
+        try:
+            conn.execute(f'INSERT INTO {table_name} VALUES ({placeholders})', values)
+            conn.execute(f"COPY (SELECT * FROM {table_name}) TO ? (FORMAT PARQUET)", [tmp_path])
+        except Exception as e:
+            print(f"MY_INFO >>>>> In function put_pq_table_in_temp_file(), in the loop. Exception raised, skipping row {values}: {e}")
     # Write the Parquet file to
     # the temporary file:
     # SELECT * FROM data - get DuckDB to read the table in the list
     # COPY ... TO ? - save the results to a file
     # [tmp_path] - replace ? with your temp file path
     # FORMAT PARQUET - save as Parquet format
-    conn.execute("COPY (SELECT * FROM {table_name}) TO ? (FORMAT PARQUET)", [tmp_path])
+        finally:
+            # Close the connection to the
+            # database:
+            print(f"MY_INFO >>>>> In function put_pq_table_in_temp_file(). Out of loop. About to run conn.close() and return None")
+            conn.close()
+            return None
+            
 
-    # Close the connection to the
-    # database:
-    conn.close()
 
-    return None
+    

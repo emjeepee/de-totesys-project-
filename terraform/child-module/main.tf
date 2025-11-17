@@ -258,6 +258,8 @@ resource "aws_iam_role_policy_attachment" "attach_lambda_s3_access" {
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   name = "/aws/lambda/${var.lambda_name}"
   retention_in_days = 14
+
+
                                                   }
 
 

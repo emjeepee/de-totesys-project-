@@ -95,6 +95,7 @@ def second_lambda_handler(event, context):
     # function has just been notified 
     # about and convert it to a python 
     # list:
+    print("MY_INFO >>>>> In second lambda handler. about to read from ingestion bucket")
     try:
         table_json = read_from_s3(s3_client, ingestion_bucket, object_key) # jsonified [{<row data>}, {<row data>}, etc]
                                                                            # where {<row data>} is, eg,
@@ -112,12 +113,12 @@ def second_lambda_handler(event, context):
         # Could also use a return:
         raise
     
-
+    
     # make a Python list version of the table:
     table_python = json.loads(table_json) # [{<row data>}, {<row data>}, etc]
                                           # where {<row data>} is, eg,
                                           # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}        
-
+    print(f"MY_INFO >>>>> In second lambda handler. table_python is {table_python}")        
 
     try:
     # If this is the first ever run of the ETL 
@@ -125,6 +126,7 @@ def second_lambda_handler(event, context):
     # empty) make a date dimension table in 
     # Parquet form and save it in the 
     # processed bucket: 
+        print(f"MY_INFO >>>>> In second lambda handler. About to call funcion should_make_dim_date()")
         should_make_dim_date(is_first_run_of_pipeline, 
                              create_dim_date_Parquet, 
                              upload_to_s3, 
@@ -133,6 +135,7 @@ def second_lambda_handler(event, context):
                              num_rows, 
                              proc_bucket, 
                              s3_client)
+        
     except Exception:
         logger.error(err_msg)
         raise
@@ -151,7 +154,8 @@ def second_lambda_handler(event, context):
         # 'abcdef': 'xxx', 
         # 'design_name': 'yyy', 
         # etc
-        # }        
+        # }     
+        print(f"MY_INFO >>>>> In second lambda handler. About to call funcion make_dim_or_fact_table()")    
         dim_or_fact_table = make_dim_or_fact_table(table_name, 
                                                    table_python, 
                                                    s3_client, 
@@ -168,6 +172,7 @@ def second_lambda_handler(event, context):
 
     # Convert the dim/fact table to a 
     # Parquet file in a buffer: 
+    print(f"MY_INFO >>>>> In second lambda handler. About to call function convert_to_parquet()")    
     pq_file = convert_to_parquet(dim_or_fact_table, table_name) # a buffer
 
     # Create the key (a string) under 
@@ -179,6 +184,7 @@ def second_lambda_handler(event, context):
     try:
         # Write the Parquet file in 
         # the processed bucket:
+        print(f"MY_INFO >>>>> In second lambda handler. About to call function upload_to_s3()")    
         upload_to_s3(s3_client, proc_bucket, table_key, pq_file)
     except Exception:
         logger.error(err_msg)

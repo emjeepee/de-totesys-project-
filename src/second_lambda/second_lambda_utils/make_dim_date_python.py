@@ -9,37 +9,44 @@ import calendar
 def make_dim_date_python(start_date, loop_range: int, ):
     """
     This function:
-        Creates a list of dictionaries that 
-         represents the date dimension table. This list is 
-         the date dimension table. The first 
-         member dictionary has key date_id,
-         whose value is datetime object 
-         start_date. Subsequent member 
-         dictionaries have their date_id values
-         that increment by one day, ie 
-         start_date + 1 day, start_date + 2 days, 
+        Creates a list of dictionaries 
+         that represents the date 
+         dimension table. 
+         All dictionaries have the key 
+         date_id. In the dictionary at 
+         index 0 the value ofthe key 
+         is value is datetime object 
+         start_date. Successive 
+         dictionaries have date_id 
+         values that increment by one 
+         day, ie start_date + 1 day, 
+         start_date + 2 days, 
          start_date + 3 days, etc.
 
     Args:
-        start_date: a datetime object for the date from 
-         which the date dimension table must begin. 
+        start_date: a datetime object 
+         for the date from which the 
+         date dimension table must begin. 
 
-        loop_range: a number of days from loop_date.
-         Also the number of dictionaries that will
-         populate the list that represents the date 
-         dimension table (ie the number of rows).
+        loop_range: a number of days 
+         from loop_date. Also the number 
+         of dictionaries that will
+         populate the list that 
+         represents the date dimension 
+         table (ie the number of rows).
 
     Returns:
-        A date dimension table. This list of dictionaries 
-        looks like this:
+        A date dimension table as a 
+         list of dictionaries that looks 
+         like this:
         [ {"date_id": start_date, "year": 2020, "month": 07, "day": 2 ... etc},
           {"date_id": -start_date+1day-, "year": 2020, "month": 07, "day": 3 ... etc},
           {"date_id": -start_date+2days-, "year": 2020, "month": 07, "day": 4 ... etc},
           etc 
         ], 
-        For example, assuming start_date is a datetime object representing 
-        the date 2jul2020. If loop_range is 5000 there will be
-        5000 member dictionaries in the list        
+        If loop_range is, eg, 5000, there 
+        will be 5000 member dictionaries 
+        in the list.
 
     """
 

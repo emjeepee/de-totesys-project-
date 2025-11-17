@@ -27,6 +27,8 @@ def is_first_run_of_pipeline(proc_bucket: str, s3_client):
         False otherwise.
     """
 
+            
+
     err_msg = "An error occurred in is_first_run_of_pipeline() in attempt to list objects in the processed bucket"
 
     try:
@@ -36,8 +38,12 @@ def is_first_run_of_pipeline(proc_bucket: str, s3_client):
         logger.error(err_msg)
         raise 
 
-
+    
+    
     if objects_list["KeyCount"] == 0:
+        print(f"MY_INFO >>>>> In function is_first_run_of_pipeline. The processed bucket is empty")    
         return True
+    
+    print(f"MY_INFO >>>>> In function is_first_run_of_pipeline. The processed bucket is NOT empty")    
     return False        
 
