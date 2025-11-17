@@ -31,60 +31,67 @@ def make_staff_or_cp_dim_table(
     Args:
         1) table_name: will be either 
             'staff' or 'counterparty'.
+
         2) table_python: the staff or 
             counterparty table as 
             read from the ingestion 
             bucket and converted to a 
             python list.
+
         3) ingestion_bucket: the name of 
-            the ingestion bucket
+            the ingestion bucket.
+
         4) aux_table_name: the name of an 
             auxilliary table this function 
-            will retrieve from the 
-            ingestion bucket to help it
-            create either the staff or the 
+            will read from the ingestion 
+            bucket to help it create 
+            either the staff or the 
             counterparty dimension table.
-            Its value is 'department' if
-            this function has to make the
-            staff dimension table and 
-            'address' if it has to make 
-            the counterparty dimension 
-            table.
+            The value is either:
+                'department' if this 
+                function has to make the 
+                staff dimension table
+                'address' if this function
+                has to make the 
+                counterparty dimension 
+                table.
+
         5) s3_client: a boto3 S3 client 
             object.
 
     Returns:
         The staff or counterparty 
          dimension table as a list
-         list of dictionaries.                        
+         list of dictionaries.          
     """
 
-    # aux_python will be either 
-    # the latest address table 
-    # or latest department table:  
-    aux_python = get_latest_table(s3_client, ingestion_bucket, aux_table_name)
+    # aux_table_name will be either 
+    # 'address' or 'department'.
+    # Get that table (as a list of 
+    # dictionaries) from the 
+    # ingestion bucket:  
+    aux_python = get_latest_table(s3_client, 
+                                  ingestion_bucket, 
+                                  aux_table_name) 
 
-    # call function_lookup_table(), 
-    # which returns an appropriate 
-    # function.
+    # function_lookup_table() here 
+    # returns one of two functions:
+    # 1) transform_to_dim_staff() or 
+    # 2) transform_to_dim_counterparty() 
+    transform_funcn = func_lookup_table(table_name)
+
     # Pass in to the returned 
-    # function the main table and 
-    # the auxilliary table. This 
-    # will return the required 
-    # dimension table:
-    ret_function = func_lookup_table(table_name)
-    dim_table = ret_function(table_python, aux_python)
+    # function the main table 
+    # (staff or counterparty) 
+    # and the auxilliary table
+    # (department or address, 
+    # respectively) to create
+    # the required dimension 
+    # table:
+    dim_table = transform_funcn(table_python, aux_python)
 
     return dim_table
 
 
 
 
-
-    # if table_name == 'staff':
-    #     dept_python = get_latest_table(s3_client, ingestion_bucket, 'department')
-    #     dim_or_fact_table = function_lookup_table[table_name](table_python, dept_python) # will be a dimension table   
-        
-    # if table_name == 'counterparty':
-    #     address_python = get_latest_table(s3_client, ingestion_bucket, 'address')
-    #     dim_or_fact_table = function_lookup_table[table_name](table_python, address_python)  # will be a dimension table   

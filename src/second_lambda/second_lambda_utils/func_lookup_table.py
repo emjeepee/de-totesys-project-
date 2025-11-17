@@ -27,7 +27,7 @@ def func_lookup_table(table_name: str):
     lookup_table = {
     "sales_order": transform_to_star_schema_fact_table, # tested
     "staff": transform_to_dim_staff,
-    "address": transform_to_dim_location, # address table converted to location dim table
+    "address": transform_to_dim_location, # converts address table to location dim table
     "design": transform_to_dim_design,
     "counterparty": transform_to_dim_counterparty,
     "currency": transform_to_dim_currency,

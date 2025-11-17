@@ -9,18 +9,25 @@ logger = logging.getLogger(__name__)
 def get_latest_table(s3_client, bucket: str, table_name: str):
     """
     This function:
-        Gets the latest table of the given
-         table name from the given S3 bucket.
+        Gets the latest table of 
+        the given table name from 
+        the given S3 bucket.
 
     Args:
-        1) s3_client: a boto3 s3 client.
-        2) bucket: the name of the S3 bucket
-         from which to get the table.
-        3) table_name: the name of the table.
+        1) s3_client: a boto3 s3 
+        client.
+
+        2) bucket: the name of the 
+        S3 bucket from which to get 
+        the table.
+        
+        3) table_name: the name of 
+        the table.
 
     Returns:
-        A Python list of dictionaries that 
-         is the latest table of name 
+        A Python list of 
+         dictionaries that is the 
+         latest table of name 
          table_name.        
     """
 
