@@ -19,6 +19,10 @@ def convert_to_parquet(data: list, table_name: str):
         form of a list of dictionaries 
         into a table in Parquet format
         in a BytesIO buffer.
+        Function
+        second_lambda_handler() calls
+        this function.
+
     
     Args:
         data: a list of dictionaries
@@ -40,7 +44,7 @@ def convert_to_parquet(data: list, table_name: str):
 
     print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run function make_column_defs().")    
     # make a string of column names:
-    col_defs = make_column_defs(data)
+    col_defs = make_column_defs(data) # "some_col_name INT, some_col_name TEXT ..."
 
 
     # makes parts of the insert 
@@ -63,7 +67,7 @@ def convert_to_parquet(data: list, table_name: str):
     # random character string instead of 
     # xyz123. Don't delete the temporary 
     # file when the with block ends:
-    print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run with tempfile.NamedTemporaryFile().")    
+    # print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run with tempfile.NamedTemporaryFile().")    
     with tempfile.NamedTemporaryFile(delete=False, suffix='.parquet') as tmp:
         tmp_path = tmp.name
 
@@ -71,7 +75,7 @@ def convert_to_parquet(data: list, table_name: str):
     # make a duckdb table in Parquet 
     # format and save it to the temp
     # location:
-    print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run put_pq_table_in_temp_file().")
+    # print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run put_pq_table_in_temp_file().")
     put_pq_table_in_temp_file(table_name, col_defs, values_list, placeholders, tmp_path)
  
 
@@ -81,25 +85,9 @@ def convert_to_parquet(data: list, table_name: str):
     # buffer and permanently delete 
     # the temporary Parquet file 
     # at path tmp_path: 
-    print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run write_parquet_to_buffer().")
+    # print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run write_parquet_to_buffer().")
     pq_buffer = write_parquet_to_buffer(tmp_path)
                        
 
     return pq_buffer
     
-
-
-
-# OLD CODE:
-    # not_err_1 = f"NOT AN ERROR but col_defs is {col_defs}"
-    # logger.error(not_err_1)
-
-    # not_err_2 = f"NOT AN ERROR but values_list is {values_list}"
-    # not_err_3 = f"NOT AN ERROR but placeholders is {placeholders}"
-
-    # logger.error(not_err_2)
-    # logger.error(not_err_3)
-
-    
-    # not_err_4 = f"NOT AN ERROR but tmp_path is {tmp_path}"
-    # logger.error(not_err_4)

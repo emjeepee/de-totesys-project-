@@ -85,6 +85,8 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
 
     """
 
+    print(f"MY_INFO >>>>> In first lambda util write_to_s3(). data_list should be all fake tables. Actual value of first member is {data_list[0]}")        
+
     err_msg_1 = f"There has been an error in function write_to_s3(). \n Unable to read ingestion bucket." 
     err_msg_2 = f"There has been an error in function write_to_s3(). \n Unable to write to ingestion bucket." 
 
@@ -93,8 +95,19 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
     timestamp = create_formatted_timestamp()
 
 
-    # data_list is, eg, [{'design': [{<row data>}, {<row data>}, etc]}, {'sales': [{<row data>}, {<row data>}, etc]}, etc]
-    # where {<row data>>} is, eg, {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
+    # data_list is, eg, 
+    # [
+    # {'design': [{<row data>}, {<row data>}, etc]}, 
+    # {'sales_orders': [{<row data>}, {<row data>}, etc]}, 
+    # etc
+    # ], 
+    # where {<row data>>} is, eg, 
+    # {
+    # 'design_id': 123, 
+    # 'created_at': 'xxx', 
+    # 'design_name': 'yyy',
+    #  etc
+    # }
     for member in data_list: # member is, eg, {'design': [{<updated-row data>}, {<updated-row data>}, etc]}
         table_name = list(member.keys())[0]  # 'design'
 

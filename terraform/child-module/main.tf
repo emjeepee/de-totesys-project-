@@ -40,7 +40,19 @@
 
 locals {
   common_env_vars = {
-        # The S3 bucket names:  
+    # OLAP_OK has value True 
+    # if the totesys database 
+    # still contains valid info, 
+    # False if not 
+    # (Northcoders set the 
+    # value of the 
+    # 'last_updated' columns 
+    # in all tables to None in 
+    # November 2025, making
+    # the database unusable):
+    IS_OLAP_OK = "False"
+
+    # The S3 bucket names:  
     AWS_INGEST_BUCKET  = var.AWS_INGEST_BUCKET # used in get_env_vars() 
     AWS_PROCESS_BUCKET = var.AWS_PROCESS_BUCKET # used in second_lambda_init() 
     AWS_CODE_BUCKET    = var.AWS_CODE_BUCKET # used above
@@ -118,7 +130,7 @@ resource "aws_lambda_function" "mod_lambda" {
   #          ]
   layers = [
     var.layer_arn,
-  			]           
+  			   ]           
 
   environment {
     variables = local.common_env_vars
@@ -259,7 +271,16 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
   name = "/aws/lambda/${var.lambda_name}"
   retention_in_days = 14
 
-
+# Terraform sometimes automatically creates
+# log groups before Terraform tells it to, causing
+# an error after running terraform apply. 
+# The 'lifecycle' block below tells Terraform
+# not to create this log group if it already 
+# exists (NOTE: includng it does not make the 
+# error message go away!):
+lifecycle {
+    ignore_changes = [name]
+           }
                                                   }
 
 

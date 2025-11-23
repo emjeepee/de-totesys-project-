@@ -54,20 +54,3 @@ def transform_to_dim_location(address_data: list):
 
 
 
-    # OLD CODE:
-    # dim_location = []
-
-    # for location in location_data:
-        
-    #         transformed_row = {
-    #             "location_id": location.get("address_id"),
-    #             "address_line_1": location.get("address_line_1"),
-    #             "address_line_2": location.get("address_line_2"),
-    #             "district": location.get("district"),
-    #             "city": location.get("city"),
-    #             "postal_code": location.get("postal_code"),
-    #             "country": location.get("country"),
-    #             "phone": location.get("phone"),
-    #         }
-    #         dim_location.append(transformed_row)
-    # return dim_location

@@ -41,9 +41,9 @@ def is_first_run_of_pipeline(proc_bucket: str, s3_client):
     
     
     if objects_list["KeyCount"] == 0:
-        print(f"MY_INFO >>>>> In function is_first_run_of_pipeline. The processed bucket is empty")    
+        # print(f"MY_INFO >>>>> In function is_first_run_of_pipeline. The processed bucket is empty")    
         return True
     
-    print(f"MY_INFO >>>>> In function is_first_run_of_pipeline. The processed bucket is NOT empty")    
+    # print(f"MY_INFO >>>>> In function is_first_run_of_pipeline. The processed bucket is NOT empty")    
     return False        
 

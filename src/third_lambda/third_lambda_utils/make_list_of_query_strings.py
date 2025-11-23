@@ -1,8 +1,8 @@
 
 
-
+from .read_parquet_from_buffer          import read_parquet_from_buffer
 from .make_list_of_formatted_row_values import make_list_of_formatted_row_values
-from .make_query_string_for_one_row import make_query_string_for_one_row
+from .make_query_string_for_one_row     import make_query_string_for_one_row
 
 
 def make_list_of_query_strings(rows, table_name, column_str):
@@ -12,9 +12,8 @@ def make_list_of_query_strings(rows, table_name, column_str):
         INSERT statements, each 
         statement will tell the 
         data warehouse to insert 
-        values into a particular 
-        dimension table or the 
-        facts table.
+        values into a dimension
+        table or the facts table.
         
         2. returns the list.
     
@@ -55,6 +54,8 @@ def make_list_of_query_strings(rows, table_name, column_str):
         data warehouse.       
 
     """
+
+    
 
     # generate INSERT queries 
     # and put them in a list: 

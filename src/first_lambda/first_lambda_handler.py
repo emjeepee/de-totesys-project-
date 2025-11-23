@@ -5,6 +5,7 @@ from first_lambda_utils.write_to_s3                 import write_to_s3
 from first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
 from first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
 from first_lambda_utils.get_env_vars                import get_env_vars
+from first_lambda_utils.reorder_list                import reorder_list
 
 
 
@@ -27,19 +28,25 @@ logging.basicConfig(
 def first_lambda_handler(event, context):
     """
     This function:
-        1) runs every five minutes in response to
-            an AWS EventBridge trigger.
-        2) makes SQL queries to totesys database 
-            to get updated row data for every
-            table that has had its row data updated 
+        1) runs every five minutes 
+           in response to an AWS 
+           EventBridge trigger.
+        2) makes SQL queries to the
+            totesys database to get 
+            updated row data for 
+            every table that has 
+            had its row data updated 
             in the totesys database.
-        3) for each table that has had rows updated 
-            in the totesys database goes to the 
-            ingestion bucket and gets the previously 
-            saved table of the same name and updates 
-            it with the new row data.
-        4) saves each updated table to the ingestion
-             bucket under a new key (leaving the 
+        3) for each table that has 
+            had rows updated goes to 
+            the ingestion bucket and 
+            gets the previously saved 
+            table of the same name 
+            and updates it with the 
+            new row data.
+        4) saves each updated table 
+             to the ingestion bucket 
+             under a new key (leaving the 
              previous table in place). 
 
     Args:
@@ -85,16 +92,35 @@ def first_lambda_handler(event, context):
     try: 
         # Find only those tables in the ToteSys 
         # database that have updated rows.
-        data_for_s3 = get_data_from_db(tables, after_time, conn, read_table) 
-            # [{'design': [{<updated-row data>}, etc]}, {'sales': [{<updated-row data>}, etc]}, etc].
-            # where {<updated-row data>} is eg {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
+        updated_tables = get_data_from_db(tables, after_time, conn, read_table) 
+            # [
+            # {'design': [{<updated-row data>}, etc]}, 
+            # {'sales': [{<updated-row data>}, etc]}, 
+            # etc
+            # ]
+            # where {<updated-row data>} is, eg, {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
     except Exception: 
         root_logger.exception("Error caught in first_lambda_handler() while trying to run get_data_from_db()\n\n")    
 
+    # If the department table or 
+    # the address table are in
+    # list updated_tables, move 
+    # them to the front of the 
+    # list. This ensures that 
+    # updated versions of those
+    # tables are always 
+    # available for the code in 
+    # the second lambda handler 
+    # that creates the dim_staff 
+    # and dim_counterparty tables:
+    data_for_s3 = reorder_list(updated_tables, "address", "department")
+
+
 
     try:
-        # write updated row data from each
-        # table to the ingestion bucket: 
+        # write updated row data 
+        # from each table to the 
+        # ingestion bucket: 
         write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name)
     except Exception: 
         root_logger.exception("Error caught in first_lambda_handler() while trying to run write_to_s3()\n\n")    

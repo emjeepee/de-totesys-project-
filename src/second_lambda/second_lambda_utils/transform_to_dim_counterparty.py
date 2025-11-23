@@ -1,5 +1,5 @@
 from .preprocess_dim_tables import preprocess_dim_tables
-from .add_keys_and_values   import add_keys_and_values
+from .make_dictionary   import make_dictionary
 
 
 
@@ -9,19 +9,42 @@ from .add_keys_and_values   import add_keys_and_values
 def transform_to_dim_counterparty(counterparty_data, address_data):
     """
     This function: 
-        transforms the 
-         counterparty table from 
-         the ingestion bucket 
-         into a counterparty 
-         dimension table by:
-         1) getting the additional 
-            data needed to make the 
-            counterparty dimension 
-            table from the address 
-            table (address_data)
-        2) removing unneeded data 
-            from the counterparty 
-            table.
+        1) transforms the 
+        counterparty table that a
+        another function previously 
+        read from the ingestion 
+        bucket into a counterparty 
+        dimension table.
+        
+        2) achieves 1) by looping 
+        through the dictionaries in 
+        the counterparty table. For 
+        each dictionary, this function 
+        finds the value of the key 
+        'legal_address_id' and finds 
+        the dictionary in the address 
+        table that has the same value 
+        for its key 'address_id'.
+        This function then creates new
+        keys in the counterparty table,
+        setting the values of those 
+        keys to the values of specific 
+        keys in the address table.
+        For example: a this function 
+        will create key 
+        "counterparty_legal_address_line_1"
+        in the dictionary in the 
+        counterparty table and set its 
+        value to the value of key 
+        "address_line_1" in the 
+        dictionary from the address 
+        table.
+        This function also ensures 
+        that the counterparty dimension
+        table it creates contains no 
+        unneeded data from the 
+        counterparty table.
+
 
     Args:
         counterparty_data: a list 
@@ -98,51 +121,44 @@ def transform_to_dim_counterparty(counterparty_data, address_data):
     #    "counterparty_legal_country"
     #    "counterparty_legal_phone_number"
 
+    
  
     # 1):
+    # Get the value of key 
     key_pairs = [
     ("counterparty_legal_address_line_1", "address_line_1"),
     ("counterparty_legal_address_line_2", "address_line_2"),
     ("counterparty_legal_district", "district"),
-    ("counterparty_legal_legal_city", "city"),
-    ("counterparty_legal_legal_postal_code", "postal_code"),
+    ("counterparty_legal_city", "city"),
+    ("counterparty_legal_postal_code", "postal_code"),
     ("counterparty_legal_country", "country"),
     ("counterparty_legal_phone_number", "phone"),
                 ]
 
+    # for each row in the 
+    # counterparty table find
+    # the value of the key 
+    # 'legal_address_id' and 
+    # find the row in the address
+    # table whose 'address_id' 
+    # key has the same value:
+    cp_dim_table = []
     for row_CP in counterparty_data:
         for row_ADD in address_data:
             if row_CP['legal_address_id'] \
                 == row_ADD['address_id']:
-                add_keys_and_values(row_CP, row_ADD, key_pairs)
+                # For the row in the counterparty
+                # table add new keys and values:
+                new_cp_row = make_dictionary(row_ADD, key_pairs)
+                new_cp_row['counterparty_id'] = row_CP['counterparty_id'] #
+                new_cp_row['counterparty_legal_name'] = row_CP['counterparty_legal_name'] 
+                cp_dim_table.append(new_cp_row) #
 
-    # 2): 
-    cp_dim_table = preprocess_dim_tables(counterparty_data, 
-                                            [ 'legal_address_id', 
-                                             'commercial_contact', 
-                                             'delivery_contact', 
-                                             'created_at', 
-                                             'last_updated']
-                                             )
+    
 
     return cp_dim_table
 
 
 
-#=========#=========#=========#=========#=========#=========#=========#=========
+              
 
-    # OLD CODE
-                # row_CP["counterparty_legal_address_line_1"]\
-                #     = row_ADD["address_line_1"]
-                # row_CP["counterparty_legal_address_line_2"]\
-                #     = row_ADD["address_line_2"]
-                # row_CP["counterparty_legal_district"]\
-                #     = row_ADD["district"]
-                # row_CP["counterparty_legal_legal_city"]\
-                #     = row_ADD["city"]
-                # row_CP["counterparty_legal_legal_postal_code"]\
-                #     = row_ADD["postal_code"]
-                # row_CP["counterparty_legal_country"]\
-                #     = row_ADD["country"]
-                # row_CP["counterparty_legal_phone_number"]\
-                #     = row_ADD["phone"]                

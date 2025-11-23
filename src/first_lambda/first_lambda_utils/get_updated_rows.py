@@ -53,6 +53,7 @@ def get_updated_rows(conn_obj, after_time: str, table_name: str):
     try: 
         response = conn_obj.run(query, after_time=after_time)
         # log status:
+        print("Function get_updated_rows() successfully\n got updated rows of table: %s", table_name)
         logger.info("Function get_updated_rows() successfully\n got updated rows of table: %s", table_name)
 
         return response

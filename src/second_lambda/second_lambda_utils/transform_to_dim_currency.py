@@ -69,23 +69,3 @@ def transform_to_dim_currency(currency_data):
 
 
 
-# OLD CODE:
-    # dim_currency = []
-
-    # for currency in currency_data:
-    #     currency_obj: Currency = get_currency_by_code(
-    #         currency.get("currency_code")
-    #         )  # Generates a currency object based on the code
-
-    #     currency_name = (
-    #             currency_obj.name
-    #         )  # Grab the name from the object made above
-
-    #     transformed_row = {
-    #             "currency_id": currency.get("currency_id"),
-    #             "currency_code": currency.get("currency_code"),
-    #             "currency_name": currency_name,
-    #         }
-    #     dim_currency.append(transformed_row)
-
-    # return dim_currencys

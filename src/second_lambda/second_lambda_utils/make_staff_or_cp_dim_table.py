@@ -27,6 +27,10 @@ def make_staff_or_cp_dim_table(
             table requires. This function 
             gets the address table from 
             the ingestion bucket.
+        
+        Function 
+        make_staff_or_cp_dim_table()
+        calls this function.            
 
     Args:
         1) table_name: will be either 

@@ -14,38 +14,54 @@ def transform_to_star_schema_fact_table(table_data):
 
     Args:
         table_data: the sales_order table 
-         from the ingestion bucket 
-         converted into a Python list of 
-         dictionaries. 
+         from the ingestion bucket. This 
+         is a list of dictionaries. 
         
     Returns:
-        a Python list of dictionaries that 
+        a list of dictionaries that 
          is the sales_order fact table.
-
     """
     
-    # The following shows the columns
-    # of the fact_sales_order table
+    # fact_sales_order table columns
     # in the warehouse and the SQL
     # types of their values:
-    #    col               value's SQL type      eg
-    # created_date            date            2024-01-01
-    # created_time            time            14:35:20  
-    # last_updated_date       date            2024-01-01
-    # last_updated_time       time            14:35:20  
-    # agreed_payment_date     date            2024-01-01  
-    # agreed_delivery_date    date            2024-01-01  
-    # unit_price            numeric(10,2)       2.45  
-    #    All the rest are ints
+
+    #    col               value's SQL type                  other 
+    # sales_record_id         SERIAL          # -- make in INSERT statement -- #                          
+    # sales_order_id          int                                       
+    # created_date            date                                      (from 'created_at')
+    # created_time            time                                      (from 'created_at')
+    # last_updated_date       date                                      (from 'last_updated')
+    # last_updated_time       time                                      (from 'last_updated')
+    # sales_staff_id          int                                       (same as staff_id?)
+    # counterparty_id         int                                       
+    # units_sold              int                                       
+    # unit_price            numeric(10,2)                           
+    # currency_id             int                                       
+    # design_id               int                                       
+    # agreed_payment_date     date                           
+    # agreed_delivery_date    date                            
+    # agreed_delivery_        int
+    #          location_id                                    
+
 
 
     # the sales_orders table as retrieved from
     # the ingestion bucket looks like this:
-            #             [
-            #  {'sales_order_id': 15647, 'created_at': datetime(2025, 8, 13, 9, 47, 9, 901000), 'last_updated': datetime(2025, 8, 13, 9, 47, 9, 901000),  'design_id': 648,  'staff_id': 19,  'counterparty_id': 14, 'units_sold': 36692, 'unit_price': Decimal('2.40'), 'currency_id': 2, 'agreed_delivery_date': '2025-08-20', 'agreed_payment_date': '2025-08-16', 'agreed_delivery_location_id': 11},
-            #  {'sales_order_id': 15648, 'created_at': datetime(2025, 9, 13, 9, 47, 9, 901000), 'last_updated': datetime(2025, 9, 13, 9, 47, 9, 901000),  'design_id': 649,  'staff_id': 19,  'counterparty_id': 12, 'units_sold': 36692, 'unit_price': Decimal('2.40'), 'currency_id': 2, 'agreed_delivery_date': '2025-09-20', 'agreed_payment_date': '2025-09-16', 'agreed_delivery_location_id': 12},
-            #    etc
-            #             ]
+    #                     [
+    #          {'sales_order_id': 15647, 
+    #         'created_at': datetime(2025, 8, 13, 9, 47, 9, 901000), 
+    #         'last_updated': datetime(2025, 8, 13, 9, 47, 9, 901000),  
+    #         'design_id': 648,  
+    #         'staff_id': 19,  
+    #         'counterparty_id': 14, 
+    #         'units_sold': 36692, 
+    #         'unit_price': Decimal('2.40'), 
+    #         'currency_id': 2, 
+    #         'agreed_delivery_date':   # '2025-08-20', 
+    #         'agreed_payment_date': '2025-08-16', 
+    #         'agreed_delivery_location_id': 11},
+    #                     ]
 
 
 
@@ -78,21 +94,22 @@ def transform_to_star_schema_fact_table(table_data):
         
 
         facts_table_row = {
-                "sales_order_id": row.get("sales_order_id"),    # type is int
-                "created_date": dt_created_date,                # type is datetime.date 
-                "created_time": dt_created_time,                # type is datetime.time 
-                "last_updated_date": dt_updated_date,           # type is datetime.date 
-                "last_updated_time": dt_updated_time,           # type is datetime.time 
-                "sales_staff_id": row.get("staff_id"),          # type is int
-                "counterparty_id": row.get("counterparty_id"),  # type is int
-                "units_sold": row.get("units_sold"),            # type is int
-                "unit_price": up_form,                          # type is string
-                "currency_id": row.get("currency_id"),          # type is int
-                "design_id": row.get("design_id"),              # type is int
-                "agreed_payment_date": dt_apd,                  # type is datetime.date 
-                "agreed_delivery_date": dt_add,                 # type is datetime.date 
-                "agreed_delivery_location_id": \
-                    row.get("agreed_delivery_location_id"),     # type is int
+            # sales_record_id -> create in INSERT string in third lambda
+            "sales_order_id": row.get("sales_order_id"),    # in warehouse is int NN
+            "created_date": dt_created_date,                # in warehouse is date NN 
+            "created_time": dt_created_time,                # in warehouse is time NN 
+            "last_updated_date": dt_updated_date,           # in warehouse is date NN 
+            "last_updated_time": dt_updated_time,           # in warehouse is time NN 
+            "sales_staff_id": row.get("staff_id"),          # in warehouse is int NN
+            "counterparty_id": row.get("counterparty_id"),  # in warehouse is int NN
+            "units_sold": row.get("units_sold"),            # in warehouse is int NN
+            "unit_price": up_form,                          # in warehouse is numeric(10,2)
+            "currency_id": row.get("currency_id"),          # in warehouse is int NN
+            "design_id": row.get("design_id"),              # in warehouse is int NN
+            "agreed_payment_date": dt_apd,                  # in warehouse is date NN 
+            "agreed_delivery_date": dt_add,                 # in warehouse is date NN 
+            "agreed_delivery_location_id": \
+                row.get("agreed_delivery_location_id"),     # in warehouse is int NN
                         }
        
         fact_sales_order.append(facts_table_row)

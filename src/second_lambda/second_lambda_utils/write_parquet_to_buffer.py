@@ -46,7 +46,7 @@ def write_parquet_to_buffer(tmp_path):
         # temporary Parquet file 
         # at path tmp_path:          
         os.remove(tmp_path)
-        print(f"MY_INFO >>>>> In function write_parquet_to_buffer(). About to return the buffer.")
+        # print(f"MY_INFO >>>>> In function write_parquet_to_buffer(). About to return the buffer.")
         return buffer
     
     

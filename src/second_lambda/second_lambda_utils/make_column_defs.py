@@ -7,6 +7,8 @@ def make_column_defs(data):
     """
     This function:
 
+        is called by function convert_to_parquet()
+
     
     Args: 
         data: a list of dictionaries
@@ -25,7 +27,7 @@ def make_column_defs(data):
     # allow duckdb to 
     # determine the type of 
     # the data in cells:
-    type_mapping = {
+    type_map = {
     int: "INTEGER",
     float: "REAL",
     bool: "BOOLEAN",
@@ -33,17 +35,18 @@ def make_column_defs(data):
     date: "DATE",
     datetime: "TIMESTAMP",
     Decimal: "NUMERIC",
-                   }
+    None: "TEXT"           # Hopefully this will correctly 
+                           # take care of None values in any 
+                           # table 
+               }
     
     # Get the first row from the 
-    # table so that code can 
-    # later determine the column
-    # names:
-    first_row = data[0] 
+    # table:
+    first_row = data[0] # {"some_col_name": "some_value", etc}
 
     # make column definitions:
-    col_defs = ', '.join(
-        f"{col} {type_mapping.get(type(val))}"
+    col_defs = ', '.join(     # "some_col_name INT, some_col_name TEXT ..."
+        f"{col} {type_map.get(type(val))}"
         for col, val in first_row.items()
                         )
     

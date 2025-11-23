@@ -157,7 +157,20 @@ resource "aws_s3_bucket_policy" "AWS_lambda_SERVICE_access" {
 resource "aws_s3_object" "layer_zip" {
   bucket = var.AWS_CODE_BUCKET
   key    = "zipped/layer.zip"
-  source = "../../zipped_files/layer.zip"
+  # source = "../../zipped_files/layer.zip"
+  source = "${path.module}/../../zipped_files/layer.zip"  # 
+
+  # ensure Terraform has 
+  # provisioned the code 
+  # bucket first: 
+  depends_on = [aws_s3_bucket.code_bucket]
+  
+  # Add this to ensure 
+  # Terraform re-uploads 
+  # when the file changes
+  etag   = filemd5("${path.module}/../../zipped_files/layer.zip")
+
+
                                      }
 
 
@@ -195,21 +208,15 @@ resource "aws_s3_object" "third_lambda_zip" {
 
 
 
-# CREATE THREE LAMBDA LAYER VERSIONS
-# (ALL SHARED BY THE THREE LAMBDAS)
+# CREATE A LAMBDA LAYER 
+# (SHARED BY THE THREE LAMBDAS)
 # =============================
 resource "aws_lambda_layer_version" "layer" {
   layer_name          = "layer-shared-by-all-lambdas"
   s3_bucket           = var.AWS_CODE_BUCKET
   s3_key              = aws_s3_object.layer_zip.key
   compatible_runtimes = ["python3.12"]
-  # NOTE: instead of creating resource 
-  # aws_s3_object.data_layer1_zip.key
-  # above and referring to it here 
-  # you could simply have the 
-  # following line here instead:
-  # filename = "${path.module}/../layers/data_layer1.zip"
-                                                  }
+                                            }
 
 
 
@@ -271,24 +278,29 @@ resource "aws_sns_topic_subscription" "lambda_error_email" {
 
 module "extract" {
 
+  # For the totesys database:
   TOTE_SYS_DB_DB = var.TOTE_SYS_DB_DB
   TOTE_SYS_DB_HOST = var.TOTE_SYS_DB_HOST
   TOTE_SYS_DB_PASSWORD = var.TOTE_SYS_DB_PASSWORD
   TOTE_SYS_DB_PORT = var.TOTE_SYS_DB_PORT
   TOTE_SYS_DB_USER = var.TOTE_SYS_DB_USER
 
+  # For the warehouse database:
   WAREHOUSE_DB_DB = var.WAREHOUSE_DB_DB
   WAREHOUSE_DB_HOST = var.WAREHOUSE_DB_HOST
   WAREHOUSE_DB_PASSWORD = var.WAREHOUSE_DB_PASSWORD
   WAREHOUSE_DB_PORT = var.WAREHOUSE_DB_PORT
   WAREHOUSE_DB_USER = var.WAREHOUSE_DB_USER
 
+  # For various:
   AWS_INGEST_BUCKET = var.AWS_INGEST_BUCKET
   AWS_PROCESS_BUCKET = var.AWS_PROCESS_BUCKET
   AWS_ALERT_EMAIL = var.AWS_ALERT_EMAIL
   AWS_CODE_BUCKET = var.AWS_CODE_BUCKET
   AWS_TABLES_LIST = var.AWS_TABLES_LIST
 
+  # Names of the OLTP 
+  # and OLAP databases:
   OLTP_NAME                  = var.OLTP_NAME
   WAREHOUSE_NAME             = var.WAREHOUSE_NAME
 

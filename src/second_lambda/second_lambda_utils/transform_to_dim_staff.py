@@ -1,131 +1,97 @@
-from .preprocess_dim_tables import preprocess_dim_tables
+from .make_dictionary   import make_dictionary
 
 
 
 def transform_to_dim_staff(staff_data, dept_data):
     """
-    This function:
-        transforms the staff table 
-        data from the ingestion 
-        bucket into a staff 
-        dimension table.
-        In doing so this function 
-        creates a lookup table for 
-        department data. This is 
-        in the form of a
-        dictionary.
+    This function: 
+        1) transforms the staff
+        table that another function 
+        previously read from the 
+        ingestion bucket into a 
+        staff dimension table.
+        
+        2) achieves 1) by looping 
+        through the dictionaries in 
+        the counterparty table. For 
+        each dictionary, this function 
+        finds the value of the key 
+        'department_id' and finds 
+        the dictionary in the address 
+        table that has the same value 
+        for its key 'department_id'.
+        This function then creates new
+        keys in the counterparty table,
+        setting the values of those 
+        keys to the values of specific 
+        keys in the address table.
+        For example: this function 
+        will create key 
+        "department_name" in the 
+        dictionary in the staff table 
+        and set its value to the value 
+        of key "depratment_name" in the 
+        dictionary from the department
+        table.
+        This function also ensures 
+        that the staff dimension
+        table it creates contains no 
+        unneeded data from the 
+        staff table.
+
 
     Args:
-        staff_data: a list of 
-        dictionaries that represents 
-        the staff table that came 
+        staff_data: a list 
+        of dicts. This is the 
+        the staff table 
         from the ingestion bucket. 
-        Each dictionary in the list 
-        represents a row. Each 
-        key-value pair in the 
-        dictionary represents a 
-        columnName-cellValue pair.
+        Each dict is a row.
 
         dept_data: a list of 
-        dictionaries that represents 
-        the department table. This 
-        list came from the ingestion 
-        bucket. Each dictionary 
-        in the list represents a row. 
-        Each key-value pair in the 
-        dictionary represents a 
-        columnName-cellValue pair.
+        dicts. This is the 
+        department table from the 
+        ingestion bucket. Each dict 
+        is a row. 
 
     Returns:
-        A list of dictionaries that 
-        is the staff dimension table.    
+        A list of dictionaries 
+        that is the counterparty 
+        dimension table, each 
+        dict representing a row.         
+
     """
-    # The department table has these column names and types:
-    # 'department_id',  'department_name',  'location',  'manager',  'created_at',          'last_updated' 
-    #  int                  str              str            str       datetime.datetime     datetime.datetime
+
+ 
+    # 1):
+    key_pairs = [
+    ("department_name", "department_name"),
+    ("location", "location"),
+                ]
+
+    # for each row in the 
+    # counterparty table find
+    # the value of the key 
+    # 'legal_address_id' and 
+    # find the row in the address
+    # table whose 'address_id' 
+    # key has the same value:
+    staff_dim_table = []
+    for row_ST in staff_data:
+        for row_DPT in dept_data:
+            if row_ST['department_id'] \
+                == row_DPT['department_id']:
+                # For the row in the counterparty
+                # table add new keys and values:
+                new_st_row = make_dictionary(row_DPT, key_pairs)
+                new_st_row['staff_id'] = row_ST['staff_id'] 
+                new_st_row['first_name'] = row_ST['first_name'] 
+                new_st_row['last_name'] = row_ST['last_name'] 
+                new_st_row['email_address'] = row_ST['email_address'] 
+                staff_dim_table.append(new_st_row) 
+
     
-    # Make a lookup dictionary that the department 
-    # table will employ:
-    # {
-    #  '15': {"department_name": 'aaaa aaa', "location": 'bbbbb'},
-    #  '16': {"department_name": 'cccc ccc', "location": 'ddddd'},
-    #           etc
-    # }
-    department_lookup = {  # if dept_data contains 2+ dicts in
-                           # which key "department_id" has the 
-                           # same value each will produce the 
-                           # same key-value pair in 
-                           # department_lookup, the current 
-                           # one replacing the previous one.
-        str(dept["department_id"]): {
-            "department_name": dept.get("department_name"),
-            "location": dept.get("location"),
-                                    }
-        for dept in dept_data
-                        }
-    
 
-    # create a preprocessed staff dimension table:
-    pp_staff_dim_table = preprocess_dim_tables(staff_data, ['created_at', 'last_updated'])
-
-    # add keys to the preprocessed staff dimension table
-    # to make the final staff dimension table:
-    for i in range(len(pp_staff_dim_table)):
-        # try:
-            # department_lookup is a dictionary that looks like this:
-                # {
-                #  '1': {"department_name": 'aaaa aaa', "location": 'bbbbb'},
-                #  '2': {"department_name": 'cccc ccc', "location": 'ddddd'},
-                #  etc
-                # }
-            dept = department_lookup.get(
-                        str(staff_data[i].get("department_id")) # '13'
-                                        )  # JOINS department table to staff at department ID
-            
-            # dept is a dictionary that looks like this:
-            # {"department_name": 'cccc ccc', "location": 'ddddd'}
-            pp_staff_dim_table[i]["department_name"] = dept.get("department_name") 
-            pp_staff_dim_table[i]["location"] = dept.get("location")
-
-
-    # preproc_staff_dim_table is now the 
-    # finished staff dimension table. 
-    # Return it:          
-    return pp_staff_dim_table
+    return staff_dim_table
 
 
 
-
-
-
-
-
-
-
-
-
-
-# OLD CODE:
-    # dim_staff = []
-
-    # department_lookup = {  # a look up for the department table
-    #     dept["department_id"]: {
-    #         "department_name": dept.get("department_name"),
-    #         "location": dept.get("location"),
-    #     }
-    #     for dept in dept_data
-    # }
-
-    # for staff in staff_data:
-    #         dept = department_lookup.get(
-    #             staff.get("department_id")
-    #         )  # JOINS department table to staff at department ID
-    #         transformed_row = {
-    #             "staff_id": staff.get("staff_id"),
-    #             "first_name": staff.get("first_name"),
-    #             "last_name": staff.get("last_name"),
-    #             "email_address": staff.get("email_address"),
-    #             "department_name": dept.get("department_name"),
-    #             "location": dept.get("location"),
-    #         }
-    #         dim_staff.append(transformed_row)
