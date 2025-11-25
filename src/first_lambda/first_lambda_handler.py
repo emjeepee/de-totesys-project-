@@ -64,14 +64,6 @@ def first_lambda_handler(event, context):
     # Get values this handler requires:
     lookup = get_env_vars()
 
-    # Set variables to those values:
-    bucket_name = lookup['bucket_name'] # name of ingestion bucket
-    tables = lookup['tables'] # list of names of tables of interest
-    s3_client = lookup['s3_client'] # boto3 S3 client object
-    conn = lookup['conn'] # pg8000.native Connection object
-    close_db = lookup['close_db'] # function to close connection to database
-
-
 
     
     try:
@@ -80,7 +72,10 @@ def first_lambda_handler(event, context):
         # and replace that timestamp 
         # with one for the current time:
         after_time = change_after_time_timestamp(
-        bucket_name, s3_client, "***timestamp***", "1900-01-01 00:00:00"
+                        lookup['bucket_name'], # name of ingestion bucket
+                        lookup['s3_client'], # boto3 S3 client object
+                        "***timestamp***", 
+                        "1900-01-01 00:00:00"
                                             )
     except Exception:
         # The following line automatically logs 
@@ -92,7 +87,11 @@ def first_lambda_handler(event, context):
     try: 
         # Find only those tables in the ToteSys 
         # database that have updated rows.
-        updated_tables = get_data_from_db(tables, after_time, conn, read_table) 
+        updated_tables = get_data_from_db(
+                    lookup['tables'], # list of names of tables of interest 
+                    after_time, 
+                    lookup['conn'], # pg8000.native Connection object 
+                    read_table) 
             # [
             # {'design': [{<updated-row data>}, etc]}, 
             # {'sales': [{<updated-row data>}, etc]}, 
@@ -101,6 +100,9 @@ def first_lambda_handler(event, context):
             # where {<updated-row data>} is, eg, {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
     except Exception: 
         root_logger.exception("Error caught in first_lambda_handler() while trying to run get_data_from_db()\n\n")    
+
+    
+
 
     # If the department table or 
     # the address table are in
@@ -113,7 +115,10 @@ def first_lambda_handler(event, context):
     # the second lambda handler 
     # that creates the dim_staff 
     # and dim_counterparty tables:
-    data_for_s3 = reorder_list(updated_tables, "address", "department")
+    data_for_s3 = reorder_list(
+                updated_tables, 
+                "address", 
+                "department")
 
 
 
@@ -121,13 +126,17 @@ def first_lambda_handler(event, context):
         # write updated row data 
         # from each table to the 
         # ingestion bucket: 
-        write_to_s3(data_for_s3, s3_client, write_to_ingestion_bucket, bucket_name)
+        write_to_s3(data_for_s3, 
+                    lookup['s3_client'], # boto3 S3 client object, 
+                    write_to_ingestion_bucket, 
+                    lookup['bucket_name'])
     except Exception: 
         root_logger.exception("Error caught in first_lambda_handler() while trying to run write_to_s3()\n\n")    
     
 
     # Close connection to ToteSys database:
-    close_db(conn)
+    lookup['close_db'] # returns fn to close connection to db
+    lookup['close_db'](lookup['conn'])
 
     
 

@@ -45,20 +45,17 @@ def make_staff_or_cp_dim_table(
         3) ingestion_bucket: the name of 
             the ingestion bucket.
 
-        4) aux_table_name: the name of an 
-            auxilliary table this function 
-            will read from the ingestion 
-            bucket to help it create 
-            either the staff or the 
-            counterparty dimension table.
-            The value is either:
-                'department' if this 
-                function has to make the 
-                staff dimension table
-                'address' if this function
-                has to make the 
-                counterparty dimension 
-                table.
+        4) aux_table_name: the name of 
+            an auxilliary table this 
+            function gets from the 
+            ingestion bucket to help
+            it create either the staff 
+            dimension table or the 
+            counterparty dimension 
+            table. The value is 
+            'department' for the 
+            former and 'address' for 
+            the latter.
 
         5) s3_client: a boto3 S3 client 
             object.
@@ -82,7 +79,7 @@ def make_staff_or_cp_dim_table(
     # returns one of two functions:
     # 1) transform_to_dim_staff() or 
     # 2) transform_to_dim_counterparty() 
-    transform_funcn = func_lookup_table(table_name)
+    transform_func = func_lookup_table(table_name)
 
     # Pass in to the returned 
     # function the main table 
@@ -92,7 +89,8 @@ def make_staff_or_cp_dim_table(
     # respectively) to create
     # the required dimension 
     # table:
-    dim_table = transform_funcn(table_python, aux_python)
+    dim_table = transform_func(table_python, 
+                               aux_python)
 
     return dim_table
 

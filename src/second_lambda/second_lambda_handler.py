@@ -24,37 +24,34 @@ def second_lambda_handler(event, context):
     """
     This function:
         1) Either:
-            i)   Reads an object from the ingestion bucket
-                 and converts it into a dimension table
-                 or fact table, converts that table into
-                 a Parquet file and writes the Parquet
-                 file to the processed S3 bucket.
-        
-            ii)  Creates a date dimension table if this 
-                 is the first ever run of the pipeline, 
-                 converts that table into a Parquet 
-                 file and writes that file to the 
+            i)   Reads an object from the 
+                 ingestion bucket and 
+                 converts it into a 
+                 dimension table or fact 
+                 table, converts that 
+                 table into a Parquet 
+                 file and writes the 
+                 Parquet file to the 
                  processed S3 bucket.
         
+            ii)  Creates a date 
+                 dimension table if this 
+                 is the first ever run of 
+                 the pipeline, converts 
+                 that table into a Parquet 
+                 file and puts that file 
+                 in the processed S3 
+                 bucket.
+        
         2) carries out 1)i) and 1)ii) in 
-            in reponse to an event from 
-            the S3 ingestion bucket when 
-            the first lambda function 
-            has saved a table in that 
-            bucket. The ingestion bucket 
-            stores each table as a 
-            jsonified list of 
-            dictionaries, where each 
-            dictionary represents a row 
-            of the table. 
-        3) gets the name of the S3 
-            ingestion bucket from the 
-            passed-in event and the name 
-            of the key under which the 
-            first lambda stored the 
-            table in that bucket.
+            in reponse to the event from 
+            the S3 ingestion bucket that 
+            S3 sends when the first 
+            lambda has saved a table in 
+            that bucket. 
         3) gets the table stored under 
-            the key, converts it to a 
+            the key obtained from the 
+            event, converts it to a 
             dimension table or fact 
             table (in the form of a list
             of dictionaries), converts 
@@ -74,7 +71,7 @@ def second_lambda_handler(event, context):
         sent to this lambda 
         handler by AWS EventBridge 
         when the first lambda 
-        handler stores a table in 
+        handler puts a table in 
         the ingestion bucket.
 
     Returns:
@@ -83,7 +80,11 @@ def second_lambda_handler(event, context):
 
     # Get lookup table that contains 
     # values this handler requires:
-    lookup = second_lambda_init(event, boto3.client("s3"), datetime.now(), datetime(2024, 1, 1), 2557)
+    lookup = second_lambda_init(event, 
+                                boto3.client("s3"), 
+                                datetime.now(), 
+                                datetime(2024, 1, 1), 
+                                2557)
     
     # Set vars to values in lookup table: 
     s3_client = lookup['s3_client'] # boto3 S3 client object,
@@ -108,8 +109,8 @@ def second_lambda_handler(event, context):
         # simply stop this lambda 
         # handler:
         return {
-            "status": "skipped",
-            "reason": "table_name = department"
+            "status": "code skipped",
+            "reason": "because table_name is 'department' "
                }
 
 
@@ -120,7 +121,9 @@ def second_lambda_handler(event, context):
     # notified about:
     
     try:
-        table_json = read_from_s3(s3_client, ingestion_bucket, object_key) # jsonified [{<row data>}, {<row data>}, etc]
+        table_json = read_from_s3(s3_client, 
+                                  ingestion_bucket, 
+                                  object_key) # jsonified [{<row data>}, {<row data>}, etc]
                                                                            # where {<row data>} is, eg,
                                                                            # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}        
     except Exception:
@@ -141,8 +144,12 @@ def second_lambda_handler(event, context):
     # the table:
     table_python = json.loads(table_json) # [{<row data>}, {<row data>}, etc]
                                           # where {<row data>} is, eg,
-                                          # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}        
-    print(f"MY_INFO >>>>> In second lambda handler. table_python is {table_python}")        
+                                          # {
+                                          # 'design_id': 123, 
+                                          # 'created_at': 'xxx', 
+                                          # 'design_name': 'yyy', 
+                                          # etc
+                                          # }        
 
     try:
     # If this is the first 
@@ -152,7 +159,6 @@ def second_lambda_handler(event, context):
     # date dimension table in 
     # Parquet form and save it 
     # in the processed bucket: 
-        print(f"MY_INFO >>>>> In second lambda handler. About to call funcion should_make_dim_date()")
         should_make_dim_date(is_first_run_of_pipeline, 
                              create_dim_date_Parquet, 
                              upload_to_s3, 
@@ -180,7 +186,6 @@ def second_lambda_handler(event, context):
         # 'design_name': 'yyy', 
         # etc
         # }     
-        print(f"MY_INFO >>>>> In second lambda handler. About to call funcion make_dim_or_fact_table()")    
         dim_or_fact_table = make_dim_or_fact_table(table_name, 
                                                    table_python, 
                                                    s3_client, 
@@ -188,30 +193,36 @@ def second_lambda_handler(event, context):
 
     except Exception:
         logger.error(err_msg)
-        # following line needed 
-        # to ensure code stops
-        # running (could also 
-        # have used a return):
+        # stop code (a return 
+        # would work too):
         raise 
 
 
-    # Use Duckdb to convert the 
-    # dim/fact table to a 
-    # Parquet file in a buffer: 
-    # print(f"MY_INFO >>>>> In second lambda handler. About to call function convert_to_parquet()")    
-    pq_file = convert_to_parquet(dim_or_fact_table, table_name) # a buffer
+    # Convert the dim/fact 
+    # table into a Parquet 
+    # file in a buffer: 
+    pq_file = convert_to_parquet(dim_or_fact_table, 
+                                 table_name) # a buffer
 
-    # Create the key (a string) under 
-    # which to save the dim/fact table 
-    # in the processed bucket:
-    table_key = f"fact_{table_name}/{timestamp_string}.parquet" if table_name == "sales_order" else f"dim_{table_name}/{timestamp_string}.parquet"
+    # Create the key string 
+    # under which to save 
+    # the dim/fact table in 
+    # the processed bucket:
+    if table_name == "sales_order": 
+        table_key = f"fact_{table_name}/{timestamp_string}.parquet"    
+    else:
+        table_key = f"dim_{table_name}/{timestamp_string}.parquet"
+
 
 
     try:
-        # Write the Parquet file in 
+        # Put the Parquet file in 
         # the processed bucket:
-        # print(f"MY_INFO >>>>> In second lambda handler. About to call function upload_to_s3()")    
-        upload_to_s3(s3_client, proc_bucket, table_key, pq_file)
+        upload_to_s3(s3_client, 
+                     proc_bucket, 
+                     table_key, 
+                     pq_file)
+        
     except Exception:
         logger.error(err_msg)
         raise

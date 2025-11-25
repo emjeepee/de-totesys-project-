@@ -20,8 +20,8 @@ def make_fake_cp_table():
      'last_updated': None}, 
 
     {'counterparty_id': None, 
-     'counterparty_legal_name': 'Leannon, '
-     'Predovic and Morar', 'legal_address_id': 8, 
+     'counterparty_legal_name': 'Leannon, Predovic and Morar', 
+     'legal_address_id': 8, 
      'commercial_contact': 'Melba Sanford', 
      'delivery_contact': 'Jean Hane III', 
      'created_at': None, 

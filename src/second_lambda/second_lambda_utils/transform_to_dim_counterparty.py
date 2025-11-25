@@ -6,58 +6,64 @@ from .make_dictionary   import make_dictionary
 
 
 
-def transform_to_dim_counterparty(counterparty_data, address_data):
+def transform_to_dim_counterparty(counterparty_table, address_table):
     """
     This function: 
         1) transforms the 
-        counterparty table that a
-        another function previously 
-        read from the ingestion 
-        bucket into a counterparty 
-        dimension table.
+        counterparty table into 
+        a counterparty dimension 
+        table. Another function 
+        previously got the 
+        counterparty and address 
+        tables from the 
+        ingestion bucket. 
         
         2) achieves 1) by looping 
-        through the dictionaries in 
-        the counterparty table. For 
-        each dictionary, this function 
+        through the rows 
+        (dictionaries)of the 
+        counterparty table. For 
+        each row, this function 
         finds the value of the key 
         'legal_address_id' and finds 
-        the dictionary in the address 
-        table that has the same value 
-        for its key 'address_id'.
-        This function then creates new
-        keys in the counterparty table,
-        setting the values of those 
-        keys to the values of specific 
-        keys in the address table.
-        For example: a this function 
+        the dictionary in the 
+        address table that has the 
+        same value for its key 
+        'address_id'.
+        
+        3) This function then creates 
+        new keys in the counterparty 
+        table, setting the values of 
+        those keys to the values of 
+        certain keys in the address 
+        table row identified in 2) 
+        above.
+        For example: this function 
         will create key 
         "counterparty_legal_address_line_1"
-        in the dictionary in the 
-        counterparty table and set its 
-        value to the value of key 
-        "address_line_1" in the 
-        dictionary from the address 
-        table.
+        in the row in the 
+        counterparty table and set 
+        its value to the value of 
+        key "address_line_1" in the 
+        row of the address table.
         This function also ensures 
-        that the counterparty dimension
-        table it creates contains no 
-        unneeded data from the 
-        counterparty table.
+        that the counterparty 
+        dimension table it creates 
+        contains no unneeded data 
+        from the counterparty table.
 
 
     Args:
-        counterparty_data: a list 
+        counterparty_table: a list 
         of dicts. This is the 
         the counterparty table 
         from the ingestion bucket. 
         Each dict is a row.
 
-        address_data: a list of 
-        dicts. This is the 
-        address table from the 
-        ingestion bucket. Each dict 
-        is a row. 
+        address_table: a list of 
+        dicts. This is the address 
+        table from the ingestion 
+        bucket. Each dict is a 
+        row. 
 
     Returns:
         A list of dictionaries 
@@ -74,21 +80,21 @@ def transform_to_dim_counterparty(counterparty_data, address_data):
     # 'legal_address_id': 'xxx',           DELETE THIS
     # 'commercial_contact': 'xxx',         DELETE THIS
     # 'delivery_contact': 'xxx',           DELETE THIS
-    # 'created_at':     'xxx',             DELETE THIS
-    # 'last_updated': 'xxx'                DELETE THIS
+    # 'created_at':     'xxx',             
+    # 'last_updated': 'xxx'                
     #   }]
 
 
-# Add the following columns, all
-# of whose values come from the 
-# address table:
-# "counterparty_legal_address_line_1"
-# "counterparty_legal_address_line_2"
-# "counterparty_legal_district"      
-# "counterparty_legal_city"          
-# "counterparty_legal_postal_code"   
-# "counterparty_legal_country"       
-# "counterparty_legal_phone_number"  
+    # Add the following columns, all
+    # of whose values come from the 
+    # address table:
+    # "counterparty_legal_address_line_1"
+    # "counterparty_legal_address_line_2"
+    # "counterparty_legal_district"      
+    # "counterparty_legal_city"          
+    # "counterparty_legal_postal_code"   
+    # "counterparty_legal_country"       
+    # "counterparty_legal_phone_number"  
 
 
 
@@ -109,7 +115,7 @@ def transform_to_dim_counterparty(counterparty_data, address_data):
     # 2) remove the unneeded columns
     #    and their cell values from
     #    each row of the table in
-    #    counterparty_data so that its 
+    #    counterparty_table so that its 
     #    column names are now:
     #    'counterparty_id' 
     #    'counterparty_legal_name' 
@@ -120,6 +126,8 @@ def transform_to_dim_counterparty(counterparty_data, address_data):
     #    "counterparty_legal_postal_code"
     #    "counterparty_legal_country"
     #    "counterparty_legal_phone_number"
+    #   'created_at'             
+    #   'last_updated' 
 
     
  
@@ -140,16 +148,16 @@ def transform_to_dim_counterparty(counterparty_data, address_data):
     # the value of the key 
     # 'legal_address_id' and 
     # find the row in the address
-    # table whose 'address_id' 
-    # key has the same value:
+    # table with the same value 
+    # for its 'address_id' key::
     cp_dim_table = []
-    for row_CP in counterparty_data:
-        for row_ADD in address_data:
+    for row_CP in counterparty_table:
+        for row_add in address_table:
             if row_CP['legal_address_id'] \
-                == row_ADD['address_id']:
+                == row_add['address_id']:
                 # For the row in the counterparty
                 # table add new keys and values:
-                new_cp_row = make_dictionary(row_ADD, key_pairs)
+                new_cp_row = make_dictionary(row_add, key_pairs)
                 new_cp_row['counterparty_id'] = row_CP['counterparty_id'] #
                 new_cp_row['counterparty_legal_name'] = row_CP['counterparty_legal_name'] 
                 cp_dim_table.append(new_cp_row) #

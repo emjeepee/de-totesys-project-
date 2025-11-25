@@ -1,3 +1,6 @@
+from .make_data_json_safe import make_data_json_safe
+
+
 
 
 def get_data_from_db(table_names: list, after_time: str, conn, read_table):
@@ -68,8 +71,15 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
 
     data_list = []
     for table in table_names:
-        result = read_table(table, conn, after_time)  # {'design': [{<updated-row data>}, {<updated-row data>}, etc]}
+        table_dict = read_table(table, conn, after_time)  # {'design': [{<updated-row data>}, {<updated-row data>}, etc]}
         
-        data_list.append(result) # [{'design': [{<updated-row data>}, etc]}, {'sales': [{<updated-row data>}, etc]}, etc].
+        # change 
+        # datetime.datetime objects 
+        # to iso strings and 
+        # decimal.Decimal objects 
+        # to strings:
+        clean_table_list = make_data_json_safe(table_dict[table]) # [{<updated-row data>}, {<updated-row data>}, etc]
+        clean_table_dict = {table: clean_table_list}
+        data_list.append(clean_table_dict) # [{'design': [{<updated-row data>}, etc]}, {'sales': [{<updated-row data>}, etc]}, etc].
                                  # where {<updated-row data>} is eg {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
     return data_list

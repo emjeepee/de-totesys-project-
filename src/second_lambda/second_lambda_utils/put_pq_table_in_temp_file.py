@@ -50,9 +50,6 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
          None       
     """
 
-
-
-    # print(f"MY_INFO >>>>> In function put_pq_table_in_temp_file(). About to run conn = duckdb.connect(':memory:')")
     # Create a database in RAM and
     # create object conn to allow
     # interaction with it:
@@ -81,7 +78,6 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
         finally:
             # Close the connection to the
             # database:
-            # print(f"MY_INFO >>>>> In function put_pq_table_in_temp_file(). Out of loop. About to run conn.close() and return None")
             conn.close()
             return None
             
