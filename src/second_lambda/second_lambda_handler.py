@@ -149,8 +149,12 @@ def second_lambda_handler(event, context):
                                           # 'created_at': 'xxx', 
                                           # 'design_name': 'yyy', 
                                           # etc
-                                          # }        
-
+                                          # }    
+    # DELETE THIS LATER:                                           
+    if table_name == 'address':                                                   
+        print(f" \n\n\n MY_INFO tues25Nov25>>>>> In second_lambda_handler(). \n address table retrieved from ing buck and converted to Python is>> \n {table_python}")
+    
+    
     try:
     # If this is the first 
     # ever run of the pipeline 

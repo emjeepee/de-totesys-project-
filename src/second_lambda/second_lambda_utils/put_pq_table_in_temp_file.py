@@ -7,22 +7,27 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
     function convert_to_parquet()
     calls this function, which:
         1. Uses duckdb to recreate 
-         the table data (which is 
+         the table data in Parquet 
+         format. The table is 
          either a dimension table 
          or the fact table, 
-         extracted elsewhere from 
-         the ingestion bucket and 
+         extracted by a previous 
+         function from the 
+         ingestion bucket and 
          converted into a list of 
-         dictionaries) in Parquet 
-         format. 
+         dictionaries) 
+        
         2. does 1. above by opening
          a duckdb connection
+        
         3. making a duckdb table, 
          starting with the table 
          columns
+        
         4. inserting the rows of the 
          table into the duckdb table
-        6. saving the table in a 
+        
+        5. saving the table in a 
          temporary file path.  
 
 
@@ -57,7 +62,7 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
 
     # make a table, starting with 
     # the column names:
-    # print(f"MY_INFO >>>>> In function put_pq_table_in_temp_file(). About to run conn.execute with f string with CREATE TABLE. The table is {table_name} and col_defs is {col_defs};")
+    print(f"MY_INFO tues25Nov25>>>>> In put_pq_table_in_temp_file(). About to run conn.execute. The table is {table_name} and col_defs is {col_defs};")
     conn.execute(f"CREATE TABLE {table_name} ({col_defs});") # fri21Nov25: problem here
             # eg CREATE TABLE staff (department_name TEXT, location TEXT, staff_id None, first_name TEXT, last_name TEXT, email_address TEXT);
 

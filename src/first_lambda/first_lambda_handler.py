@@ -98,6 +98,13 @@ def first_lambda_handler(event, context):
             # etc
             # ]
             # where {<updated-row data>} is, eg, {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
+        # DELETE THIS LATER:
+        for dictnry in updated_tables:
+            if "address" in dictnry:
+                print(f"MY_INFO tues25Nov25>>>>> In first_lambda_handler() before writing to S3. The address table is {dictnry['address']}")
+                pass
+        
+
     except Exception: 
         root_logger.exception("Error caught in first_lambda_handler() while trying to run get_data_from_db()\n\n")    
 

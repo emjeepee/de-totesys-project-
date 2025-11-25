@@ -22,7 +22,7 @@ def make_fake_ad_table():
     
     """
 
-    base_day = datetime(2025, 11, 13) 
+    base_day = datetime(2025, 11, 13, 13, 17, 19) 
     td_1_day = timedelta(days=1) 
 
     add_table = [
@@ -161,8 +161,11 @@ def make_fake_ad_table():
         add_table[i-1]['address_id'] = i
         add_table[i-1]['created_at'] = base_day
         add_table[i-1]['last_updated'] = base_day
-        if add_table[i-1] == None:
-            add_table[i-1] == '' # remove None 
+        for ky, vl in add_table[i-1].items():
+            if add_table[i-1][ky] == None:
+                add_table[i-1][ky] = '' # remove None 
 
 
     return add_table
+
+
