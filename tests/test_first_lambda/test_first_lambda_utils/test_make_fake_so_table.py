@@ -44,7 +44,7 @@ def test_returns_list_of_fifty_dicts():
 # @pytest.mark.skip
 def test_returns_correct_list():
     # Arrange:
-    base_day = datetime(2025, 11, 13) 
+    base_day = datetime(2025, 11, 13, 15, 17, 8) 
     td_1_day = timedelta(days=1)
     expected_fail = "expected_fail"
     expected_so_id = 38
@@ -104,3 +104,5 @@ def test_returns_correct_list():
     assert result_up_type == Decimal
     assert result_curid > 0 and result_curid < 4 
     assert result_adlid > 0 and result_adlid < 11 
+
+

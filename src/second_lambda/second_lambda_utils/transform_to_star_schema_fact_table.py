@@ -76,24 +76,20 @@ def transform_to_star_schema_fact_table(table_data):
         # Do similar for other  
         # values:
 
-        #---------------
-        # DELETE THIS LATER:
-        iso_date = row.get("created_at")
-        type_var = type(iso_date)
-        print(f"MY INFO: in transform_to_star_schem_fact_table() and the value of key created_at is {iso_date} and the type is {type_var} ")
-        # 2025-11-14T15:17:08 and the type is <class 'str'> 
-        #---------------
 
-
-        iso_cr_date = row.get("created_at")
-        dt_created = datetime.fromisoformat(iso_cr_date)
+        iso_ca_date = row.get("created_at")
+        dt_created = datetime.fromisoformat(iso_ca_date)
         dt_created_time = dt_created.time() # extract time only
         dt_created_date = dt_created.date() # extract date only
 
-        iso_up_date = row.get("created_at")
+
+        iso_up_date = row.get("last_updated")
         dt_updated = datetime.fromisoformat(iso_up_date)
         dt_updated_time = dt_updated.time() # extract time only
         dt_updated_date = dt_updated.date() # extract date only
+
+        print(f"MY INFO 25Nov25, 21.32: inside transform_to_star_schema_fact_table().    dt_created_time is {dt_created_time} and dt_updated_time is {dt_updated_time}")
+
 
         apd_str = row.get("agreed_payment_date") # eg '2025-08-16'
         dt_apd = datetime.strptime(apd_str, "%Y-%m-%d").date()
