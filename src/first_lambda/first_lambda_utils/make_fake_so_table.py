@@ -64,7 +64,7 @@ def make_fake_so_table():
     # 10 design_id, one for each price, so will need a lookup table
     # 'unit_price' must have value 1.00 to 9.99 as a string
     
-    base_day = datetime(2025, 11, 13) 
+    base_day = datetime(2025, 11, 13, 15, 17, 8) 
     td_1_day = timedelta(days=1)    
     
     so_table =  [   {

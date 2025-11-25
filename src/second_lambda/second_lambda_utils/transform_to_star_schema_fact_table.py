@@ -6,20 +6,20 @@ def transform_to_star_schema_fact_table(table_data):
     """
     This function:
         1) Converts the sales-order table
-            (retrieved from the ingestion 
-            bucket and converted into a 
-            Python list of dictionaries)
-            into the facts sales order 
-            table.
+            (read from the ingestion 
+            bucket and in the form of a 
+            list of dictionaries) into 
+            the facts sales-order table.
 
     Args:
-        table_data: the sales_order table 
-         from the ingestion bucket. This 
-         is a list of dictionaries. 
+        table_data: the sales_order 
+        table from the ingestion 
+        bucket. This is a list of 
+        dictionaries. 
         
     Returns:
         a list of dictionaries that 
-         is the sales_order fact table.
+        is the sales_order fact table.
     """
     
     # fact_sales_order table columns

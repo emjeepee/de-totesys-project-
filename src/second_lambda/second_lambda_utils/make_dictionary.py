@@ -63,12 +63,11 @@ def make_dictionary(source_dict, key_pairs):
     """
     new_row = {}
     for pairs in key_pairs:
-        if pairs[1] in source_dict:
-            new_row[pairs[0]] = source_dict[pairs[1]]
+        new_row[pairs[0]] = source_dict[pairs[1]]
 
     return new_row
 
-
+# if pairs[1] in source_dict:
 
 
 

@@ -161,6 +161,8 @@ def make_fake_ad_table():
         add_table[i-1]['address_id'] = i
         add_table[i-1]['created_at'] = base_day
         add_table[i-1]['last_updated'] = base_day
+        if add_table[i-1] == None:
+            add_table[i-1] == '' # remove None 
 
 
     return add_table

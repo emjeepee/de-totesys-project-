@@ -151,15 +151,17 @@ def transform_to_dim_counterparty(counterparty_table, address_table):
     # table with the same value 
     # for its 'address_id' key::
     cp_dim_table = []
-    for row_CP in counterparty_table:
-        for row_add in address_table:
-            if row_CP['legal_address_id'] \
-                == row_add['address_id']:
+    for CP_row in counterparty_table:
+        for addr_row in address_table:
+            if CP_row['legal_address_id'] \
+                == addr_row['address_id']:
                 # For the row in the counterparty
                 # table add new keys and values:
-                new_cp_row = make_dictionary(row_add, key_pairs)
-                new_cp_row['counterparty_id'] = row_CP['counterparty_id'] #
-                new_cp_row['counterparty_legal_name'] = row_CP['counterparty_legal_name'] 
+                new_cp_row = make_dictionary(addr_row, key_pairs)
+                new_cp_row['counterparty_id'] = CP_row['counterparty_id'] #
+                new_cp_row['counterparty_legal_name'] = CP_row['counterparty_legal_name'] 
+                new_cp_row['created_at'] = CP_row['created_at']
+                new_cp_row['last_updated'] = CP_row['last_updated']
                 cp_dim_table.append(new_cp_row) #
 
     
