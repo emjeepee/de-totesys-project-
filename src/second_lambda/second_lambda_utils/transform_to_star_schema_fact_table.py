@@ -1,4 +1,4 @@
-from datetime import datetime 
+from datetime import datetime, date, time 
 
 
 
@@ -75,11 +75,23 @@ def transform_to_star_schema_fact_table(table_data):
         # and datetime time objects. 
         # Do similar for other  
         # values:
-        dt_created = row.get("created_at")
+
+        #---------------
+        # DELETE THIS LATER:
+        iso_date = row.get("created_at")
+        type_var = type(iso_date)
+        print(f"MY INFO: in transform_to_star_schem_fact_table() and the value of key created_at is {iso_date} and the type is {type_var} ")
+        # 2025-11-14T15:17:08 and the type is <class 'str'> 
+        #---------------
+
+
+        iso_cr_date = row.get("created_at")
+        dt_created = datetime.fromisoformat(iso_cr_date)
         dt_created_time = dt_created.time() # extract time only
         dt_created_date = dt_created.date() # extract date only
 
-        dt_updated = row.get("last_updated")
+        iso_up_date = row.get("created_at")
+        dt_updated = datetime.fromisoformat(iso_up_date)
         dt_updated_time = dt_updated.time() # extract time only
         dt_updated_date = dt_updated.date() # extract date only
 
@@ -90,7 +102,7 @@ def transform_to_star_schema_fact_table(table_data):
         dt_add = datetime.strptime(add_str, "%Y-%m-%d").date()
 
         up_dec = row.get("unit_price")
-        up_form = f"{up_dec:.2f}" # eg '3.56'
+        up_form = f"{float(up_dec):.2f}" # eg '3.56'
         
 
         facts_table_row = {

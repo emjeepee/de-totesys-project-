@@ -6,7 +6,7 @@ from pg8000.native import Connection
 def conn_to_db(DB_NAME: str):
     
 
-    username = os.environ[f"{DB_NAME}_DB_USER"]
+    user     = os.environ[f"{DB_NAME}_DB_USER"]
     password = os.environ[f"{DB_NAME}_DB_PASSWORD"]
     database = os.environ[f"{DB_NAME}_DB_DB"]
     host     = os.environ[f"{DB_NAME}_DB_HOST"]
@@ -14,9 +14,9 @@ def conn_to_db(DB_NAME: str):
 
 
     conn = Connection(
-        username,
-        database=database,
+        user=user,
         password=password,
+        database=database,
         host=host,
         port=port,
         ssl_context=True,

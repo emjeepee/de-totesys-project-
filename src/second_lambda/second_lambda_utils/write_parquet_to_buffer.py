@@ -25,8 +25,9 @@ def write_parquet_to_buffer(tmp_path):
         the contents of the Parquet file. 
     """
  
-    # Create an empty container 
-    # in RAM that acts like a file
+    # Create an empty 
+    # container in RAM that 
+    # acts like a file:
     buffer = BytesIO()
 
     # The if statement below takes
@@ -46,7 +47,7 @@ def write_parquet_to_buffer(tmp_path):
         # temporary Parquet file 
         # at path tmp_path:          
         os.remove(tmp_path)
-        # print(f"MY_INFO >>>>> In function write_parquet_to_buffer(). About to return the buffer.")
+
         return buffer
     
     

@@ -1,5 +1,6 @@
 import boto3
 import logging
+import io
 
 from third_lambda_utils.third_lambda_init                import third_lambda_init
 from third_lambda_utils.make_insert_queries_from_parquet import make_insert_queries_from_parquet
@@ -79,7 +80,10 @@ def third_lambda_handler(event, context):
         # Get the buffer that contains 
         # the Parquet file that represents
         # the dimension table/facts table:
-        pq_buff = lookup['s3_client'].get_object(Key=lookup['object_key'], Bucket=lookup['proc_bucket'])
+        dict_from_s3 = lookup['s3_client'].get_object(Key=lookup['object_key'], Bucket=lookup['proc_bucket'])
+        strmng_bod_obj = dict_from_s3["Body"]
+        raw_bytes = strmng_bod_obj.read()
+        pq_buff = io.BytesIO(raw_bytes) 
     except Exception:
         logger.error(err_msg)
         raise
