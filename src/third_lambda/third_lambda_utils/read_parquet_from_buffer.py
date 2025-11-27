@@ -1,4 +1,6 @@
-import duckdb
+import tempfile
+
+
 from io import BytesIO
 
 
@@ -12,7 +14,7 @@ def read_parquet_from_buffer(parquet_buffer, conn):
     Args:
         parquet_buffer: a
         dimension table or the 
-        facts table table in 
+        fact table table in 
         Parquet form in a BytesIO 
         buffer.
 
@@ -22,20 +24,30 @@ def read_parquet_from_buffer(parquet_buffer, conn):
     Returns:
         list [column_str, rows],
         where: 
-            column_str: a string containing all
-             column names, eg
-                '"xx", "yyy", "zzz", "abcdef"'
+            column_str: a string 
+            containing all column names, 
+            eg
+            '"xx", "yyy", "zzz", "abcdef"'
             
             rows: a list of tupls, each 
              tuble being a row's values.
-
     """
 
     parquet_buffer.seek(0)
     
-    # read the parquet data:
-    result = conn.execute("SELECT * FROM parquet_scan(?)", [parquet_buffer])
-        
+    # Write BytesIO to a 
+    # temp file:
+    with tempfile.NamedTemporaryFile(suffix=".parquet") as tmp:
+        tmp.write(parquet_buffer.getvalue())
+        tmp.flush()  # Ensure all bytes are written
+
+        # Now pass the file path (string) to DuckDB
+        # to read the parquet data:
+        result = conn.execute(
+            "SELECT * FROM parquet_scan(?)",
+            [tmp.name]
+                             )
+
     # result.description is 
     # info about each column 
     # (name, type, etc) and 

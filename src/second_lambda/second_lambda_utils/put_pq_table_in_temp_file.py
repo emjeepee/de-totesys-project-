@@ -15,7 +15,7 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
          function from the 
          ingestion bucket and 
          converted into a list of 
-         dictionaries) 
+         dictionaries. 
         
         2. does 1. above by opening
          a duckdb connection
@@ -37,15 +37,18 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
          fact table. 
         
         col_defs: a string of the 
-         column names of the table.
+         column names of the table,
+         eg 'col_1, col_, col_3 ...'.
 
         values_list: a list of lists,
-         the member lists containing 
-         row values in tring form.
+         where each member list 
+         contains the values from one
+         row in string form, eg.
      
-        placeholders: a string of '?'s
-        equal in number to the number 
-        of columns in the table.
+        placeholders: a string of 
+        question marks ('?'s) equal 
+        in number to the number of 
+        columns in the table.
         
         tmp_path: file path to the 
          temporary file.
@@ -64,7 +67,7 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
     # the column names:
     print(f"MY_INFO tues25Nov25>>>>> In put_pq_table_in_temp_file(). About to run conn.execute. The table is {table_name} and col_defs is {col_defs};")
     conn.execute(f"CREATE TABLE {table_name} ({col_defs});") # fri21Nov25: problem here
-            # eg CREATE TABLE staff (department_name TEXT, location TEXT, staff_id None, first_name TEXT, last_name TEXT, email_address TEXT);
+            # eg CREATE TABLE staff (department_name TEXT, location TEXT, staff_id ???, first_name TEXT, last_name TEXT, email_address TEXT);
 
     # Insert the table's rows
     # one at a time:

@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, time
 from decimal import Decimal
 
 
@@ -6,20 +6,29 @@ from decimal import Decimal
 def make_column_defs(data):
     """
     This function:
-
-        is called by function convert_to_parquet()
+        1. 
+        
+        2. is called by function 
+        convert_to_parquet()
 
     
     Args: 
-        data: a list of dictionaries
-        that represents a table. 
-        Each dictionary represents a 
-        row and its key-value pairs 
-        represent columnname-cellvalue 
+        data: a list of 
+        dictionaries that 
+        represents a dimension 
+        table or the fact table. 
+        Each dictionary 
+        represents a row and its 
+        key-value pairs 
+        represent 
+        columnname-cellvalue 
         pairs.
 
     Returns:
-        the col defs
+        a string that looks like 
+        this:
+        'col1_name, col2_name, ...' 
+        
     
     """
 
@@ -34,18 +43,17 @@ def make_column_defs(data):
     str: "TEXT",
     date: "DATE",
     datetime: "TIMESTAMP",
+    time: "TIME",
     Decimal: "NUMERIC",
-    None: "TEXT"           # Hopefully this will correctly 
-                           # take care of None values in any 
-                           # table 
+    None: "TEXT"           
                }
     
     # Get the first row from the 
     # table:
-    first_row = data[0] # {"some_col_name": "some_value", etc}
+    first_row = data[0] # {"col_1_name": 13, "col_2_name": "val_2", etc}
 
     # make column definitions:
-    col_defs = ', '.join(     # "some_col_name INT, some_col_name TEXT ..."
+    col_defs = ', '.join(     # "col_1_name INT, "col_2_name TEXT, etc"
         f"{col} {type_map.get(type(val))}"
         for col, val in first_row.items()
                         )

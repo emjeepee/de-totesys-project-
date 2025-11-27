@@ -25,7 +25,7 @@ from .transform_to_dim_location import transform_to_dim_location
 def func_lookup_table(table_name: str):
 
     lookup_table = {
-    "sales_order": transform_to_star_schema_fact_table, # tested
+    "sales_order": transform_to_star_schema_fact_table, 
     "staff": transform_to_dim_staff,
     "address": transform_to_dim_location, # converts address table to location dim table
     "design": transform_to_dim_design,

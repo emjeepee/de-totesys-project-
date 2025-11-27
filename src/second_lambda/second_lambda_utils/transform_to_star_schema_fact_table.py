@@ -61,6 +61,7 @@ def transform_to_star_schema_fact_table(table_data):
     #         'agreed_delivery_date':   # '2025-08-20', 
     #         'agreed_payment_date': '2025-08-16', 
     #         'agreed_delivery_location_id': 11},
+    #                   etc
     #                     ]
 
 
@@ -88,7 +89,7 @@ def transform_to_star_schema_fact_table(table_data):
         dt_updated_time = dt_updated.time() # extract time only
         dt_updated_date = dt_updated.date() # extract date only
 
-        print(f"MY INFO 25Nov25, 21.32: inside transform_to_star_schema_fact_table().    dt_created_time is {dt_created_time} and dt_updated_time is {dt_updated_time}")
+        # print(f"MY INFO 25Nov25, 21.32: inside transform_to_star_schema_fact_table().    dt_created_time is {dt_created_time} and dt_updated_time is {dt_updated_time}")
 
 
         apd_str = row.get("agreed_payment_date") # eg '2025-08-16'
@@ -121,4 +122,6 @@ def transform_to_star_schema_fact_table(table_data):
                         }
        
         fact_sales_order.append(facts_table_row)
+
+
     return fact_sales_order

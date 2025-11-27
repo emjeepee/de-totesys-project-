@@ -42,11 +42,17 @@ def general_setup():
              int
                     ]
 
+        cre_at_iso_1 = datetime(2025, 8, 13, 9, 47, 9).isoformat()
+        cre_at_iso_2 = datetime(2025, 8, 13, 9, 47, 9).isoformat()
+        las_up_iso_1 = datetime(2025, 8, 14, 9, 47, 9).isoformat()
+        las_up_iso_2 = datetime(2025, 8, 14, 9, 47, 9).isoformat()
+
 
         mock_so_table = [
-             {'sales_order_id': 15647, 'created_at': datetime(2025, 8, 13, 9, 47, 9, 901000), 'last_updated': datetime(2025, 8, 13, 9, 47, 9, 901000),  'design_id': 648,  'staff_id': 19,  'counterparty_id': 14, 'units_sold': 36692, 'unit_price': Decimal('2.40'), 'currency_id': 2, 'agreed_delivery_date': '2025-08-20', 'agreed_payment_date': '2025-08-16', 'agreed_delivery_location_id': 11},
-             {'sales_order_id': 15648, 'created_at': datetime(2025, 9, 13, 9, 47, 9, 901000), 'last_updated': datetime(2025, 9, 13, 9, 47, 9, 901000),  'design_id': 649,  'staff_id': 19,  'counterparty_id': 12, 'units_sold': 36692, 'unit_price': Decimal('4.63'), 'currency_id': 1, 'agreed_delivery_date': '2025-09-20', 'agreed_payment_date': '2025-09-16', 'agreed_delivery_location_id': 12},
+             {'sales_order_id': 15647, 'created_at': cre_at_iso_1, 'last_updated': las_up_iso_1,  'design_id': 648,  'staff_id': 19,  'counterparty_id': 14, 'units_sold': 62, 'unit_price': Decimal('2.40'), 'currency_id': 2, 'agreed_delivery_date': '2025-08-20', 'agreed_payment_date': '2025-08-16', 'agreed_delivery_location_id': 11},
+             {'sales_order_id': 15648, 'created_at': cre_at_iso_2, 'last_updated': las_up_iso_2,  'design_id': 649,  'staff_id': 2,  'counterparty_id': 1, 'units_sold': 36, 'unit_price': Decimal('4.63'), 'currency_id': 1, 'agreed_delivery_date': '2025-09-20', 'agreed_payment_date': '2025-09-16', 'agreed_delivery_location_id': 12},
                         ]
+        
 
         yield keys, types, mock_so_table
 
@@ -57,27 +63,30 @@ def general_setup():
 # @pytest.mark.skip
 def test_returns_list(general_setup):
     # Arrange
-    ( keys, types, mock_so_table) = general_setup
-
+    keys, types, mock_so_table = general_setup
     expected = list
+    expected_fail = str
+
 
     # Act
     response = transform_to_star_schema_fact_table(mock_so_table)
     result = type(response)
-    # result = None
     
-
+    
     # Assert
+    # ensure test can fail:
+    # assert result == expected_fail
     assert result == expected
 
 
 
 
 # @pytest.mark.skip
-def test_fact_table_has_same_number_or_rows_as_sales_order_table(general_setup):
+def test_fact_table_has_same_number_of_rows_as_sales_order_table(general_setup):
     # Arrange:
-    ( keys, types, mock_so_table) = general_setup
-    expected = len(mock_so_table)        
+    keys, types, mock_so_table = general_setup
+    expected_fail = 42
+    expected = len(mock_so_table)   
 
     # Act:
     response = transform_to_star_schema_fact_table(mock_so_table) # [{}, {}, {}, etc]
@@ -85,6 +94,7 @@ def test_fact_table_has_same_number_or_rows_as_sales_order_table(general_setup):
     # result = None
     
     # Assert:
+    # result == expected_fail
     assert result == expected
 
 
@@ -93,7 +103,7 @@ def test_fact_table_has_same_number_or_rows_as_sales_order_table(general_setup):
 # @pytest.mark.skip
 def test_each_row_of_fact_table_has_correct_keys(general_setup):
     # Arrange:
-    ( keys, types, mock_so_table) = general_setup
+    keys, types, mock_so_table = general_setup
     is_equal = True
 
     # Act:
@@ -108,6 +118,8 @@ def test_each_row_of_fact_table_has_correct_keys(general_setup):
     # result = False
     
     # Assert:
+    # ensure test can fail:
+    # assert False
     assert result 
 
 
@@ -134,10 +146,11 @@ def test_each_row_of_fact_table_has_values_of_correct_type(general_setup):
                 break
 
     result = is_equal
-    # result = False
-
+    
 
     # Assert
+    # ensure test can fail:
+    # assert False
     assert result
 
 

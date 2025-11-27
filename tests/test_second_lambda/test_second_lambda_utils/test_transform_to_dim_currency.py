@@ -33,7 +33,7 @@ def general_setup():
 # @pytest.mark.skip
 def test_returns_list(general_setup):
     # Arrange
-    (mock_pp_curr_table, expected) = general_setup
+    mock_pp_curr_table, expected = general_setup
 
     expected = list
 

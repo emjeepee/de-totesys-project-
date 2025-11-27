@@ -15,22 +15,24 @@ logger = logging.getLogger(__name__)
 def convert_to_parquet(data: list, table_name: str):
     """
     This function:
-        converts a table in the 
-        form of a list of dictionaries 
-        into a table in Parquet format
-        in a BytesIO buffer.
-        Function
-        second_lambda_handler() calls
-        this function.
+        
+        1. converts a table in the 
+        form of a list of 
+        dictionaries into a table 
+        in Parquet format in a 
+        BytesIO buffer. 
+        
+        2. is called by function
+        second_lambda_handler().
 
     
     Args:
         data: a list of dictionaries
         representing a table, where 
         each dictionary represents a 
-        row and whose key-value pairs 
-        represent columnname-cellvalue 
-        pairs.
+        row and has key-value pairs 
+        that represent 
+        columnname-cellvalue pairs.
 
         table_name: the name of the 
         table
@@ -38,6 +40,7 @@ def convert_to_parquet(data: list, table_name: str):
     Returns:
         a BytesIO buffer that contains
         the table in Parquet format.
+    
     """
 
     
@@ -53,7 +56,7 @@ def convert_to_parquet(data: list, table_name: str):
     # into the duckdb Parquet 
     # file that this function 
     # will make:
-    print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run function make_parts_of_insert_statements().")    
+    # print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run function make_parts_of_insert_statements().")    
     ph_and_v_list = make_parts_of_insert_statements(data)
     values_list  = ph_and_v_list[1]
     placeholders = ph_and_v_list[0]
