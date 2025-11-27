@@ -1,27 +1,22 @@
 
-# Project Title
+### Project Title
 
-### **Extract-transform-load (ETL) pipeline** <br><br><br>
+## **Extract-transform-load (ETL) pipeline** <br><br><br>
 
 
 ## Description of project
-A project that transforms data in a transactional OLTP database into star-schema data for analytics.  
-This project converts updated data from OLTP database ToteSys into denormalised data in the form of dimensions tables and a facts table and puts this data in an Amazon RDS postgresql data warehouse. 
+This project creates an extract-transform-load (ETL) pipeline that reads table data from an OLTP database, transforms the data so that it is compatible with the star-schema model and writes the data to an OLAP data warehouse.  
+
  <br><br><br>
 
 
 ## Project directories
-This project includes the following directories:
+The most important directories in this project are:
  - .github -- contains the GitHub Actions workflow.yml file
- - src -- contains all the python files for the three lambda functions.
-		This includes a main python file for each lambda and separate files 
-		for the utility functions employed by the lambda functions
- - terraform -- this directory contains all Terraform *.tf files that describe 
-		the provisioning of AWS cloud services this project needs.
-		NOTE: the Terraform state must be placed elsewhere.
- - tests -- this directory contains test_*.py files, which contain the pytest
-		functions that will test all of the python code that makes up the 
-		lambda functions
+ - src -- contains all the python modules for this project.
+		This includes a python module that contains three lambda handlers. It also contains utility modules that the lambda handlers employ.
+ - terraform -- this directory contains all the Terraform *.tf files that together provision the cloud services that this project employs. This project employs three AWS Lambda functions, two S3 buckets, AWS CloudWatch, an AWS EventBridge scheduler and AWS EventBridge notifications
+ - tests -- contains test_*.py files, which contain the pytest functions that will test all of the python code that makes up the lambda handlers and their utility functions.
  <br><br><br>
 
 
@@ -42,13 +37,13 @@ fork this GitHub repository: https://github.com/emjeepee/de-totesys-project- and
  <br><br><br>
     
 ## Tech Stack
-
- - CI/CD: GitHub Actions
- - Code: Python 3.13
- - Python libraries pg8000, pg8000.native, pandas, pyarrow, io, botocore, datetime, os, logging, json, dotenv, currency_codes, calendar and decimal
- - Testing: Python libraries Pytest, coverage, unittest and moto 
- - Provisioning of cloud services: Terraform
  - AWS cloud services: S3, Lambda, EventBridge and CloudWatch
+ - Code: Python 3.12
+ - CI/CD: GitHub Actions
+ - Python libraries botocore, calendar, copy, currency_codes, datetime, decimal dotenv, io, json, logging, os, pg8000.native, tempfile 
+ - Testing: Python libraries coverage, moto, Pytest and unittest
+
+ 
  <br><br><br>
 
 
@@ -64,7 +59,8 @@ fork this GitHub repository: https://github.com/emjeepee/de-totesys-project- and
 
 ## Operation of the project:
 ### **Overview** <br>
-***This project:***
+This project converts data from an OLTP database ToteSys into denormalised data in the form of dimensions tables and a fact table and puts this data into an AWS RDS postgresql data warehouse. 
+
  - 		extracts updated data from postgresql database ToteSys, 
  		which holds the data in several tables. 
  - 		transforms each updated table into either a dimension table 
