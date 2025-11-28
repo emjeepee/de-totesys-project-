@@ -108,16 +108,16 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     # when the info in the 
     # totesys database is 
     # no longer usable):
-    IS_OLAP_OK = environ["IS_OLAP_OK"] # "True" or "False"
+    IS_OLTP_OK = environ["IS_OLTP_OK"] # "True" or "False"
     # Handle "True", "true", "TRUE", etc:
-    IS_OLAP_OK = True if IS_OLAP_OK.lower() == "true" else False 
+    IS_OLTP_OK = True if IS_OLTP_OK.lower() == "true" else False 
 
     # The following code no 
     # longer runs because 
     # maintenance of the data 
     # in the totesys database 
     # has stopped (Nov25)
-    if  IS_OLAP_OK:
+    if  IS_OLTP_OK:
         # Make a list of the column 
         # names of the table in 
         # question: 
@@ -159,7 +159,7 @@ def read_table(table_name: str, conn: Connection, after_time: str):
 
     else:
         # This code will run 
-        # once the totesys 
+        # once database totesys 
         # stops running:
         so_table    = make_fake_so_table()
         de_table    = make_fake_de_table()
