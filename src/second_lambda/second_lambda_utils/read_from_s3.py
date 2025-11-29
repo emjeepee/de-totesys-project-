@@ -2,6 +2,8 @@ from botocore.exceptions import ClientError
 
 import logging
 
+from .errors_lookup import errors_lookup
+
 
 
 
@@ -31,7 +33,10 @@ def read_from_s3(s3_client, bucket_name: str, key: str):
         response = s3_client.get_object(Bucket=bucket_name, Key=key)
         result = response["Body"].read().decode("utf-8")
         return result
+    
     except ClientError:
-        logger.error(err_msg)
+        # log the error 
+        # and stop the code:
+        logger.exception(errors_lookup['err_0'])
         raise 
 

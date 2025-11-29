@@ -12,13 +12,28 @@ from second_lambda_utils.second_lambda_init       import second_lambda_init
 from second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
 from second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
 from second_lambda_utils.should_make_dim_date     import should_make_dim_date
+from second_lambda_utils.errors_lookup            import errors_lookup
+from second_lambda_utils.info_lookup              import info_lookup
 
 
 
 
 
+root_logger = logging.getLogger()
 
-logger = logging.getLogger()
+
+
+# Create and configure a logger 
+# that writes to a file:
+logging.basicConfig(
+        level=logging.DEBUG,                                         # Log level (includes INFO, WARNING, ERROR)
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",  # Log format
+        filemode="a"                                                 # 'a' appends. 'w' would overwrite
+                   )
+
+
+
+
 
 def second_lambda_handler(event, context):
     """
@@ -77,6 +92,13 @@ def second_lambda_handler(event, context):
     Returns:
         None                    
     """
+
+
+
+    # log status:
+    root_logger.info(info_lookup['info_0'])
+
+    
 
     # Get lookup table that contains 
     # values this handler requires:
