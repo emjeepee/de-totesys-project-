@@ -93,7 +93,7 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
         # if failure, return
         # timestamp for the 
         # year 1900:    
-        logger.error(errors_lookup['err_0'])
+        logger.exception(errors_lookup['err_0'])  # <-- logs full stacktrace
         return default_ts
     
 
@@ -110,25 +110,8 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
         # if failure, log the 
         # error but allow the 
         # code to continue:
-        logger.error(errors_lookup['err_1'])
+        logger.exception(errors_lookup['err_1'])  # <-- logs full stacktrace
         
-
-    try:
-        # Replace previous timestamp 
-        # in the bucket with the
-        # new timestamp:
-        s3_client.put_object(
-            Bucket=bucket_name, 
-            Key=ts_key, 
-            Body=now_ts)
-
-    except ClientError:
-        # If failure, log and 
-        # stop the code:
-        logger.error(errors_lookup['err_2'])
-        raise 
-
-
 
     # Return the previous 
     # timestamp:

@@ -14,13 +14,12 @@ import logging
 
 root_logger = logging.getLogger()
 
-# Logging config.
 # Create and configure a logger 
 # that writes to a file:
 logging.basicConfig(
     level=logging.DEBUG,                                         # Log level (includes INFO, WARNING, ERROR)
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",  # Log format
-    filemode="a"                                                 # 'a' appends; 'w' would overwrite
+    filemode="a"                                                 # 'a' appends. 'w' would overwrite
                    )
 
 
@@ -66,51 +65,37 @@ def first_lambda_handler(event, context):
     # in a lookup table:
     lookup = get_env_vars()
     
-    try:
-        # Get the timestamp saved 
-        # in the S3 ingestion bucket
-        # and replace it with one 
-        # for the current time:
-        after_time = change_after_time_timestamp(
-                        lookup['bucket_name'], # name of ingestion bucket
-                        lookup['s3_client'], # boto3 S3 client object
-                        "***timestamp***", 
-                        "1900-01-01 00:00:00"
+
+    # Get the timestamp saved 
+    # in the S3 ingestion bucket
+    # and replace it with one 
+    # for the current time:
+    after_time = change_after_time_timestamp(
+                    lookup['bucket_name'], # name of ingestion bucket
+                    lookup['s3_client'], # boto3 S3 client object
+                    "***timestamp***", 
+                    "1900-01-01 00:00:00"
                                             )
-    except Exception:
-        # The following line 
-        # automatically logs the 
-        # full traceback of the 
-        # most recent exception:
-        root_logger.exception(errors_lookup['err_0'])      
 
 
-    try: 
-        # Find only those tables in the ToteSys 
-        # database that have updated rows.
-        updated_tables = get_data_from_db(
-                    lookup['tables'], # list of names of tables of interest 
-                    after_time, 
-                    lookup['conn'], # pg8000.native Connection object 
-                    read_table) 
+
+    # Find only those tables 
+    # in the totesys database 
+    # that have updated rows:
+    updated_tables = get_data_from_db(
+                lookup['tables'], # list of names of tables of interest 
+                after_time, 
+                lookup['conn'], # pg8000.native Connection object 
+                read_table) 
             # [
             # {'design': [{<updated-row data>}, etc]}, 
             # {'sales': [{<updated-row data>}, etc]}, 
             # etc
             # ]
             # where {<updated-row data>} is, eg, {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
-        # DELETE THIS LATER:
-        for dictnry in updated_tables:
-            if "address" in dictnry:
-                print(f"MY_INFO tues25Nov25>>>>> In first_lambda_handler() before writing to S3. The address table is {dictnry['address']}")
-                pass
-        
-
-    except Exception: 
-        root_logger.exception(errors_lookup['err_1'])    
-
     
-
+    # Log status:
+    root_logger.info(info_lookup['info_1'])
 
     # If the department table or 
     # the address table are in
@@ -130,24 +115,31 @@ def first_lambda_handler(event, context):
 
 
 
-    try:
-        # write updated row data 
-        # from each table to the 
-        # ingestion bucket: 
-        write_to_s3(data_for_s3, 
-                    lookup['s3_client'], # boto3 S3 client object, 
-                    write_to_ingestion_bucket, 
-                    lookup['bucket_name'])
-    except Exception: 
-        root_logger.exception(errors_lookup['err_2'])    
-    
+    # write updated row data 
+    # from each table to the 
+    # ingestion bucket: 
+    write_to_s3(data_for_s3, 
+                lookup['s3_client'], # boto3 S3 client object, 
+                write_to_ingestion_bucket, 
+                lookup['bucket_name'])
+  
+    # Log status:
+    root_logger.info(info_lookup['info_2'])
 
-    # Close connection to ToteSys database:
-    lookup['close_db'] # returns fn to close connection to db
+
+
+    # Close connection to 
+    # totesys database.
+    # lookup['close_db'] 
+    # returns function 
+    # conn_to_db(), which
+    # closes the 
+    # connection to a
+    # database:
     lookup['close_db'](lookup['conn'])
 
-
-    root_logger.info(info_lookup['info_1'])
+    # Log status:
+    root_logger.info(info_lookup['info_3'])
 
     
 

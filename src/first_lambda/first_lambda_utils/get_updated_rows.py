@@ -2,7 +2,7 @@ from pg8000.native import Error
 
 import logging
 
-
+from .errors_lookup import errors_lookup
 
 
 
@@ -43,23 +43,18 @@ def get_updated_rows(conn_obj, after_time: str, table_name: str):
     """
     
 
-    err_msg = "Error in function get_updated_rows()." \
-              "\nFailed to read ToteSys database" \
-              "\nwhen trying to get a list of updated" \
-              "\nrows for table {table_name}."
-
     query = f"SELECT * FROM {table_name} WHERE last_updated > :after_time LIMIT 20;"
 
     try: 
         response = conn_obj.run(query, after_time=after_time)
         # log status:
-        print("Function get_updated_rows() successfully\n got updated rows of table: %s", table_name)
-        logger.info("Function get_updated_rows() successfully\n got updated rows of table: %s", table_name)
-
         return response
     
     except Error as e:
-        logger.error(err_msg)
-        raise RuntimeError
+        # log the error 
+        # and stop the code:
+        logger.exception(errors_lookup['err_3'] + f'{table_name}')  # <-- logs full stacktrace
+        raise
+
         
         

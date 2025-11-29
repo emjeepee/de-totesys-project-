@@ -1,7 +1,10 @@
 import json
 import boto3
 import logging
+
 from botocore.exceptions import ClientError
+
+from .errors_lookup import errors_lookup
 
 
 logger = logging.getLogger(__name__)
@@ -67,17 +70,20 @@ def get_latest_table(resp_dict, S3_client: boto3.client, bucket_name: str):
               "\n get_latest_table()." \
               "\n Unable to read ingestion bucket." \
 
-    # Get the list of keys under which
-    # the versions of the table are 
+    # Get the list of keys 
+    # under which the versions 
+    # of the table are 
     # stored:
     keys_list = [dict["Key"] for dict in resp_dict.get("Contents", [])]
     # ['design/2025-06-02_22-17-19-2513.json', 'design/2025-05-29_22-17-19-2513.json', etc]
         
     # Get the key for the latest table:
     latest_table_key = sorted(keys_list)[ -1 ]  # 'design/2025-06-02_22-17-19-2513.json'
+    table_name = latest_table_key.split('/')[0]
 
     try:        
-        # Get the latest table itself:
+        # Get the latest 
+        # table itself:
         response = S3_client.get_object(Bucket=bucket_name, Key=latest_table_key)
         data = response["Body"].read().decode("utf-8")
 
@@ -85,7 +91,9 @@ def get_latest_table(resp_dict, S3_client: boto3.client, bucket_name: str):
         return json.loads(data)
 
     except ClientError:
-        logger.error(err_msg)
+        # log the error 
+        # and stop the code:
+        logger.exception(errors_lookup['err_5']+ f'{table_name}')
         raise
         
 

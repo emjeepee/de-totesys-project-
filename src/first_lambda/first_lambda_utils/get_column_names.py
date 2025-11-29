@@ -3,7 +3,7 @@ from pg8000.native import Error
 
 import logging
 
-
+from .errors_lookup import errors_lookup
 
 
 
@@ -46,13 +46,14 @@ def get_column_names(conn_obj, table_name: str):
 
     try: 
         response = conn_obj.run(query)
-        # log status:
-    
         return response
     
     except (Error):
-        logger.info(err_Msg)
-        raise RuntimeError
+        # log the error 
+        # and stop the code:
+        logger.exception(errors_lookup['err_2'] + f'{table_name}')  # <-- logs full stacktrace
+        raise
+
         
     
 

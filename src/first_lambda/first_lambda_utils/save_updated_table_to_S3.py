@@ -3,6 +3,7 @@ import logging
 
 from botocore.exceptions import BotoCoreError
 
+from .errors_lookup import errors_lookup
 
 
 
@@ -12,7 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 def save_updated_table_to_S3(
-    updated_table, S3_client: boto3.client, new_key: str, bucket: str
+                updated_table, 
+                S3_client: boto3.client, 
+                new_key: str, 
+                bucket: str
                             ):
     """
     This function:
@@ -35,15 +39,17 @@ def save_updated_table_to_S3(
             S3 ingestion bucket.
     """
 
-    err_msg = f"Error in function " \
-              "\n save_updated_table_to_S3()." \
-              "\n Unable to write an updated"  \
-              "\n table to the ingestion bucket." \
-
-
     try:
-        S3_client.put_object(Bucket=bucket, Key=new_key, Body=updated_table)
+        table_name = new_key.split('/')[0]
+
+        S3_client.put_object(
+                    Bucket=bucket, 
+                    Key=new_key, 
+                    Body=updated_table)
         logger.info("Function save_updated_table_to_S3() successfully\n wrote an updated table to the ingestion bucket")
+
     except BotoCoreError as e:
-        logger.error(err_msg)
-        raise RuntimeError
+        # log exception and 
+        # stop the code:
+        logger.exception(errors_lookup['err_5'] + f'{table_name}')
+        raise 

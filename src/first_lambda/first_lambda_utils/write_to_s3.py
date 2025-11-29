@@ -3,6 +3,8 @@ from .create_formatted_timestamp import create_formatted_timestamp
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
+from .errors_lookup import errors_lookup
+
 import json
 import logging
 
@@ -157,7 +159,9 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
                     Body=json.dumps(member[table_name]) # jsonified [{<updated-row data>}, {<updated-row data>}, etc]
                 )
             except ClientError:
-                logger.error(err_msg_2)
+                # log the error and
+                # stop the code:
+                logger.exception(errors_lookup['err_7'] + f'{table_name}')
                 raise 
             
             

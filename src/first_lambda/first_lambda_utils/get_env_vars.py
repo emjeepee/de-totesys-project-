@@ -22,8 +22,8 @@ def get_env_vars():
         None
 
     Returns:
-        a dictionary that acts as a lookup 
-         table
+        a dictionary that acts as 
+        a lookup table.
     """
     
     lookup = {}

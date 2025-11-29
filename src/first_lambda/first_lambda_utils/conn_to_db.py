@@ -1,5 +1,12 @@
 import os
-from pg8000.native import Connection
+import logging
+
+from pg8000.native import Connection, Error
+
+
+from .errors_lookup import errors_lookup
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -26,4 +33,11 @@ def conn_to_db(DB_NAME: str):
 
 
 def close_db(conn: Connection):
-    conn.close()
+    try:
+        conn.close()
+
+    except Error:
+        # log the error but 
+        # allow the code to 
+        # continue:
+        logger.exception(errors_lookup['err_8'])  # <-- logs full stacktrace

@@ -4,7 +4,9 @@ import logging
 
 from datetime import datetime, timezone
 from botocore.exceptions import ClientError
+
 from .get_latest_table import get_latest_table
+from .errors_lookup import errors_lookup
 
 
 
@@ -13,7 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 def get_most_recent_table_data(
-    file_location: str, S3_client: boto3.client, bucket_name: str
+            file_location: str, 
+            S3_client: boto3.client, 
+            bucket_name: str
                               ):
     """
     This function:
@@ -63,13 +67,21 @@ def get_most_recent_table_data(
 
     """
 
-    err_msg_1 = f"There has been an error in function \n get_most_recent_table_data(). \n Unable to read ingestion bucket \n for the latest table of name {file_location} ." 
 
     try:
-        response = S3_client.list_objects_v2(Bucket=bucket_name, Prefix=file_location)
+        response = S3_client.list_objects_v2(
+                    Bucket=bucket_name, 
+                    Prefix=file_location)
+        
     except (ClientError):
-        logger.error(err_msg_1)
+        # log the error and 
+        # stop the code:
+        logger.exception(errors_lookup['err_4'] + f'{file_location}')
         raise
 
-    latest_tbl = get_latest_table(response, S3_client, bucket_name) # a Python list
+    latest_tbl = get_latest_table(
+                response, 
+                S3_client, 
+                bucket_name) # a Python list
+    
     return latest_tbl
