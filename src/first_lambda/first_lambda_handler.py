@@ -6,8 +6,8 @@ from first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bu
 from first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
 from first_lambda_utils.get_env_vars                import get_env_vars
 from first_lambda_utils.reorder_list                import reorder_list
-
-
+from first_lambda_utils.errors_lookup               import errors_lookup
+from first_lambda_utils.info_lookup                 import info_lookup
 
 import logging
 
@@ -56,21 +56,21 @@ def first_lambda_handler(event, context):
     Returns:
         None
     """
-    root_logger.info("First Lambda function starting anew.\n\n")
+    root_logger.info(info_lookup['info_0'])
 
     if event is None:
         event = {"time": "1900-01-01 00:00:00"}
 
-    # Get values this handler requires:
+    # Get values this handler 
+    # requires and put them 
+    # in a lookup table:
     lookup = get_env_vars()
-
-
     
     try:
-        # Get the timestamp saved in 
+        # Get the timestamp saved 
         # in the S3 ingestion bucket
-        # and replace that timestamp 
-        # with one for the current time:
+        # and replace it with one 
+        # for the current time:
         after_time = change_after_time_timestamp(
                         lookup['bucket_name'], # name of ingestion bucket
                         lookup['s3_client'], # boto3 S3 client object
@@ -78,10 +78,11 @@ def first_lambda_handler(event, context):
                         "1900-01-01 00:00:00"
                                             )
     except Exception:
-        # The following line automatically logs 
-        # the full traceback of the most recent 
-        # exception.
-        root_logger.exception("Error caught in first Lambda function while trying to run change_after_time_timestamp()\n\n")      
+        # The following line 
+        # automatically logs the 
+        # full traceback of the 
+        # most recent exception:
+        root_logger.exception(errors_lookup['err_0'])      
 
 
     try: 
@@ -106,7 +107,7 @@ def first_lambda_handler(event, context):
         
 
     except Exception: 
-        root_logger.exception("Error caught in first_lambda_handler() while trying to run get_data_from_db()\n\n")    
+        root_logger.exception(errors_lookup['err_1'])    
 
     
 
@@ -138,12 +139,15 @@ def first_lambda_handler(event, context):
                     write_to_ingestion_bucket, 
                     lookup['bucket_name'])
     except Exception: 
-        root_logger.exception("Error caught in first_lambda_handler() while trying to run write_to_s3()\n\n")    
+        root_logger.exception(errors_lookup['err_2'])    
     
 
     # Close connection to ToteSys database:
     lookup['close_db'] # returns fn to close connection to db
     lookup['close_db'](lookup['conn'])
+
+
+    root_logger.info(info_lookup['info_1'])
 
     
 
