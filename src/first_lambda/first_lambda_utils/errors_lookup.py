@@ -1,21 +1,81 @@
 
 
+err_0 = (
+    """\n\n\nEither change_after_time_timestamp() 
+    caught an error while trying to read
+    the ingestion bucket for the previous 
+    timestamp or this is the first ever
+    run of the pipeline (which is correct 
+    behaviour)."""
+                )
+
+err_1 = (
+    """\n\n\nchange_after_time_timestamp() 
+    caught an error while trying to write 
+    new timestamp to ingestion bucket.""")
+
+
+err_2 = (
+    """\n\n\nget_column_names() caught an error 
+    while trying to read from the totesys 
+    database the table """
+        )
+
+err_3 = (
+    """\n\n\nget_updated_rows() caught an error 
+    while trying to read from the totesys 
+    database the table """
+        )
+
+err_4 = (
+    """\n\n\nget_most_recent_table_data() caught 
+    an error while trying to read ingestion 
+    bucket for the latest table of name """)
+
+err_5 = (
+    """\n\n\nget_latest_table() caught an error 
+    while trying to read ingestion bucket 
+    for the latest table under key """
+    )
+
+err_6 = (
+    """\n\n\nsave_updated_table_to_S3() caught an 
+    error while trying to write to the 
+    ingestion bucket upodated table """)
+
+err_7 = (
+    """\n\n\nwrite_to_s3() caught an error while 
+    trying to write to the ingestion bucket 
+    table """
+        )
+
+err_8 = (
+    """\n\n\nconn_to_db() caught an error while 
+    trying to connect to the totesys database."""
+        )
+
+err_9 = (
+    """\n\n\nclose_db() caught an error while trying 
+    to close the connection to the totesys 
+    database."""
+        )
+
 
 # a lookup table for 
 # error messages that 
 # first lambda utlilities 
 # will employ when logging 
-
 errors_lookup = {
-'err_0': "Error caught in change_after_time_timestamp() while trying read ingestion bucket for previous timestamp.",    
-"err_1": "Error caught in change_after_time_timestamp() while trying to write new timestamp to ingestion bucket.",
-"err_2": "Error caught in get_column_names() while trying to read from the totesys database the table ",
-"err_3": "Error caught in get_updated_rows() while trying to read from the totesys database the table ",
-"err_4": "Error caught in get_most_recent_table_data() while trying to read ingestion bucket for the latest table of name ",
-"err_5": "Error caught in get_latest_table() while trying to read ingestion bucket for the latest table under key ",
-"err_6": "Error caught in save_updated_table_to_S3() while trying to write to the ingestion bucket upodated table ",
-"err_7": "Error caught in write_to_s3() while trying to write to the ingestion bucket table ",
-"err_8": "Error caught in close_db() while trying to close the connection to the database",
+'err_0': err_0,    
+"err_1": err_1,
+"err_2": err_2,
+"err_3": err_3,
+"err_4": err_4,
+"err_5": err_5,
+"err_6": err_6,
+"err_7": err_7,
+"err_8": err_8,
+"err_9": err_9,
                 }
 
 

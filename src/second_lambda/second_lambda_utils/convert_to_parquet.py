@@ -43,12 +43,8 @@ def convert_to_parquet(data: list, table_name: str):
     
     """
 
-    
-
-    print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run function make_column_defs().")    
     # make a string of column names:
     col_defs = make_column_defs(data) # "some_col_name INT, some_col_name TEXT ..."
-
 
     # makes parts of the insert 
     # statements that will insert 
@@ -60,7 +56,6 @@ def convert_to_parquet(data: list, table_name: str):
     ph_and_v_list = make_parts_of_insert_statements(data)
     values_list  = ph_and_v_list[1]
     placeholders = ph_and_v_list[0]
-
     
     # Create a temporary file with  
     # extension .parquet, put the file
@@ -74,14 +69,11 @@ def convert_to_parquet(data: list, table_name: str):
     with tempfile.NamedTemporaryFile(delete=False, suffix='.parquet') as tmp:
         tmp_path = tmp.name
 
-
     # make a duckdb table in Parquet 
     # format and save it to the temp
     # location:
     # print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run put_pq_table_in_temp_file().")
     put_pq_table_in_temp_file(table_name, col_defs, values_list, placeholders, tmp_path)
- 
-
 
     # Write the Parquet file in the 
     # temporary location to a BytesIO
@@ -90,7 +82,6 @@ def convert_to_parquet(data: list, table_name: str):
     # at path tmp_path: 
     # print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run write_parquet_to_buffer().")
     pq_buffer = write_parquet_to_buffer(tmp_path)
-                       
 
     return pq_buffer
     

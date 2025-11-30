@@ -8,15 +8,16 @@ from .conn_to_db import conn_to_db, close_db
 def get_env_vars():
     """
     This function:
-        1) gets the values of certain 
+        1) gets the values of  
             environment variables
-            for use by all three lambda 
-            functions.
-        2) creates a dictionary that 
-            contains the values of 
-            those environment variables 
-            and that will act as a 
-            lookup table
+            s othat all three lambda 
+            functions can employ 
+            them.
+        2) puts those values in a 
+            dictionary that will act 
+            as a lookup table (for 
+            use in 
+            first_lambda_handler())
 
     Args:
         None
@@ -31,14 +32,27 @@ def get_env_vars():
     # Either way read the other env 
     # vars, make dict with those 
     # values, return the dict:
-    tables_list_string = os.environ['AWS_TABLES_LIST'] # 'design, sales_order, ...etc'
-    tables_list = [item.strip() for item in tables_list_string.split(",")]
+    tables_list_string = os.environ['AWS_TABLES_LIST'] # 'design, sales_order, 
+                                                       # ...etc'
+    lookup['tables'] = [item.strip() 
+                        for item in 
+                        tables_list_string.split(",")] # names of all tables 
+                                     # of interest: 
+                                     # [<name string>, <name string>, etc]
 
-    lookup['tables'] = tables_list # names of all tables of interest (a list): [<table_name_string>, <table_name_string>, ... etc  ]
-    lookup['s3_client'] = boto3.client("s3")
-    lookup['bucket_name'] = os.environ['AWS_INGEST_BUCKET']     # Name of ingestion S3 bucket, a string  
-    lookup['conn'] = conn_to_db(os.environ['OLTP_NAME'])    # A string
-    lookup['close_db'] = close_db 
+    lookup['s3_client'] = boto3.client("s3") 
+
+    lookup['bucket_name'] = os.environ['AWS_INGEST_BUCKET'] # Name of 
+                                        # S3 ingestion bucket, a string.
+                                        
+    lookup['conn'] = conn_to_db(os.environ['OLTP_NAME']) # pg8000.native 
+                                                         # Connection object
+                                                         # with access to 
+                                                         # OLTP database
+                                                         # totesys
+
+    lookup['close_db'] = close_db # function to close connection 
+                                  # to OLTP database totesys
 
 
     return lookup

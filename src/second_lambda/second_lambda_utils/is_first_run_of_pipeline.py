@@ -2,6 +2,8 @@ from botocore.exceptions import ClientError
 
 import logging
 
+from .errors_lookup import errors_lookup
+
 
 
 
@@ -27,23 +29,18 @@ def is_first_run_of_pipeline(proc_bucket: str, s3_client):
         False otherwise.
     """
 
-            
-
-    err_msg = "An error occurred in is_first_run_of_pipeline() in attempt to list objects in the processed bucket"
-
     try:
         objects_list = s3_client.list_objects_v2(Bucket=proc_bucket)
 
     except ClientError:
-        logger.error(err_msg)
+        # log exception and
+        # stop the code:
+        logger.exception(errors_lookup['err_1'])
         raise 
-
-    
+   
     
     if objects_list["KeyCount"] == 0:
-        # print(f"MY_INFO >>>>> In function is_first_run_of_pipeline. The processed bucket is empty")    
         return True
     
-    # print(f"MY_INFO >>>>> In function is_first_run_of_pipeline. The processed bucket is NOT empty")    
     return False        
 

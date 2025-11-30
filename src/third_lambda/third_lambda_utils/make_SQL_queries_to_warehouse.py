@@ -5,6 +5,11 @@ from pg8000.native import (
 
 import logging
 
+from .errors_lookup import errors_lookup
+
+
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,19 +33,18 @@ def make_SQL_queries_to_warehouse(qrs_list: list, conn):
 
     """
 
-    # Could put this error message and
-    # others in other functions in lookup:
-    err_Msg = f"Error in make_SQL_queries_to_warehouse()." \
-              "An error occured while trying to connect"  \
-              "to the data warehouse."  \
-
     try:
-        # Make sql queries to 
+        # Make SQL queries to 
         # the warehouse:
         for q_str in qrs_list: conn.run(q_str)
         
-    except (DatabaseError, InterfaceError, TimeoutError):
-        logger.info(err_Msg)
+    except (DatabaseError, 
+            InterfaceError, 
+            TimeoutError):
+        
+        # log the exception 
+        # and stop the code:
+        logger.exception(errors_lookup['err_1'])
         raise 
 
     

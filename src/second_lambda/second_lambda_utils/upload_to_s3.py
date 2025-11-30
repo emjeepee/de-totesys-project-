@@ -27,12 +27,12 @@ def upload_to_s3(S3_client, bucket_name: str, key: str, body):
         None
     """
 
-    err_msg = "Error in upload_to_s3() while trying to write to processed bucket." 
-
     try:
         S3_client.put_object(Bucket=bucket_name, Key=key, Body=body)
     except ClientError:
-        logger.error(err_msg)
+        # log the exception and 
+        # stop the code:
+        logger.exception("err_2")
         raise 
 
 

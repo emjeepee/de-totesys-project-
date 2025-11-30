@@ -2,9 +2,9 @@ import pytest
 from unittest.mock import Mock, patch, ANY
 from moto import mock_aws
 from botocore.exceptions import ClientError
+
 import os
 import boto3
-
 
 from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
 
@@ -53,10 +53,13 @@ def S3_setup(aws_credentials):
 
         # change_after_time_timestamp()
         # returns timesstamp_1900 on the 
-        # first ever run of the first lambda, 
-        # ie this is returned by the 
-        # 'except:' code of the function 
-        # under test.
+        # first ever run of the first 
+        # lambda or when there has been 
+        # a problem reading the ingestion 
+        # bucket, ie the function 
+        # returns timesstamp_1900 when 
+        # the first except block of the 
+        # function runs:
         timesstamp_1900 = "1900-01-01_00-00-00"  
 
 
@@ -64,8 +67,8 @@ def S3_setup(aws_credentials):
         # returns timesstamp_2025 when the 
         # first lambda runs for the 
         # 2nd-plus time, ie this is 
-        # returned by the 'try:' code of
-        # the function being tested.
+        # returned by the first try block 
+        # of the function.
         timesstamp_2025 = "2025-06-04_00-00-00"  
         
 
@@ -89,11 +92,33 @@ def S3_setup(aws_credentials):
 
 
 
-# @pytest.mark.skip
-def test_that_function_change_after_time_timestamp_returns_default_timestamp_on_appropriate_occasion(
-    S3_setup,
-                                                                                    ):
+def test_change_after_time_timestamp_returns_a_string(S3_setup):
     # arrange
+    expected_fail = list
+    yield_list = S3_setup
+    expected_timestamp = yield_list[3]
+    bucket = yield_list[1]  # the empty bucket
+    s3_client = yield_list[0]
+    ts_1900 = yield_list[3]
+    ts_key = yield_list[5]
+
+    # act
+    timestamp = change_after_time_timestamp(bucket, s3_client, ts_key, ts_1900)
+    result = type(timestamp)
+
+    # assert
+    # ensure the test can fail:
+    # assert result == expected_fail
+    assert result == str
+
+
+
+
+
+# @pytest.mark.skip
+def test_change_after_time_timestamp_returns_default_timestamp_when_it_should(S3_setup):
+    # arrange
+    expected_fail = "fail_test"
     yield_list = S3_setup
     expected_timestamp = yield_list[3]
     bucket = yield_list[1]  # the empty bucket
@@ -105,20 +130,23 @@ def test_that_function_change_after_time_timestamp_returns_default_timestamp_on_
     result_timestamp = change_after_time_timestamp(bucket, s3_client, ts_key, ts_1900)
 
     # assert
+    # ensure the test can fail:
+    # assert result_timestamp == expected_fail
     assert result_timestamp == expected_timestamp
 
 
+
+
 # @pytest.mark.skip
-def test_that_function_change_after_time_timestamp_returns_correct_timestamp_when_lambda_runs_2ndPlus_time(
+def test_change_after_time_timestamp_returns_correct_timestamp_when_lambda_runs_2ndPlus_time(
     S3_setup,
 ):
     # arrange
-
+    expected_fail = "fail_test"
     yield_list = S3_setup
     expected_timestamp = yield_list[4]
-    bucket = yield_list[2]  # the bucket containing the 2025 timestamp
+    bucket = yield_list[2]  # bucket containing 2025 timestamp
     s3_client = yield_list[0]
-    ts_2025 = yield_list[4]
     ts_1900 = yield_list[3]
     ts_key = yield_list[5]
 
@@ -126,39 +154,62 @@ def test_that_function_change_after_time_timestamp_returns_correct_timestamp_whe
     result_timestamp = change_after_time_timestamp(bucket, s3_client, ts_key, ts_1900)
 
     # assert
+    # ensure test can fail:
+    # assert result_timestamp == expected_fail
     assert result_timestamp == expected_timestamp
 
 
 # @pytest.mark.skip
-def test_that_function_change_after_time_timestamp_saves_new_timestamp_to_bucket_real(
+def test_change_after_time_timestamp_saves_new_timestamp_to_bucket_real(
     S3_setup,
-):
+                        ):
+    """
+    This test function: 
+        Uses the mock bucket that already 
+        contains a ('old') timestamp.
+
+        Mocks a current ('new') timestamp,
+        which change_after_time_timestamp()
+        should put into the S3 bucket as a 
+        replacement for the old timestamp.
+
+        Tests that the new timestamp is  
+        actually in the mock ingestion 
+        bucket.
+    """
+
     # arrange
+    expected_fail = "fail_test"
     yield_list = S3_setup
     # expected_timestamp = yield_list[4]
-    bucket = yield_list[2]  # the bucket containing 2025 timestamp "2025-06-04_00-00-00"
+    bucket = yield_list[2]  # bucket containing timestamp "2025-06-04_00-00-00"
     s3_client = yield_list[0]
     default_ts = yield_list[3]
     ts_key = yield_list[5]
 
     # act
     with patch("src.first_lambda.first_lambda_utils.change_after_time_timestamp.datetime") as mock_datetime:
-        mock_now = Mock()
-        mock_now.isoformat.return_value = "2025-06-04T08:28:12.301474+00:00"
-        mock_datetime.now.return_value = mock_now
+        mock_now_datetime = Mock()
+        mock_datetime.now.return_value = mock_now_datetime
+        mock_now_datetime.isoformat.return_value = "2025-06-04T01:23:45.678910+00:00" # mocks now_ts but with seconds
+        
 
-        expected_time = "2025-06-04T08:28:12"
+        expected_time = "2025-06-04T01:23:45"
         # Act:
-        # get the previous stored timestamp:
+        # put the new timestamp
+        # in the mock ingestion bucket,
+        # replacing the old one:
         change_after_time_timestamp(bucket, s3_client, ts_key, default_ts)
+        # Get the timestamp in the mock 
+        # ingestion bucket and test that 
+        # it is correct:
         response = s3_client.get_object(Bucket=bucket, Key=ts_key)
         result_time = response["Body"].read().decode("utf-8")
 
         # Assert
+        # ensure the test can fail:
+        # assert result_time == expected_fail
         assert result_time == expected_time
-
-
-
 
 
 
@@ -166,8 +217,9 @@ def test_that_function_change_after_time_timestamp_saves_new_timestamp_to_bucket
 # @pytest.mark.skip
 def test_change_after_time_timestamp_raises_ClientError_error_for_get_object(S3_setup):
     # Arrange
+    expected_fail = 'fail_test'
     yield_list = S3_setup
-    bucket = yield_list[2]
+    bucket = yield_list[2] # mock bucket containing timestamp "2025-06-04_00-00-00"
     s3_client = Mock()  # create a mock S3 client
     default_ts = yield_list[3]
     ts_key = yield_list[5]
@@ -182,6 +234,8 @@ def test_change_after_time_timestamp_raises_ClientError_error_for_get_object(S3_
     result = change_after_time_timestamp(bucket, s3_client, ts_key, default_ts)
 
     # Assert
+    # ensure test can fail:
+    # assert result == expected_fail
     assert result == default_ts  # the function should return default_ts on error
     s3_client.get_object.assert_called_once_with(Bucket=bucket, Key=ts_key)
 
@@ -190,11 +244,28 @@ def test_change_after_time_timestamp_raises_ClientError_error_for_get_object(S3_
 # @pytest.mark.skip
 def test_change_after_time_timestamp_raises_ClientError_error_for_put_object(S3_setup):
     # Arrange
+    expected_fail = 'fail_test'
     yield_list = S3_setup
-    bucket = yield_list[2]
+    bucket = yield_list[2] # mock bucket containing timestamp "2025-06-04_00-00-00"
     s3_client = Mock()  # create a mock S3 client
     default_ts = yield_list[3]
     ts_key = yield_list[5]
+
+
+    # This test must mock s3_client.get_object too
+    # because the function returns what get_object()
+    # returns:
+    # Need to mock this:
+    # response["Body"].read().decode("utf-8"),
+    # which is what get_object() returns
+
+    mock_body = Mock()
+    mock_body_read_return = Mock()
+    mock_body.read.return_value = mock_body_read_return
+    mock_body_read_return.decode.return_value = '1900-01-01_00-00-00'
+    # mock_body.read.decode = 'mock_timestamp'
+    mock_dict = {"Body": mock_body}
+    s3_client.get_object.return_value = mock_dict
 
     # Make get_object raise ClientError
     s3_client.put_object.side_effect = ClientError(
@@ -206,5 +277,7 @@ def test_change_after_time_timestamp_raises_ClientError_error_for_put_object(S3_
     result = change_after_time_timestamp(bucket, s3_client, ts_key, default_ts)
 
     # Assert
-    assert result == default_ts  # the function should return default_ts on error
+    # ensure test can fail:
+    # assert result == expected_fail    
+    assert result == default_ts  # the function should return default_ts 
     s3_client.put_object.assert_called_once_with(Bucket=bucket, Key=ts_key, Body=ANY)

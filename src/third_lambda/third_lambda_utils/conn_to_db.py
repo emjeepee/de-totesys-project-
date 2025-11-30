@@ -1,6 +1,12 @@
 import os
-from pg8000.native import Connection
+import logging
 
+from pg8000.native import Connection, Error
+
+from .errors_lookup import errors_lookup
+
+
+logger = logging.getLogger(__name__)
 
 
 def conn_to_db(DB_NAME):
@@ -10,7 +16,9 @@ def conn_to_db(DB_NAME):
     database = os.environ[f"{DB_NAME}_DB_DB"]
     host     = os.environ[f"{DB_NAME}_DB_HOST"]
     port     = os.environ[f"{DB_NAME}_DB_PORT"] # default: 5432?
-    return Connection(
+
+    try:
+        return Connection(
         user=user,
         database=database,
         password=password,
@@ -18,7 +26,21 @@ def conn_to_db(DB_NAME):
         port=port,
         ssl_context=True,
                     )
+    except Error:
+        # log exception 
+        # and stop code:
+        logger.exception(errors_lookup['err_2'])
+        raise
+
+
 
 
 def close_db(conn: Connection):
-    conn.close()
+    try:
+        conn.close()
+
+    except Error:
+        # log exception 
+        # and stop code:
+        logger.exception(errors_lookup['err_3'])
+        raise

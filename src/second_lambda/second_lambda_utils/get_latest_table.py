@@ -3,6 +3,8 @@ import logging
 
 from botocore.exceptions import ClientError
 
+from .errors_lookup import errors_lookup
+
 
 logger = logging.getLogger(__name__)
 
@@ -31,15 +33,18 @@ def get_latest_table(s3_client, bucket: str, table_name: str):
          table_name.        
     """
 
-    err_msg_1 = 'Error occurred in get_latest_table while attempting to read the ingestion bucket'
+    
 
     try:
-        # Get a list of the objects in 
-        # the bucket that have the Prefix
+        # Get a list of the 
+        # objects in the bucket 
+        # that have the Prefix
         # table_name:
         resp = s3_client.list_objects_v2(Bucket=bucket, Prefix=table_name)
     except ClientError:
-        logger.error(err_msg_1)
+        # log the exception 
+        # and stop the code:
+        logger.error(errors_lookup['err_3'])
         raise 
 
     # Make a list of the keys:
@@ -51,7 +56,9 @@ def get_latest_table(s3_client, bucket: str, table_name: str):
     try:
         response = s3_client.get_object(Bucket=bucket, Key=latest_table_key)
     except ClientError as e:
-        logger.error(err_msg_1)
+        # log the exception 
+        # and stop the code:
+        logger.error(errors_lookup['err_3'])
         raise 
 
     data = response["Body"].read().decode("utf-8")

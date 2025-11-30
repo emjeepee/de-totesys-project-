@@ -23,7 +23,14 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
             stores.
             On success it returns 
             the timestamp. 
-            On failure it returns
+            On failure (ie if there 
+            is no timestamp in the 
+            bucket because this is 
+            the first ever run of 
+            the pipeline or there 
+            has been a failure in 
+            the reading of the S3 
+            bucket) it returns
             the default timestamp, 
             which is for the year 
             1900.
@@ -80,7 +87,8 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
     # for the current time, eg
     # "2025-06-04T08:28:12", ie 
     # no milliseconds:
-    now_ts = datetime.now(UTC).isoformat()[:-13]
+    now_ts_datetime = datetime.now(UTC)
+    now_ts = now_ts_datetime.isoformat()[:-13]
 
     try:
         # Get previous timestamp 
@@ -90,9 +98,16 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
             Key=ts_key)
 
     except ClientError: 
-        # if failure, return
-        # timestamp for the 
-        # year 1900:    
+        # the interpreter raises 
+        # this exception either 
+        # on the first ever run 
+        # of the pipeline or if 
+        # there is a problem 
+        # with the process of 
+        # reading the ingestion 
+        # bucket. Return the 
+        # timestamp for the year
+        # 1900:    
         logger.exception(errors_lookup['err_0'])  # <-- logs full stacktrace
         return default_ts
     

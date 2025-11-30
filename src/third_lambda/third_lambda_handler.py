@@ -6,8 +6,21 @@ from third_lambda_utils.third_lambda_init                import third_lambda_ini
 from third_lambda_utils.make_insert_queries_from_parquet import make_insert_queries_from_parquet
 from third_lambda_utils.make_SQL_queries_to_warehouse    import make_SQL_queries_to_warehouse
 from third_lambda_utils.conn_to_db                       import conn_to_db, close_db
+from third_lambda_utils.errors_lookup                    import errors_lookup
+from third_lambda_utils.info_lookup                      import info_lookup
 
-logger = logging.getLogger()
+
+
+root_logger = logging.getLogger()
+
+# Create and configure a logger 
+# that writes to a file:
+logging.basicConfig(
+    level=logging.DEBUG,                                         # Log level (includes INFO, WARNING, ERROR)
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",  # Log format
+    filemode="a"                                                 # 'a' appends. 'w' would overwrite
+                   )
+
 
 
 
@@ -59,6 +72,9 @@ def third_lambda_handler(event, context):
     Returns:
         None                            
     """
+    # log the status:
+    root_logger.info(info_lookup['info_0'])        
+
 
     # Get lookup table that contains 
     # values this lambda handler requires:
@@ -70,12 +86,6 @@ def third_lambda_handler(event, context):
     lookup = third_lambda_init(event, conn_to_db, close_db, boto3.client('s3'))   
 
 
-
-    # CHANGE TO MAKE: Have third_lambda_init return this
-    # plus maybe a few other error messages:
-    err_msg = 'Error in third_lambda_handler'
-
-
     try:
         # Get the buffer that contains 
         # the Parquet file that represents
@@ -85,7 +95,9 @@ def third_lambda_handler(event, context):
         raw_bytes = strmng_bod_obj.read()
         pq_buff = io.BytesIO(raw_bytes) 
     except Exception:
-        logger.error(err_msg)
+        # log the exception 
+        # and stop the code:
+        root_logger.error(errors_lookup['err_0'] + f'{lookup['table_name']}')
         raise
 
 
@@ -98,63 +110,16 @@ def third_lambda_handler(event, context):
     queries_list = make_insert_queries_from_parquet(pq_buff, lookup['table_name'])
     
 
-    try:
-        # Use the SQL queries to put
-        # table data into the 
-        # warehouse:
-        make_SQL_queries_to_warehouse(queries_list, lookup['conn'])  
 
-        # Close connection to warehouse:
-        close_db(lookup['conn'])
-    except Exception:
-        logger.error(err_msg)
-        raise
+    # Use the SQL queries to put
+    # table data into the 
+    # warehouse:
+    make_SQL_queries_to_warehouse(queries_list, lookup['conn'])  
 
+    # Close connection to warehouse:
+    close_db(lookup['conn'])
 
+    # log the status:
+    root_logger.info(info_lookup['info_1'] + f'{lookup['table_name']}')
 
-
-
-# =========================================================================
-# OLD CODE (preFri7Nov25:)
-    # # Get lookup table that contains 
-    # # values this lambda handler requires:
-    # lookup = third_lambda_init(event, conn_to_db, close_db, boto3.client('s3'))   
-    # proc_bucket = lookup['proc_bucket'] # name of processed bucket
-    # s3_client = lookup['s3_client']     # boto3 S3 client object
-    # object_key = lookup['object_key']   # key under which processed bucket saved Parquet file
-    # table_name = lookup['table_name']   # name of table
-    # conn = lookup['conn']               # pg8000.native Connection object that knows about warehouse
-  
-
-
-    # err_msg = 'Error in third_lambda_handler'
-
-
-    # try:
-    #     # Get the Parquet file and convert
-    #     # it to a pandas dataframe:
-    #     df = make_dataframe(proc_bucket, s3_client, object_key) 
-    # except Exception:
-    #     logger.error(err_msg)
-
-
-    # # make the SQL queries from the 
-    # # data in the dataFrame. 
-    # # queries_list will take one 
-    # # form when table_name is 
-    # # 'sales_order' and another 
-    # # form when table_name is, for 
-    # # example, 'design':
-    # queries_list = make_SQL_queries(df, table_name)  
-
-    # try:
-    #     # Make SQL queries to the data 
-    #     # warehouse to insert data into
-    #     # the table there:
-    #     make_SQL_queries_to_warehouse(queries_list, conn)  
-
-    #     # Close connection to warehouse:
-    #     close_db(conn)
-    # except Exception:
-    #     logger.error(err_msg)
 

@@ -12,26 +12,18 @@ from second_lambda_utils.second_lambda_init       import second_lambda_init
 from second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
 from second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
 from second_lambda_utils.should_make_dim_date     import should_make_dim_date
-from second_lambda_utils.errors_lookup            import errors_lookup
 from second_lambda_utils.info_lookup              import info_lookup
-
-
-
 
 
 root_logger = logging.getLogger()
 
-
-
 # Create and configure a logger 
 # that writes to a file:
 logging.basicConfig(
-        level=logging.DEBUG,                                         # Log level (includes INFO, WARNING, ERROR)
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",  # Log format
-        filemode="a"                                                 # 'a' appends. 'w' would overwrite
+    level=logging.DEBUG,                                         # Log level (includes INFO, WARNING, ERROR)
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",  # Log format
+    filemode="a"                                                 # 'a' appends. 'w' would overwrite
                    )
-
-
 
 
 
@@ -93,12 +85,7 @@ def second_lambda_handler(event, context):
         None                    
     """
 
-
-
-    # log status:
-    root_logger.info(info_lookup['info_0'])
-
-    
+    root_logger.info(info_lookup['info_0'])        
 
     # Get lookup table that contains 
     # values this handler requires:
@@ -142,28 +129,16 @@ def second_lambda_handler(event, context):
     # handler has just been 
     # notified about:
     
-    try:
-        table_json = read_from_s3(s3_client, 
+    table_json = read_from_s3(s3_client, 
                                   ingestion_bucket, 
                                   object_key) # jsonified [{<row data>}, {<row data>}, etc]
                                                                            # where {<row data>} is, eg,
                                                                            # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}        
-    except Exception:
-        logger.error(err_msg)
-        # Need the raise below
-        # otherwise when read_from_s3 
-        # raises an exception and 
-        # the error message is logged 
-        # the line below 
-        # (json.loads(table_json))
-        # will run too, but table_json
-        # will not have been set! 
-        # Could also use a return:
-        raise
+
     
     
-    # make a list version of 
-    # the table:
+    # convert the table 
+    # into a list:
     table_python = json.loads(table_json) # [{<row data>}, {<row data>}, etc]
                                           # where {<row data>} is, eg,
                                           # {
@@ -172,56 +147,34 @@ def second_lambda_handler(event, context):
                                           # 'design_name': 'yyy', 
                                           # etc
                                           # }    
-    # DELETE THIS LATER:                                           
-    if table_name == 'address':                                                   
-        print(f" \n\n\n MY_INFO tues25Nov25>>>>> In second_lambda_handler(). \n address table retrieved from ing buck and converted to Python is>> \n {table_python}")
     
     
-    try:
-    # If this is the first 
-    # ever run of the pipeline 
-    # (ie if the processed 
-    # bucket is empty) make a 
-    # date dimension table in 
-    # Parquet form and save it 
-    # in the processed bucket: 
-        should_make_dim_date(is_first_run_of_pipeline, 
-                             create_dim_date_Parquet, 
-                             upload_to_s3, 
-                             start_date, 
-                             timestamp_string, 
-                             num_rows, 
-                             proc_bucket, 
-                             s3_client)
-        
-    except Exception:
-        logger.error(err_msg)
-        raise
-                    
-        
 
-    try:
-        # Make the fact table 
-        # or a dimension table 
-        # that looks like this:
-        # [{<row data>}, {<row data>}, etc] 
-        # where {<row data>} is, eg,
-        # {
-        # 'design_id': 123, 
-        # 'abcdef': 'xxx', 
-        # 'design_name': 'yyy', 
-        # etc
-        # }     
-        dim_or_fact_table = make_dim_or_fact_table(table_name, 
-                                                   table_python, 
-                                                   s3_client, 
-                                                   ingestion_bucket)
-
-    except Exception:
-        logger.error(err_msg)
-        # stop code (a return 
-        # would work too):
-        raise 
+    should_make_dim_date(is_first_run_of_pipeline, 
+                        create_dim_date_Parquet, 
+                        upload_to_s3, 
+                        start_date, 
+                        timestamp_string, 
+                        num_rows, 
+                        proc_bucket, 
+                        s3_client)
+        
+      
+    # Make the fact table 
+    # or a dimension table 
+    # that looks like this:
+    # [{<row data>}, {<row data>}, etc] 
+    # where {<row data>} is, eg,
+    # {
+    # 'design_id': 123, 
+    # 'abcdef': 'xxx', 
+    # 'design_name': 'yyy', 
+    # etc
+    # }     
+    dim_or_fact_table = make_dim_or_fact_table(table_name, 
+                                            table_python, 
+                                            s3_client, 
+                                            ingestion_bucket)
 
 
     # Convert the dim/fact 
@@ -229,6 +182,7 @@ def second_lambda_handler(event, context):
     # file in a buffer: 
     pq_file = convert_to_parquet(dim_or_fact_table, 
                                  table_name) # a buffer
+
 
     # Create the key string 
     # under which to save 
@@ -240,15 +194,12 @@ def second_lambda_handler(event, context):
         table_key = f"dim_{table_name}/{timestamp_string}.parquet"
 
 
-
-    try:
-        # Put the Parquet file in 
-        # the processed bucket:
-        upload_to_s3(s3_client, 
-                     proc_bucket, 
-                     table_key, 
-                     pq_file)
+    # Put the Parquet file in 
+    # the processed bucket:
+    upload_to_s3(s3_client, 
+                proc_bucket, 
+                table_key, 
+                pq_file)
+    
+    root_logger.info(info_lookup['info_1'])
         
-    except Exception:
-        logger.error(err_msg)
-        raise
