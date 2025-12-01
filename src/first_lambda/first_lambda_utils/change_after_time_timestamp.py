@@ -7,7 +7,7 @@ from .errors_lookup import errors_lookup
 
 
 
-
+# __name__ has value "change_after_time_timestamp.py"
 logger = logging.getLogger(__name__)
 
 
@@ -98,16 +98,17 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
             Key=ts_key)
 
     except ClientError: 
-        # the interpreter raises 
-        # this exception either 
-        # on the first ever run 
-        # of the pipeline or if 
-        # there is a problem 
-        # with the process of 
-        # reading the ingestion 
-        # bucket. Return the 
-        # timestamp for the year
-        # 1900:    
+        # boto3 raises this 
+        # exception either on the 
+        # first ever run of the 
+        # pipeline (because the 
+        # s3 bucket contains no 
+        # timestamp) or if there 
+        # is a problem with 
+        # AWS S3 and reading the 
+        # ingestion bucket fails. 
+        # Return the timestamp 
+        # for the year 1900:    
         logger.exception(errors_lookup['err_0'])  # <-- logs full stacktrace
         return default_ts
     

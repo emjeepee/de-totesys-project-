@@ -1,8 +1,12 @@
 import pytest
-from unittest.mock import Mock, ANY
+import logging
+
+from unittest.mock import Mock, patch, ANY
+from pg8000.native import Error
+
 from src.first_lambda.first_lambda_utils.get_column_names import get_column_names
 from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
-
+from src.first_lambda.first_lambda_utils.errors_lookup import errors_lookup
 
 
 
@@ -102,6 +106,36 @@ def test_returns_a_list_of_column_names_after_real_connection_to_tote_sys_databa
 
     # Assert
     assert result == expected
-    
+
+
+
+def test_that_the_function_logs_correctly(caplog):
+    # arrange: 
+    # logging.ERROR below deals 
+    # with logger.exception() too:
+    caplog.set_level(logging.ERROR, logger="get_column_names.py")
+
+    # Create a mock connection object:
+    mock_conn = Mock()
+    # Make the .run() method raise the exception
+    mock_conn.run.side_effect = Error("OLTP DB error")
+
+    # patch conn_obj.run(query) 
+    # and get it to return an 
+    # Error exception:
+    # Act
+    # ensure test can fail:
+    # result = get_column_names(conn, 'custard')
+    with pytest.raises(Error):
+        # ensure test can fail:
+        # result = 'fail'
+        result = get_column_names(mock_conn, 'table_name')
+        
+    # ensure test can fail:    
+    # expected_err_msg = errors_lookup['err_2'] + 'aaaaa'
+    expected_err_msg = errors_lookup['err_2'] + 'table_name'
+    assert any(expected_err_msg in msg for msg in caplog.messages)
+        
+
 
 

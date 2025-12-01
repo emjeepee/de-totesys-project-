@@ -1,12 +1,13 @@
+import json
+import logging
+
+
 from .create_formatted_timestamp import create_formatted_timestamp
 
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
-
 from .errors_lookup import errors_lookup
 
-import json
-import logging
 
 
 load_dotenv()
@@ -87,10 +88,7 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
 
     """
 
-    print(f"MY_INFO >>>>> In first lambda util write_to_s3(). data_list should be all fake tables. Actual value of first member is {data_list[0]}")        
-
-    err_msg_1 = f"There has been an error in function write_to_s3(). \n Unable to read ingestion bucket." 
-    err_msg_2 = f"There has been an error in function write_to_s3(). \n Unable to write to ingestion bucket." 
+    
 
     # Make timestamp that has this form:
     # '2025-06-13_13-13-13'
@@ -103,7 +101,7 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
     # {'sales_orders': [{<row data>}, {<row data>}, etc]}, 
     # etc
     # ], 
-    # where {<row data>>} is, eg, 
+    # where {<row data>} is, eg, 
     # {
     # 'design_id': 123, 
     # 'created_at': 'xxx', 
@@ -117,13 +115,18 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
             # get keys for all objects  
             # in the ingestion bucket that 
             # have a prefix of table_name
-            # (if no keys match then response
-            # will be a dict without a 
-            # "Contents" key):
-            response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=table_name)
+            # (if no keys match then 
+            # response will be a dict 
+            # without a "Contents" key):
+            response = s3_client.list_objects_v2(
+                        Bucket=bucket_name, 
+                        Prefix=table_name
+                                                )
 
         except ClientError:
-            logger.error(err_msg_1)
+            # log the exception 
+            # and stop the code:
+            logger.exception(errors_lookup['err_7a'] + f'{table_name}')
             raise 
 
         # Determine whether there are any
@@ -140,28 +143,36 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
             # value of response["KeyCount"]
             # is 0 if no keys match.
 
-            # member[table_name] is [{<updated-row data>}, {<updated-row data>}, etc]
-            write_to_ingestion_bucket(member[table_name], bucket_name, table_name, s3_client)
+            # member[table_name] is 
+            # [{<updated-row data>}, {<updated-row data>}, etc]
+            write_to_ingestion_bucket(
+                    member[table_name], 
+                    bucket_name, 
+                    table_name, 
+                    s3_client)
 
             
-            # if no, then this is the very 
-            # first run of the project
+            # if no, then this is the  
+            # first ever run of the pipeline
             # and data_list contains every 
             # table and every row of every 
             # table, so make a new key and 
-            # write the table data to the 
-            # ingestion bucket under that key:
+            # put the table data in the 
+            # ingestion bucket under that 
+            # key:
         else:
             try: 
                 s3_client.put_object(
                     Bucket=bucket_name,
                     Key=f"{table_name}/{timestamp}.json", # 'sales_order/2025-06-11_13-27-29.json'
                     Body=json.dumps(member[table_name]) # jsonified [{<updated-row data>}, {<updated-row data>}, etc]
-                )
+                                    )
             except ClientError:
                 # log the error and
                 # stop the code:
-                logger.exception(errors_lookup['err_7'] + f'{table_name}')
+                logger.exception(
+                    errors_lookup['err_7b'] + f'{table_name}'
+                                )
                 raise 
             
             

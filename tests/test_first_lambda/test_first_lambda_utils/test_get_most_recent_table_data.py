@@ -1,14 +1,16 @@
-from moto import mock_aws
+import os
 import boto3
 import pytest
 import json
+import logging
+
+from moto import mock_aws
 from unittest.mock import Mock, patch
 from datetime import datetime
-import os
-import re
+
 from botocore.exceptions import ClientError
 from src.first_lambda.first_lambda_utils.get_most_recent_table_data import get_most_recent_table_data
-   
+from src.first_lambda.first_lambda_utils.errors_lookup import errors_lookup   
 
 # a pytest fixture runs before 
 # each test function that uses it:
@@ -137,13 +139,9 @@ def test_get_most_recent_table_data_returns_correct_list(S3_setup):
 def test_function_raises_exception_if_attempt_to_list_objects_in_bucket_fails(
     S3_setup_list_objs_err
                                                                              ):
-    (
-        S3_client,
-        bucket_name,
-        mock_design_table_1
-    ) = S3_setup_list_objs_err
+    S3_client, bucket_name, mock_design_table_1 = S3_setup_list_objs_err
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ClientError):
         get_most_recent_table_data('design', S3_client, bucket_name)
 
 
@@ -151,17 +149,27 @@ def test_function_raises_exception_if_attempt_to_list_objects_in_bucket_fails(
 
 
 # @pytest.mark.skip
-def test_raises_exception_if_attempt_get_object_from_bucket_fails(
-    S3_setup_get_obj_err,
-):
+def test_logs_correctly(
+    S3_setup_get_obj_err, 
+    caplog
+                      ):
     (
         S3_client,
         bucket_name,
         mock_design_table_1    
     ) = S3_setup_get_obj_err
 
-    with pytest.raises(RuntimeError):
+    caplog.set_level(logging.ERROR, logger="get_most_recent_table_data")
+
+    with pytest.raises(ClientError):
         get_most_recent_table_data('design', S3_client, bucket_name)
+
+    error_message_fail = 'fail message'
+    error_message = errors_lookup['err_4'] + 'design'
+
+    # ensure test can fail:
+    # assert any(error_message_fail in msg for msg in caplog.messages)        
+    assert any(errors_lookup['err_4'] in msg for msg in caplog.messages)        
 
 
 

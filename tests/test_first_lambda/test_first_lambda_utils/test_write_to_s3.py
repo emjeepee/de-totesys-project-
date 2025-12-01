@@ -1,16 +1,19 @@
-from moto import mock_aws
 import boto3
 import pytest
 import json
+import os
+import logging
+
+from moto import mock_aws
 from unittest.mock import Mock, patch, call
 from datetime import datetime
-import os
+
 from botocore.exceptions import ClientError
 
 
 from src.first_lambda.first_lambda_utils.write_to_s3 import write_to_s3
 from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket import write_to_ingestion_bucket
-
+from src.first_lambda.first_lambda_utils.errors_lookup import errors_lookup
 
 # What to do:
 # 1) test that the function calls create_formatted_timestamp() once
@@ -18,17 +21,16 @@ from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket import write_
 # 2) test that the function calls write_to_ingestion_bucket() 
 #           the correct number of times (because it's in a loop)
 #           (✔︎)    
-# 4) in one test function test that write_to_s3 works 
+# 4) test that write_to_s3 works 
 #           for the case where data_list contains only updated rows
 #           and there are already tables in the mock S3 bucket. Put those
 #           tables in the mock bucket first
-# 5) in another test function test that write_to_s3 works 
+# 5) test that write_to_s3 works 
 #           for the case where data_list contains whole tables and
 #           there is nothing in the mock S3 bucket. Ensure the 
 #           bucket is empty.
-# 3) test that the function raise RuntimeErrors for
+# 3) test that the function raises a ClientError for
 #           s3_client.list_objects_v2()
-#           write_to_ingestion_bucket()
 #           s3_client.put_object        
 # 6) create mocks of data_list, s3_client, write_to_ingestion_bucket(), bucket_name
 #           (✔︎)
@@ -130,6 +132,7 @@ def S3_setup():
         so_body = json.dumps(mock_data_list_whole_tables[1]['sales_orders'])
         tr_body = json.dumps(mock_data_list_whole_tables[2]['transactions'])
 
+        # put the tables in the bucket:
         S3_client.put_object( Bucket=bucket_name_with_objs, Body = de_body, Key= de_key )
         S3_client.put_object( Bucket=bucket_name_with_objs, Body= so_body, Key= so_key )
         S3_client.put_object( Bucket=bucket_name_with_objs, Body= tr_body, Key= tr_key )        
@@ -368,12 +371,13 @@ def test_correct_rows_go_into_bucket_when_bucket_is_empty(S3_setup):
 
 
 
-# Need to test the generation
-# of a RuntimeError by 
+# Need to test the function
+# logs an exception when
 # s3_client.list_objects_v2()
-# in the first try statement:
+# fails (in the first try 
+# block):
 # @pytest.mark.skip
-def test_raises_RuntimeError_when_fails_to_list_objects_in_bucket(S3_setup):
+def test_logs_exception_when_first_try_block_code_fails(S3_setup, caplog):
         # Arrange:
     (
      S3_client, 
@@ -382,31 +386,48 @@ def test_raises_RuntimeError_when_fails_to_list_objects_in_bucket(S3_setup):
      mock_wtib,  
      mock_data_list_updated_rows, 
      mock_data_list_whole_tables, 
-     de_key,  # not needed 
-     so_key,  # not needed 
-     tr_key   # not needed 
+     de_key,
+     so_key,
+     tr_key 
      ) = S3_setup
-
-    S3_client.list_objects_v2 = Mock(side_effect=ClientError(
-    {"Error": {"Code": "500", "Message": "Failed to list objects in bucket"}},
-    "ListObjectsV2"
-                                        ))
     
-    with pytest.raises(RuntimeError):
-        # write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: str):
-        write_to_s3(mock_data_list_whole_tables,  S3_client,  mock_wtib, bucket_name_empty)
+    mock_s3_client = Mock()
+    mock_s3_client.list_objects_v2.side_effect = ClientError(
+    {"Error": {"Code": "500", "Message": 
+               "Failed to list objects in ingestion bucket"}
+        },
+     "ListObjectsV2"
+                                                           ) 
 
+    
+    caplog.set_level(logging.ERROR, logger="write_to_s3")
+
+    with pytest.raises(ClientError):
+        write_to_s3(mock_data_list_whole_tables, mock_s3_client, mock_wtib, bucket_name_empty)
+        # NOTE: code here (ie that 
+        # comes after the line above, 
+        # which raises the exception, 
+        # will not run!
+
+    # print(f'\n\n\n  caplog.messages is {caplog.messages}   \n\n\n')
+    expected_err_msg_fail = 'fail'
+    expected_err_msg = errors_lookup['err_7a']
+    # ensure test can fail:
+    # assert any(expected_err_msg_fail in msg for msg in caplog.messages)
+    assert any(expected_err_msg in msg for msg in caplog.messages)
+        
     
 
 
 
-# Need to test the generation
-# of a RuntimeError by 
-# write_to_ingestion_bucket(),
-# which wrtite_to_s3() calls 
-# in the second try-except block:
+
+# Need to test the function
+# logs an exception when
+# s3_client.put_object()
+# fails (in the second try 
+# block):
 # @pytest.mark.skip
-def test_raises_RuntimeError_when_write_to_ingestion_bucket_fails(S3_setup):
+def test_logs_exception_when_second_try_block_code_fails(S3_setup, caplog):
         # Arrange:
     (
      S3_client, 
@@ -415,82 +436,35 @@ def test_raises_RuntimeError_when_write_to_ingestion_bucket_fails(S3_setup):
      mock_wtib,  
      mock_data_list_updated_rows, 
      mock_data_list_whole_tables, 
-     de_key,  # not needed 
-     so_key,  # not needed 
-     tr_key   # not needed 
+     de_key,
+     so_key,
+     tr_key 
      ) = S3_setup
-
-    mock_wtib.side_effect=RuntimeError()
     
-    with pytest.raises(RuntimeError):
-        # write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: str):
-        write_to_s3(mock_data_list_updated_rows,  S3_client,  mock_wtib, bucket_name_with_objs)
-
-    
-
-
-# Need to test the generation
-# of a RuntimeError by 
-# S3_client.put_object() in 
-# third try-except block:
-# @pytest.mark.skip
-def test_S3_client_put_object_raises_RuntimeError_when_it_fails(S3_setup):
-        # Arrange:
-    (
-     S3_client, 
-     bucket_name_empty, 
-     bucket_name_with_objs,  
-     mock_wtib,  
-     mock_data_list_updated_rows, 
-     mock_data_list_whole_tables, 
-     de_key,  # not needed 
-     so_key,  # not needed 
-     tr_key   # not needed 
-     ) = S3_setup
-
-    S3_client.put_object = Mock(side_effect=ClientError(
-    {"Error": {"Code": "500", "Message": "Failed to put objects in bucket"}},
-    "PutObject"
-                                        ))
+    mock_s3_client = Mock()
+    # the following line ensures 
+    # that the else statement 
+    # in write_to_s3() runs:
+    mock_s3_client.list_objects_v2.return_value = {"KeyCount": 0}
+    mock_s3_client.put_object.side_effect = ClientError(
+    {"Error": {"Code": "500", "Message": 
+               "Failed to list objects in ingestion bucket"}
+        },
+     "ListObjectsV2"
+                                                           ) 
 
     
-    with pytest.raises(RuntimeError):
-        # write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: str):
-        write_to_s3(mock_data_list_whole_tables,  S3_client,  mock_wtib, bucket_name_empty)
+    caplog.set_level(logging.ERROR, logger="write_to_s3")
 
-    
+    with pytest.raises(ClientError):
+        write_to_s3(mock_data_list_whole_tables, mock_s3_client, mock_wtib, bucket_name_empty)
+        # NOTE: code here (ie that 
+        # comes after the line above, 
+        # which raises the exception, 
+        # will not run!
 
-
-
-
-
-
-
-
-
-    # response_design       = S3_client.list_objects_v2(Bucket=bucket_name_with_objs, Prefix='design')
-    # response_sales_orders = S3_client.list_objects_v2(Bucket=bucket_name_with_objs, Prefix='sales_orders')
-    # response_transactions = S3_client.list_objects_v2(Bucket=bucket_name_with_objs, Prefix='transactions')
-
-
-    # if response_design["KeyCount"] > 0:
-    #     print(f'There are {response_design["KeyCount"]} objects with prefix -design- in the bucket')            
-    #     print(f'The name is {response_design['Contents'][0]['Key']}')
-    # if response_sales_orders["KeyCount"] > 0:
-    #     print(f'There are {response_sales_orders["KeyCount"]} objects with prefix -sales_orders- in the bucket')            
-    #     print(f'The name is {response_sales_orders['Contents'][0]['Key']}')
-    # if response_transactions["KeyCount"] > 0:
-    #     print(f'There are {response_transactions["KeyCount"]} objects with prefix -transactions- in the bucket')            
-    #     print(f'The name is {response_transactions['Contents'][0]['Key']}') 
-
-
-        # de_list = S3_client.list_objects_v2(Bucket = bucket_name_empty, Prefix = 'design')['Contents'] # a list
-        # print(f'de_list is {de_list}')
-        # # de_key_1 = sorted([de_list[0]['Key'], de_list[1]['Key']], reverse=True)[0] # design/2025-08-18_19-22-59.json
-
-        # so_list = S3_client.list_objects_v2(Bucket = bucket_name_empty, Prefix = 'sales_orders')['Contents'] # a list
-        # print(f'so_list is {so_list}')
-        # # so_key_1 = sorted([so_list[0]['Key'], so_list[1]['Key']], reverse=True)[0]
-
-        # tr_list = S3_client.list_objects_v2(Bucket = bucket_name_empty, Prefix = 'transactions')['Contents'] # a list
-        # print(f'tr_list is {tr_list}')
+    expected_err_msg_fail = 'fail'
+    expected_err_msg = errors_lookup['err_7b']
+    # ensure test can fail:
+    # assert any(expected_err_msg_fail in msg for msg in caplog.messages)
+    assert any(expected_err_msg in msg for msg in caplog.messages)

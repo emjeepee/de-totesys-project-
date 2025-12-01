@@ -35,20 +35,13 @@ def get_column_names(conn_obj, table_name: str):
     
     """
     
-
-    err_Msg = f"Error in function get_column_names()." \
-              "\n Failed to read ToteSys database when" \
-              "\n trying to get a list of column names" \
-              "\n of table {table_name}."
-
     query = f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}' ORDER BY ordinal_position"
-
 
     try: 
         response = conn_obj.run(query)
         return response
     
-    except (Error):
+    except Error:
         # log the error 
         # and stop the code:
         logger.exception(errors_lookup['err_2'] + f'{table_name}')  # <-- logs full stacktrace

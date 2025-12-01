@@ -1,12 +1,15 @@
 import pytest
+import logging
+import os
+import boto3
+
 from unittest.mock import Mock, patch, ANY
 from moto import mock_aws
 from botocore.exceptions import ClientError
 
-import os
-import boto3
 
 from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
+from src.first_lambda.first_lambda_utils.errors_lookup import errors_lookup
 
 
 # scope="function" ensures this setup runs 
@@ -160,7 +163,7 @@ def test_change_after_time_timestamp_returns_correct_timestamp_when_lambda_runs_
 
 
 # @pytest.mark.skip
-def test_change_after_time_timestamp_saves_new_timestamp_to_bucket_real(
+def test_change_after_time_timestamp_saves_new_timestamp_to_bucket(
     S3_setup,
                         ):
     """
@@ -215,7 +218,7 @@ def test_change_after_time_timestamp_saves_new_timestamp_to_bucket_real(
 
 
 # @pytest.mark.skip
-def test_change_after_time_timestamp_raises_ClientError_error_for_get_object(S3_setup):
+def test_gets_correct_object_after_the_function_raises_a_ClientError_after_get_object(S3_setup):
     # Arrange
     expected_fail = 'fail_test'
     yield_list = S3_setup
@@ -242,7 +245,7 @@ def test_change_after_time_timestamp_raises_ClientError_error_for_get_object(S3_
 
 
 # @pytest.mark.skip
-def test_change_after_time_timestamp_raises_ClientError_error_for_put_object(S3_setup):
+def test_returns_default_timestamp_after_it_raises_ClientError_error_for_put_object(S3_setup):
     # Arrange
     expected_fail = 'fail_test'
     yield_list = S3_setup
@@ -254,11 +257,8 @@ def test_change_after_time_timestamp_raises_ClientError_error_for_put_object(S3_
 
     # This test must mock s3_client.get_object too
     # because the function returns what get_object()
-    # returns:
-    # Need to mock this:
-    # response["Body"].read().decode("utf-8"),
-    # which is what get_object() returns
-
+    # returns, hence need to mock this:
+    # response["Body"].read().decode("utf-8"):
     mock_body = Mock()
     mock_body_read_return = Mock()
     mock_body.read.return_value = mock_body_read_return
@@ -281,3 +281,107 @@ def test_change_after_time_timestamp_raises_ClientError_error_for_put_object(S3_
     # assert result == expected_fail    
     assert result == default_ts  # the function should return default_ts 
     s3_client.put_object.assert_called_once_with(Bucket=bucket, Key=ts_key, Body=ANY)
+
+
+
+
+# pass in pytest fixtures passed as 
+# args to the test function. the 
+# order is not important:
+def test_logs_first_exception(caplog, S3_setup):
+    """
+    caplog is a built-in pytest 
+    fixture that captures 
+    anything written to the 
+    Python logging system 
+    during the test.
+    """
+        # arrange
+    yield_list = S3_setup
+    expected_timestamp = yield_list[3]
+    empty_bucket = yield_list[1]  # the empty bucket
+    s3_client = yield_list[0]
+    ts_1900 = yield_list[3]
+    ts_key = yield_list[5]
+
+
+    mock_s3_client = Mock()
+    mock_s3_client.get_object.side_effect = ClientError(
+    {"Error": {"Code": "500", "Message": 
+               "Failed to get object from ingestion bucket"}
+        },
+     "ListObjectsV2"
+                                                       ) 
+
+
+    # logging.ERROR below deals 
+    # with logger.exception() too:
+    caplog.set_level(logging.ERROR, logger="change_after_time_timestamp.py")
+
+    # ensure test can fail:
+    # change_after_time_timestamp('bucket', 's3_client', 'ts_key', 'default_timestamp')
+    change_after_time_timestamp(empty_bucket, mock_s3_client, ts_key, 'default_timestamp')
+
+
+    assert any(errors_lookup['err_0'] in msg for msg in caplog.messages)
+
+
+
+
+# pass in pytest fixtures passed as 
+# args to the test function. the 
+# order is not important:
+# @pytest.mark.skip
+def test_logs_second_exception(caplog, S3_setup):
+    """
+    caplog is a built-in pytest 
+    fixture that captures 
+    anything written to the 
+    Python logging system 
+    during the test.
+    """
+    
+    # arrange
+    yield_list = S3_setup
+    expected_timestamp = yield_list[3]
+    not_empty_bucket = yield_list[2]  # the empty bucket
+    s3_client = yield_list[0]
+    ts_1900 = yield_list[3]
+    ts_key = yield_list[5]
+
+    # logging.ERROR below deals 
+    # with logger.exception() too:
+    caplog.set_level(logging.ERROR, logger="change_after_time_timestamp")
+
+    # Make put_object raise ClientError
+    mock_s3_client = Mock()
+
+    # make put_object raise a ClientError
+    mock_s3_client.put_object.side_effect = ClientError(
+        {"Error": {"Code": "500", "Message": "Write to ingestion bucket failed"}},
+        "PutObject"
+                                                      )
+
+    # This test must mock s3_client.get_object too
+    # because the function returns what get_object()
+    # returns, hence need to mock this:
+    # response["Body"].read().decode("utf-8")
+    # (otherwise the function under test tries to 
+    # call method get_object() of the mock s3 client,
+    # which doesn't exist):
+    mock_body = Mock()
+    mock_body_read = Mock()
+    mock_body.read = mock_body_read
+    mock_body_read.decode.return_value = 'mock_timestamp'
+    mock_s3_client.get_object.return_value = {"Body": mock_body}
+
+    # ensure test can fail:
+    # change_after_time_timestamp('bucket', 's3_client', 'ts_key', 'default_timestamp')
+    change_after_time_timestamp(not_empty_bucket, mock_s3_client, ts_key, 'default_timestamp')
+
+    assert any(errors_lookup['err_1'] in msg for msg in caplog.messages)
+
+
+
+
+

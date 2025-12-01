@@ -43,10 +43,18 @@ err_6 = (
     error while trying to write to the 
     ingestion bucket upodated table """)
 
-err_7 = (
+err_7a = (
+    """\n\n\n
+    write_to_s3() caught an error while 
+    trying to get keys for all objects in the 
+    ingestion bucket that have a prefix of 
+    """
+        )
+
+err_7b = (
     """\n\n\nwrite_to_s3() caught an error while 
-    trying to write to the ingestion bucket 
-    table """
+    trying to write to the ingestion bucket the
+    table of name """
         )
 
 err_8 = (
@@ -73,7 +81,8 @@ errors_lookup = {
 "err_4": err_4,
 "err_5": err_5,
 "err_6": err_6,
-"err_7": err_7,
+"err_7a": err_7a,
+"err_7b": err_7b,
 "err_8": err_8,
 "err_9": err_9,
                 }

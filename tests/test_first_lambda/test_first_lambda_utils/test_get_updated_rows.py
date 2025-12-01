@@ -1,9 +1,13 @@
 import pytest
+import logging
+
 from datetime import datetime
 from unittest.mock import Mock, ANY
+from pg8000.native import Error
+
 from src.first_lambda.first_lambda_utils.get_updated_rows import get_updated_rows
 from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db, close_db
-
+from src.first_lambda.first_lambda_utils.errors_lookup import errors_lookup
 
 
 
@@ -96,3 +100,39 @@ def test_returns_only_updated_rows_when_real_connection_made_to_tote_sys_databas
         assert response[i][5] > timestamp_dt
 
     close_db(conn)
+
+
+
+
+def test_that_the_function_logs_correctly(caplog):
+    # arrange: 
+    timestamp = "2025-06-04T08:28:12"
+    # logging.ERROR below deals 
+    # with logger.exception() too:
+    caplog.set_level(logging.ERROR, logger="get_column_names")
+
+    # Create a mock connection object:
+    mock_conn = Mock()
+    # Make the .run() method raise the exception
+    mock_conn.run.side_effect = Error("get_updated_rows() raised Error, an OLTP DB error")
+
+    # patch conn_obj.run(query) 
+    # and get it to return an 
+    # Error exception:
+    # Act
+    # ensure test can fail:
+    # result = get_column_names(conn, 'custard')
+    with pytest.raises(Error):
+        # ensure test can fail:
+        # result = get_updated_rows('mock_conn', 'timestamp', 'table_name_doesnt_matter')
+        get_updated_rows(mock_conn, timestamp, 'table_name')
+
+    # ensure test can fail:
+    # expected_err_msg = 'aaa'
+    expected_err_msg = errors_lookup['err_3'] + 'table_name'
+    assert any(expected_err_msg in msg for msg in caplog.messages)
+        
+
+
+
+

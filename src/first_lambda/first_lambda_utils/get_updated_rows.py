@@ -50,7 +50,7 @@ def get_updated_rows(conn_obj, after_time: str, table_name: str):
         # log status:
         return response
     
-    except Error as e:
+    except Error:
         # log the error 
         # and stop the code:
         logger.exception(errors_lookup['err_3'] + f'{table_name}')  # <-- logs full stacktrace
