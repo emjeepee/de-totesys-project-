@@ -55,23 +55,20 @@ def should_make_dim_date(ifrop,
     
     """
 
-    try:
-        # if it is the first ever run of the pipeline:
-        is_empty = ifrop(proc_bucket, s3_client)
-        # print(f"MY_INFO >>>>> In function should_make_dim_date(). is_empty is {is_empty}")
-        if is_empty:
-            # print(f"MY_INFO >>>>> In function should_make_dim_date(). About to run function create_dim_date_parquet()")
-            # make the date dimension table and 
-            # a key for it and put them in an array:
-            arr = cddP(start_date, timestamp_string, num_rows)
-            # print(f"MY_INFO >>>>> In function should_make_dim_date(). Have run function cddp(). About to save to bucket of name {proc_bucket} . key is {arr[1]}")
-            # arr is [body, key]
+
+    # if it is the first ever run of the pipeline:
+    is_empty = ifrop(proc_bucket, s3_client)
+
+    if is_empty:
+        # make the date dimension table and 
+        # a key for it and put them in an array:
+        arr = cddP(start_date, timestamp_string, num_rows)
+        # arr is [body, key]
                 
-            # store the date dimension table 
-            # in the processed bucket under the
-            # key:
-            # upload_to_s3(S3_client, bucket_name, key, body):
-            uts3(s3_client, proc_bucket, arr[1], arr[0])
+        # store the date dimension table 
+        # in the processed bucket under the
+        # key:
+        # upload_to_s3(S3_client, bucket_name, key, body):
+        uts3(s3_client, proc_bucket, arr[1], arr[0])
     
-    except RuntimeError as e:
-        raise RuntimeError from e           
+      

@@ -33,18 +33,11 @@ def make_SQL_queries_to_warehouse(qrs_list: list, conn):
 
     """
 
-    try:
-        # Make SQL queries to 
-        # the warehouse:
-        for q_str in qrs_list: conn.run(q_str)
-        
-    except (DatabaseError, 
-            InterfaceError, 
-            TimeoutError):
-        
-        # log the exception 
-        # and stop the code:
-        logger.exception(errors_lookup['err_1'])
-        raise 
+
+    # Make SQL queries to 
+    # the warehouse:
+    for q_str in qrs_list: conn.run(q_str)
+       
+
 
     

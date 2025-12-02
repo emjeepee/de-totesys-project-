@@ -16,9 +16,9 @@ root_logger = logging.getLogger()
 # Create and configure a logger 
 # that writes to a file:
 logging.basicConfig(
-    level=logging.DEBUG,                                         # Log level (includes INFO, WARNING, ERROR)
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",  # Log format
-    filemode="a"                                                 # 'a' appends. 'w' would overwrite
+    level=logging.DEBUG, 
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s", 
+    filemode="a"  
                    )
 
 

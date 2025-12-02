@@ -27,7 +27,7 @@ def read_from_s3(s3_client, bucket_name: str, key: str):
         the given S3 bucket under the given key.
     """
 
-    err_msg = "Error in read_from_s3() during attempt to read ingestion bucket." 
+
 
     try:
         response = s3_client.get_object(Bucket=bucket_name, Key=key)

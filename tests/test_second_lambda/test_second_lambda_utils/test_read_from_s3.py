@@ -59,8 +59,8 @@ def test_returns_correct_object(general_setup):
     expected = test_obj
 
     # Act
-    # read_from_s3(s3_client, bucket_name: str, key: str)
     response = read_from_s3(mock_S3_client, bucket_name, test_key)             
+    # ensure test can fail:
     # result = None
     result = json.loads(response)
 
@@ -70,7 +70,7 @@ def test_returns_correct_object(general_setup):
 
 
 # @pytest.mark.skip
-def test_raises_Runtime_Error(general_setup):
+def test_ClientError_causes_error_logging(general_setup):
     (mock_S3_client, bucket_name, test_obj, test_key) = general_setup
     
     mock_S3_client.get_object = Mock(side_effect=ClientError(
@@ -78,5 +78,5 @@ def test_raises_Runtime_Error(general_setup):
     "GetObject"
                                         ))
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ClientError):
         read_from_s3(mock_S3_client, bucket_name, test_key)
