@@ -1,25 +1,35 @@
-from first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
-from first_lambda_utils.read_table                  import read_table
-from first_lambda_utils.get_data_from_db            import get_data_from_db
-from first_lambda_utils.write_to_s3                 import write_to_s3
-from first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
-from first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
-from first_lambda_utils.get_env_vars                import get_env_vars
-from first_lambda_utils.reorder_list                import reorder_list
-from first_lambda_utils.errors_lookup               import errors_lookup
-from first_lambda_utils.info_lookup                 import info_lookup
+from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
+from src.first_lambda.first_lambda_utils.read_table                  import read_table
+from src.first_lambda.first_lambda_utils.get_data_from_db            import get_data_from_db
+from src.first_lambda.first_lambda_utils.write_to_s3                 import write_to_s3
+from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
+from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
+from src.first_lambda.first_lambda_utils.get_env_vars                import get_env_vars
+from src.first_lambda.first_lambda_utils.reorder_list                import reorder_list
+from src.first_lambda.first_lambda_utils.errors_lookup               import errors_lookup
+from src.first_lambda.first_lambda_utils.info_lookup                 import info_lookup
 
 import logging
 
 
 root_logger = logging.getLogger()
 
-# Create and configure a logger 
-# that writes to a file:
+# Create and configure a 
+# logger that writes to 
+# a file. set up the 
+# default settings for 
+# Python’s logging 
+# system. Log every 
+# level of log from 
+# DEBUG (the lowest 
+# level) upwards.
+# DEBUG (lowest)->INFO->WARNING->ERROR->CRITICAL (highest level) 
+# The format will be: 
+# 2025-01-03 12:34:56 [ERROR] root_logger: Failed to write to S3.
 logging.basicConfig(
-    level=logging.DEBUG,                                         # Log level (includes INFO, WARNING, ERROR)
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",  # Log format
-    filemode="a"                                                 # 'a' appends. 'w' would overwrite
+    level=logging.DEBUG,   
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    filemode="a" # 'a' appends, 'w' would overwrite
                    )
 
 
@@ -64,6 +74,11 @@ def first_lambda_handler(event, context):
     # requires and put them 
     # in a lookup table:
     lookup = get_env_vars()
+    # lookup['tables'] -> [<name string>, <name string>, etc]
+    # lookup['s3_client' -> the boto3 s3 client 
+    # lookup['bucket_name'] -> name of ingestion bucket
+    # lookup['conn'] -> pg8000.native Connection object
+    # lookup['close_db'] -> function close_db()
     
 
     # Get the timestamp saved 

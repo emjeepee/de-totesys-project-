@@ -36,18 +36,18 @@ def aws_credentials():
 def general_setup():
     with mock_aws():
         mock_S3_client = boto3.client("s3", region_name="eu-west-2")
-        bucket_name_empty = "11-ingestion-bucket_empty"
-        bucket_name_with_objs = "11-ingestion-bucket_with_objs"
-        # Mock two buckets, one that will be empty
-        # one that will contain three tables:
-        mock_S3_client.create_bucket(
-            Bucket=bucket_name_empty,
-            CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
-                             )
-        mock_S3_client.create_bucket(
-            Bucket=bucket_name_with_objs,
-            CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
-                             )
+        # bucket_name_empty = "11-ingestion-bucket_empty"
+        # bucket_name_with_objs = "11-ingestion-bucket_with_objs"
+        # # Mock two buckets, one that will be empty
+        # # one that will contain three tables:
+        # mock_S3_client.create_bucket(
+        #     Bucket=bucket_name_empty,
+        #     CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
+        #                      )
+        # mock_S3_client.create_bucket(
+        #     Bucket=bucket_name_with_objs,
+        #     CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
+        #                             )
 
         mock_event =     {
         "Records": [
@@ -74,7 +74,6 @@ def general_setup():
 
         num_rows = 100
 
-
         yield mock_event, mock_S3_client, mock_dt_now, mock_dt_start, num_rows
 
 
@@ -84,12 +83,13 @@ def general_setup():
 def test_returns_a_dict(general_setup):
     (mock_event, mock_S3_client, mock_dt_now, mock_dt_start, num_rows) = general_setup
     # Arrange:
-    # second_lambda_init(event, s3_client, dt_now, dt_start)
+    # ensure test can fail:
+    expected_fail = 'fail'
     expected = dict
 
     # Act:
     response = second_lambda_init(mock_event, mock_S3_client, mock_dt_now, mock_dt_start, num_rows)
-    # result = None 
+    # result = expected_fail
     result = type(response) 
 
     # Assert:
@@ -115,21 +115,20 @@ def test_returns_dict_with_correct_keys_and_values(general_setup):
                        "2025-08-13_13-13-13",
                        "ingestion-bucket",
                        "design/2025-11-11_11:11:11",
-                       "11-processed-bucket",
+                       os.environ['AWS_PROCESS_BUCKET'],
                        'design', 
                        datetime(24, 1, 1),
                        100]
-    keys = []
-    values = []
-        # lookup = {
-        # 's3_client': s3_client, # boto3 S3 client object
-        # 'timestamp_string' : dt_now.strftime("%Y-%m-%d_%H-%M-%S"), # string of format "2025-08-14_12-33-27"
-        # 'ingestion_bucket': event["Records"][0]["s3"]["bucket"]["name"], # name of ingestion bucket   
-        # 'object_key': object_key, # # key for object in ingestion bucket, eg sales_order/2025-06-04_09-21-32.json
-        # 'proc_bucket': "11-processed-bucket", # name of processed bucket:
-        # 'table_name': object_key.split("/")[0], # name of table, eg 'sales_order'
-        # 'start_date': dt_start # datetime object for 1 Jan 2024 (includes time info - midnight):
-        #     }
+    
+    # ensure test can fail:
+    expected_values_fail = ['mock_S3_client',
+                       "2025",
+                       "xxx",
+                       "yyy",
+                       'zzz',
+                       'aaa', 
+                       'bbb',
+                       200]
 
 
 
@@ -143,6 +142,8 @@ def test_returns_dict_with_correct_keys_and_values(general_setup):
         result_values.append(value)
         
     # Assert:
+    # ensure test can fail:
+    # assert result_values == expected_values_fail 
     assert result_keys == expected_keys
     assert result_values == expected_values
 

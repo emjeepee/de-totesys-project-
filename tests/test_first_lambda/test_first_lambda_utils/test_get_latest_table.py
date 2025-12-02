@@ -1,20 +1,19 @@
 import pytest
-from botocore.exceptions import ClientError
-import boto3
 import json
+import logging
 
 
+from botocore.exceptions import ClientError
 from unittest.mock import Mock, patch, ANY
-from src.first_lambda.first_lambda_utils.get_latest_table import get_latest_table
 
+from src.first_lambda.first_lambda_utils.get_latest_table import get_latest_table
+from src.first_lambda.first_lambda_utils.errors_lookup import errors_lookup
 
 
 
 @pytest.fixture
 def test_list():
     # get_latest_table(resp_dict, S3_client: boto3.client, bucket_name: str):
-    # Needed for this part of the code in get_latest_table():
-    # keys_list = [dict["Key"] for dict in resp_dict.get("Contents", [])]:
     mock_resp_dict = {
             "Contents": [
                 {"Key": 'design/2025-06-02T22-17-19-2513.json'},
@@ -43,6 +42,7 @@ def test_list():
     mock_s3_client.get_object.return_value = {
         "Body": Mock(read=lambda: json.dumps(mock_table_data).encode("utf-8"))
                                              }
+       
 
     mock_values = [mock_resp_dict, mock_s3_client, mock_bucket_name, mock_table_data]
 
@@ -126,22 +126,38 @@ def test_get_latest_table_raises_ClientError():
     mock_resp_dict = {"Contents": [{"Key": "design/fake.json"}]}
     bucket_name = "ingestion-bucket"
 
-    # Teast whether get_latest_table() 
-    # raises a RuntimeError:
-    with pytest.raises(RuntimeError, match="Error occurred in reading the ingestion bucket"):
+    # Test whether get_latest_table() 
+    # raises a ClientError:
+    with pytest.raises(ClientError):
         get_latest_table(mock_resp_dict, mock_s3, bucket_name)
 
 
 
 
-# @pytest.mark.skip
-# def test_xxx():
-#     # Arrange
-    
+# @pytest.mark.skip    
+def test_get_latest_table_logs_correctly(caplog, test_list):
+    mock_resp_dict, mock_s3_client, mock_bucket_name, mock_table_data = test_list
 
-#     # Act
+    # Mock an S3 client (don't 
+    # use the one in test_list)
+    mock_s3 = Mock()
 
+    # Ensure mock_s3 has a get_object 
+    # method that raises a ClientError:
+    mock_s3.get_object.side_effect = ClientError(
+        {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist"}},
+        "GetObject"
+                                                )
 
-#     # Assert:
-#     assert True
+    caplog.set_level(logging.ERROR, logger="get_latest_table")
+
+    with pytest.raises(ClientError):
+        get_latest_table(mock_resp_dict, mock_s3, 'ingestion bucket')
+
+    # ensure test can fail:
+    error_message_fail = 'message fail'
+    # assert any(error_message_fail in msg for msg in caplog.messages)        
+    error_message = errors_lookup['err_5'] + 'design'
+    assert any(error_message in msg for msg in caplog.messages)        
+
 

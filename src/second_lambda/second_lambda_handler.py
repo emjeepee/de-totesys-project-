@@ -4,16 +4,16 @@ import logging
 
 from datetime import datetime
 
-from second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
-from second_lambda_utils.read_from_s3             import read_from_s3
-from second_lambda_utils.convert_to_parquet       import convert_to_parquet
-from second_lambda_utils.upload_to_s3             import upload_to_s3
-from second_lambda_utils.second_lambda_init       import second_lambda_init
-from second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
-from second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
-from second_lambda_utils.should_make_dim_date     import should_make_dim_date
-from second_lambda_utils.info_lookup              import info_lookup
-
+from src.second_lambda.second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
+from src.second_lambda.second_lambda_utils.read_from_s3             import read_from_s3
+from src.second_lambda.second_lambda_utils.convert_to_parquet       import convert_to_parquet
+from src.second_lambda.second_lambda_utils.upload_to_s3             import upload_to_s3
+from src.second_lambda.second_lambda_utils.second_lambda_init       import second_lambda_init
+from src.second_lambda.second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
+from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
+from src.second_lambda.second_lambda_utils.should_make_dim_date     import should_make_dim_date
+from src.second_lambda.second_lambda_utils.info_lookup              import info_lookup
+from src.second_lambda.second_lambda_utils.errors_lookup            import errors_lookup
 
 root_logger = logging.getLogger()
 
@@ -95,26 +95,19 @@ def second_lambda_handler(event, context):
                                 datetime(2024, 1, 1), 
                                 2557)
     
+
+
+
     # Set vars to values in lookup table: 
-    s3_client = lookup['s3_client'] # boto3 S3 client object,
-    ingestion_bucket = lookup['ingestion_bucket'] # name of bucket,
-    object_key = lookup['object_key'] # bucket stores object under this key
-    timestamp_string = lookup['timestamp_string'] # a timestamp string
-    table_name = lookup['table_name'] # name of table
-    proc_bucket = lookup['proc_bucket'] # name of processed bucket
-    start_date = lookup['start_date'] # a datetime object for 1 Jan 2024
     num_rows = lookup['num_rows'] # an int. number of rows in dimensions table
-
-
-    err_msg = 'Error in second_lambda_handler()'
-    
+ 
 
     # If the table just put in the 
     # ingestion bucket is "department"
     # go no further (because there 
     # is no need to create a department
     # dimension table):
-    if table_name == "department":
+    if lookup['table_name'] == "department":
         # simply stop this lambda 
         # handler:
         return {
@@ -129,12 +122,12 @@ def second_lambda_handler(event, context):
     # handler has just been 
     # notified about:
     
-    table_json = read_from_s3(s3_client, 
-                                  ingestion_bucket, 
-                                  object_key) # jsonified [{<row data>}, {<row data>}, etc]
-                                                                           # where {<row data>} is, eg,
-                                                                           # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}        
-
+    table_json = read_from_s3(lookup['s3_client'], # boto3 S3 client object,
+                        lookup['ingestion_bucket'], # name of bucket,
+                        lookup['object_key']) # bucket stores object under this key 
+                                    # jsonified [{<row data>}, {<row data>}, etc]
+                                    # where {<row data>} is, eg,
+                                    # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}        
     
     
     # convert the table 
@@ -147,17 +140,16 @@ def second_lambda_handler(event, context):
                                           # 'design_name': 'yyy', 
                                           # etc
                                           # }    
-    
-    
+       
 
     should_make_dim_date(is_first_run_of_pipeline, 
                         create_dim_date_Parquet, 
                         upload_to_s3, 
-                        start_date, 
-                        timestamp_string, 
-                        num_rows, 
-                        proc_bucket, 
-                        s3_client)
+                        lookup['start_date'], # a datetime object for 1 Jan 2024 
+                        lookup['timestamp_string'], # a timestamp string 
+                        lookup['num_rows'], # number of rows in dimensions table 
+                        lookup['proc_bucket'], # name of processed bucket 
+                        lookup['s3_client'])
         
       
     # Make the fact table 
@@ -171,35 +163,37 @@ def second_lambda_handler(event, context):
     # 'design_name': 'yyy', 
     # etc
     # }     
-    dim_or_fact_table = make_dim_or_fact_table(table_name, 
+    dim_or_fact_table = make_dim_or_fact_table(lookup['table_name'], # name of table
                                             table_python, 
-                                            s3_client, 
-                                            ingestion_bucket)
+                                            lookup['s3_client'], 
+                                            lookup['ingestion_bucket'])
 
 
     # Convert the dim/fact 
     # table into a Parquet 
     # file in a buffer: 
     pq_file = convert_to_parquet(dim_or_fact_table, 
-                                 table_name) # a buffer
+                                 lookup['table_name']) # a buffer
 
 
     # Create the key string 
     # under which to save 
     # the dim/fact table in 
     # the processed bucket:
-    if table_name == "sales_order": 
-        table_key = f"fact_{table_name}/{timestamp_string}.parquet"    
+    if lookup['table_name'] == "sales_order": 
+        table_key = f"fact_{lookup['table_name']}/{lookup['timestamp_string']}.parquet"    
     else:
-        table_key = f"dim_{table_name}/{timestamp_string}.parquet"
+        table_key = f"dim_{lookup['table_name']}/{lookup['timestamp_string']}.parquet"
 
 
     # Put the Parquet file in 
     # the processed bucket:
-    upload_to_s3(s3_client, 
-                proc_bucket, 
+    upload_to_s3(lookup['s3_client'], 
+                lookup['proc_bucket'], 
                 table_key, 
                 pq_file)
+    
+
     
     root_logger.info(info_lookup['info_1'])
         

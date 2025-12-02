@@ -1,14 +1,15 @@
-from moto import mock_aws
+import os
 import boto3
 import pytest
 import json
+import logging
+
 from unittest.mock import Mock, patch
-from datetime import datetime
-import os
-import re
-from botocore.exceptions import ClientError
+from moto import mock_aws
+
+from botocore.exceptions import ClientError, BotoCoreError
 from src.first_lambda.first_lambda_utils.save_updated_table_to_S3 import save_updated_table_to_S3
-   
+from src.first_lambda.first_lambda_utils.errors_lookup import errors_lookup   
 
 
 @pytest.fixture(scope="function")
@@ -60,7 +61,10 @@ def S3_setup_put_obj_err(S3_setup):
 
     def mock_put_object(*args, **kwargs):
         raise ClientError(
-            {"Error": {"Code": "500", "Message": "Forcing put_object() to raise exception"}},
+            {"Error": 
+             {"Code": "500", 
+              "Message": "Forcing put_object() to raise exception"
+              }},
             "put_object()",
         )
     S3_client.put_object = mock_put_object
@@ -95,15 +99,10 @@ def test_function_save_updated_table_to_S3_saves_a_table_to_the_S3(S3_setup):
     assert returned_table == mock_design_table
 
 
-
-
-
-
-
 # @pytest.mark.skip
 def test_function_save_updated_table_to_S3_raises_exception_if_attempt_to_put_object_in_S3_fails(
     S3_setup_put_obj_err,
-):
+                                                                                                ):
     (
         S3_client, 
         bucket_name, 
@@ -112,6 +111,36 @@ def test_function_save_updated_table_to_S3_raises_exception_if_attempt_to_put_ob
         mdt_json
     ) = S3_setup_put_obj_err
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ClientError):
         # save_updated_table_to_S3( updated_table, S3_client: boto3.client, new_key: str, bucket: str ):
         save_updated_table_to_S3(mdt_json, S3_client, key_1, bucket_name)
+
+
+
+# @pytest.mark.skip
+def test_function_save_updated_table_to_S3_logs_correctly(
+                        S3_setup_put_obj_err,
+                        caplog
+                                                         ):
+    (
+        S3_client, 
+        bucket_name, 
+        key_1, 
+        mock_design_table, 
+        mdt_json
+    ) = S3_setup_put_obj_err
+
+    caplog.set_level(logging.ERROR, logger="get_latest_table")
+
+    with pytest.raises(ClientError):
+        # save_updated_table_to_S3( updated_table, S3_client: boto3.client, new_key: str, bucket: str ):
+        save_updated_table_to_S3(mdt_json, S3_client, key_1, bucket_name)        
+
+    # ensure test can fail:
+    # error_message_fail = 'message fail'
+    # assert any(error_message_fail in msg for msg in caplog.messages)        
+    
+    error_message = errors_lookup['err_5'] + 'design'
+    assert any(error_message in msg for msg in caplog.messages)        
+
+

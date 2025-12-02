@@ -98,3 +98,5 @@ def test_update_rows_in_table_returns_correct_list(set_up_rows_and_table):
 
     # assert
     assert result_table == expected_updated_table
+
+

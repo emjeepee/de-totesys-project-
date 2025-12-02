@@ -56,9 +56,3 @@ def get_env_vars():
 
 
     return lookup
-
-
-
-
-
-   

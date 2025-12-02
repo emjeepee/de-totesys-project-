@@ -1,7 +1,7 @@
 import boto3
 import logging
 
-from botocore.exceptions import BotoCoreError
+from botocore.exceptions import ClientError
 
 from .errors_lookup import errors_lookup
 
@@ -46,9 +46,8 @@ def save_updated_table_to_S3(
                     Bucket=bucket, 
                     Key=new_key, 
                     Body=updated_table)
-        logger.info("Function save_updated_table_to_S3() successfully\n wrote an updated table to the ingestion bucket")
-
-    except BotoCoreError as e:
+        
+    except ClientError as e:
         # log exception and 
         # stop the code:
         logger.exception(errors_lookup['err_5'] + f'{table_name}')

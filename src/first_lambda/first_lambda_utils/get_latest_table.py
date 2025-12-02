@@ -31,7 +31,7 @@ def get_latest_table(resp_dict, S3_client: boto3.client, bucket_name: str):
             get_most_recent_table_data().
 
     Args:
-        1) resp_obj: a dictionary that boto3 
+        1) resp_dict: a dictionary that boto3 
             method S3_client.list_objects_v2()
             returns. Looks like this:
             {
@@ -56,19 +56,18 @@ def get_latest_table(resp_dict, S3_client: boto3.client, bucket_name: str):
             }    
 
         2) S3_client: a boto3 S3 client.
+
         3) bucket_name: name of the ingestion bucket.
         
+
+
     Returns:
-        A python list of dictionaries. The list 
-         represents a whole table. Each dictionary 
-         represents a row of the table.        
+        A python list of dictionaries. 
+        The list represents a whole 
+        table. Each dictionary 
+        represents a row of the table.        
 
     """
-
-
-    err_msg = f"Error in function " \
-              "\n get_latest_table()." \
-              "\n Unable to read ingestion bucket." \
 
     # Get the list of keys 
     # under which the versions 
@@ -93,7 +92,7 @@ def get_latest_table(resp_dict, S3_client: boto3.client, bucket_name: str):
     except ClientError:
         # log the error 
         # and stop the code:
-        logger.exception(errors_lookup['err_5']+ f'{table_name}')
+        logger.exception(errors_lookup['err_5'] + f'{table_name}')
         raise
         
 
