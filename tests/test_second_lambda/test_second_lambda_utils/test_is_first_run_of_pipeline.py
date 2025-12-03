@@ -2,13 +2,15 @@ import boto3
 import pytest
 import os
 import json
+import logging
 
 from moto import mock_aws
 from unittest.mock import Mock, patch, call
 from botocore.exceptions import ClientError
 
 from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
-
+from src.second_lambda.second_lambda_utils.errors_lookup import errors_lookup
+from src.second_lambda.second_lambda_utils.info_lookup import info_lookup
 
 
 
@@ -98,7 +100,7 @@ def test_correct_reaction_to_bucket_not_being_empty(general_setup):
 
 
 
-def test_raises_RuntimeError_on_failure_to_read_bucket(general_setup):
+def test_raises_ClientError_and_logs_correctly(general_setup,caplog):
     # Arrange
     (mock_S3_client, bucket_name_empty, bucket_name_not_empty, test_obj_1, test_obj_2, test_key_1,  test_key_2) = general_setup
 
@@ -109,6 +111,14 @@ def test_raises_RuntimeError_on_failure_to_read_bucket(general_setup):
     "ListObjectsV2"
                                         ))
 
-    with pytest.raises(RuntimeError):
-        # return
+    # logging.ERROR below deals 
+    # with logger.exception() too:
+    caplog.set_level(logging.ERROR, logger="is_first_run_of_pipeline")
+
+
+    with pytest.raises(ClientError):
         result = is_first_run_of_pipeline(bucket_name_not_empty, mock_S3_client)
+
+    # ensure test can fail:
+    # assert any("Richard Deckard" in msg for msg in caplog.messages)
+    assert any(errors_lookup['err_1'] in msg for msg in caplog.messages)
