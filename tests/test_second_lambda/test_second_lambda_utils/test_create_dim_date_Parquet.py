@@ -33,8 +33,6 @@ def test_returns_a_list(general_setup):
     # Arrange:
     ( start_date, mock_dim_date_py, mock_Parquet, ts, nor, dim_date_key ) = general_setup
     expected = list
-    
-
 
     # Act:
     # create_dim_date_Parquet(start_date, timestamp_string: str, num_rows: int)
@@ -42,17 +40,44 @@ def test_returns_a_list(general_setup):
     reponse = create_dim_date_Parquet(start_date, ts, nor)
     result = type(reponse)
 
-
-
     # Assert:
     assert result == expected 
     pass
 
 
 
+def test_calls_functions_correctly(general_setup):
+    # Arrange:
+    (start_date, 
+    mock_dim_date_py, 
+    mock_Parquet, 
+    ts, 
+    nor, 
+    dim_date_key)  = general_setup
+
+    # Act:
+    with patch('src.second_lambda.second_lambda_utils.create_dim_date_Parquet.make_dim_date_python') as mddp, \
+         patch('src.second_lambda.second_lambda_utils.create_dim_date_Parquet.convert_to_parquet') as ctp: 
+
+        mddp.return_value = mock_dim_date_py            
+        ctp.return_value  = mock_Parquet    
+
+        response = create_dim_date_Parquet(start_date, ts, nor)
+
+        print("\n\n\nmddp calls =", mddp.call_args_list)
+        print("ctp calls =", ctp.call_args_list)
+
+        # ensure test can fail:
+        # mddp.assert_called_once_with("They're dead, Dave")
+        mddp.assert_called_once_with(start_date, nor)
+        # ensure test can fail:
+        # ctp.assert_called_once_with('Christine Kachansky')
+        ctp.assert_called_once_with(mock_dim_date_py, 'dim_date')        
+
+
 
 # @pytest.mark.skip
-def test_returns_correct_Parquet_file(general_setup):
+def test_returns_correct_Parquet_file_and_calls_functions_correctly(general_setup):
     # Arrange:
     ( start_date, mock_dim_date_py, mock_Parquet, ts, nor, dim_date_key ) = general_setup
     expected_0 = mock_Parquet

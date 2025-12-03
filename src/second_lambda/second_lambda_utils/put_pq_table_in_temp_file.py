@@ -4,10 +4,10 @@ import duckdb
 
 def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, placeholders, tmp_path: str):
     """
-    function convert_to_parquet()
-    calls this function, which:
-        1. Uses duckdb to recreate 
-         the table data in Parquet 
+    
+    This function:
+        1. Uses DuckDB to recreate 
+         table data in Parquet 
          format. The table is 
          either a dimension table 
          or the fact table, 
@@ -17,38 +17,54 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
          converted into a list of 
          dictionaries. 
         
-        2. does 1. above by opening
-         a duckdb connection
+        2. opens a DuckDB connection.
         
-        3. making a duckdb table, 
+        3. makes a duckdb table, 
          starting with the table 
-         columns
+         columns.
         
-        4. inserting the rows of the 
-         table into the duckdb table
+        4. inserts the rows of the 
+         table into the DuckDB table
         
-        5. saving the table in a 
-         temporary file path.  
+        5. saves the table in a 
+         temporary file path.
+
+        6. is called by function 
+        convert_to_parquet().   
 
 
     Args:
         table_name: the name of a 
          dimension table or the 
-         fact table. 
+         fact table. Its form is 
+         a list of dictionaries,
+         where each dictionary 
+         represents a row and 
+         whose key-value pairs 
+         are 
+         columnname: fieldvalue 
+         pairs.
         
         col_defs: a string of the 
          column names of the table,
-         eg 'col_1, col_, col_3 ...'.
+         eg 
+         'col_name_1, col_name_2, etc'.
 
         values_list: a list of lists,
          where each member list 
          contains the values from one
-         row in string form, eg.
+         row in string form, eg
+         [
+         ["val_1", "val_2", etc], 
+         ["val_1", "val_2", etc], 
+         etc
+         ]
      
         placeholders: a string of 
         question marks ('?'s) equal 
         in number to the number of 
-        columns in the table.
+        columns in the table, eg
+        '?, ?, ?'
         
         tmp_path: file path to the 
          temporary file.
@@ -65,23 +81,33 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
 
     # make a table, starting with 
     # the column names:
-    conn.execute(f"CREATE TABLE {table_name} ({col_defs});") # fri21Nov25: problem here
-            # eg CREATE TABLE staff (department_name TEXT, location TEXT, staff_id ???, first_name TEXT, last_name TEXT, email_address TEXT);
+    conn.execute(f"CREATE TABLE {table_name} ({col_defs});")
+            # eg CREATE TABLE staff  /
+            # (department_name TEXT, / 
+            # location TEXT, staff_id INT, / 
+            # first_name TEXT, / 
+            # last_name TEXT, / 
+            # email_address TEXT);
 
-    # Insert the table's rows
-    # one at a time:
-    for values in values_list:
+    # Insert the table's rows:
+    for values in values_list: # for each list
             conn.execute(f'INSERT INTO {table_name} VALUES ({placeholders})', values)
             conn.execute(f"COPY (SELECT * FROM {table_name}) TO ? (FORMAT PARQUET)", [tmp_path])
         # Write the Parquet file to
         # the temporary file:
-        # SELECT * FROM data - get DuckDB to read the table in the list
-        # COPY ... TO ? - save the results to a file
-        # [tmp_path] - replace ? with your temp file path
-        # FORMAT PARQUET - save as Parquet format
-            # Close the connection to the
-            # database:
-            conn.close()
+        # SELECT * FROM {table_name} - get 
+        # DuckDB to read the table in 
+        # the list.
+        # COPY ... TO ? - save the 
+        # results to a file
+        # [tmp_path] - replace ? with the
+        # temp file path
+        # FORMAT PARQUET - save in Parquet 
+        # format
+        
+    # Close the connection to 
+    # the database:
+    conn.close()
     
     return None
             

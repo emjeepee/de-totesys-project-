@@ -5,12 +5,17 @@ from decimal import Decimal
 
 def make_column_defs(data):
     """
-    This function:
-        1. 
-        
-        2. is called by function 
-        convert_to_parquet()
+    convert_to_parquet() calls
+    this function, which:
 
+        1. makes a string that 
+        contains all column 
+        names and DuckDB types, 
+        each (column-name + 
+        type) separated from the 
+        next by ', '
+        
+        2. returns the string.
     
     Args: 
         data: a list of 
@@ -27,9 +32,8 @@ def make_column_defs(data):
     Returns:
         a string that looks like 
         this:
-        'col1_name, col2_name, ...' 
-        
-    
+        'col1_name TEXT, col2_name INT, ...' 
+            
     """
 
     # Make a lookup table to
@@ -52,8 +56,12 @@ def make_column_defs(data):
     # table:
     first_row = data[0] # {"col_1_name": 13, "col_2_name": "val_2", etc}
 
-    # make column definitions:
-    col_defs = ', '.join(     # "col_1_name INT, "col_2_name TEXT, etc"
+    # make a string that 
+    # contains all column 
+    # names joined by ', '
+    # and that includes 
+    # DuckDB types:
+    col_defs = ', '.join(     # "col_1_name INT, col_2_name TEXT, etc"
         f"{col} {type_map.get(type(val))}"
         for col, val in first_row.items()
                         )

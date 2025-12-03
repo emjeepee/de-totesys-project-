@@ -38,8 +38,6 @@ def create_dim_date_Parquet(start_date, timestamp_string: str, num_rows: int):
         store the table.
     
     """            
-    
-    
 
     # Make a date dimension table as a
     # Python list of dictionaries.
@@ -48,8 +46,6 @@ def create_dim_date_Parquet(start_date, timestamp_string: str, num_rows: int):
     # below is the number of days or 
     # rows in the table from start_date: 
     dim_date_py = make_dim_date_python(start_date, num_rows) # a list of dictionaries
-
-    # print(f"MY_INFO >>>>> In function create_dim_date_Parquet(). About to create Parquet file from dim_date_py.")    
     
     # convert_to_parquet() converts the 
     # list to Parquet form, puts the 
@@ -61,7 +57,6 @@ def create_dim_date_Parquet(start_date, timestamp_string: str, num_rows: int):
     # the Parquet file in the S3 
     # processed bucket:
     dim_date_key = f"dim_date/{timestamp_string}.parquet" # "dim_date/2025-08-11_15-42-10.parquet"
-    # print(f"MY_INFO >>>>> In function create_dim_date_Parquet(). dim_date_key is {dim_date_key}.")    
     
     # Return Parquet file and timestamp
     # in a list:
