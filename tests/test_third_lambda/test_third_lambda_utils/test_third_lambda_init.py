@@ -81,6 +81,7 @@ def test_returns_dict(general_setup):
     # Arrange:
     (mock_event, mock_S3_client, mock_ctdb, mock_cldb) = general_setup
     expected = dict
+    expected_fail = list
 
     # Act:
     # third_lambda_init(event, conn_to_db, close_db, s3_client)
@@ -89,6 +90,8 @@ def test_returns_dict(general_setup):
     # result = None
 
     #Assert:
+    # enusre test can fail:
+    # assert result == expected_fail
     assert result == expected
 
 
@@ -97,13 +100,18 @@ def test_returns_dict(general_setup):
 # @pytest.mark.skip
 def test_returns_dict_with_correct_keys_and_values(general_setup):
     # Arrange:
-    (mock_event, mock_S3_client, mock_ctdb, mock_cldb) = general_setup
+    (mock_event, 
+     mock_S3_client, 
+     mock_ctdb, 
+     mock_cldb) = general_setup
+    
     expected_1 = mock_S3_client
     expected_2 = "design/2025-06-13_13:23.parquet"
     expected_3 = '11-processed-bucket'
     expected_4 = 'design'
     expected_5 = mock_ctdb()
     expected_6 = mock_cldb
+    expected_fail = 'fail'
 
 
         # 's3_client': boto3.client("s3"),                        # boto3 S3 client
@@ -113,20 +121,31 @@ def test_returns_dict_with_correct_keys_and_values(general_setup):
         # 'conn': conn_to_db('WAREHOUSE'),                        # pg8000.native Connection object
         # 'close_db': close_db 
     # Act:
-    response = third_lambda_init(mock_event, mock_ctdb, mock_cldb, mock_S3_client)
+    response = third_lambda_init(mock_event, 
+                                 mock_ctdb, 
+                                 mock_cldb, 
+                                 mock_S3_client)
+    
     result_1 = response['s3_client']
     result_2 = response['object_key']
     result_3 = response['proc_bucket']
     result_4 = response['table_name']
     result_5 = response['conn']
     result_6 = response['close_db']
-    # result_6 = None
+    # result_fail = None
 
     #Assert:
+    # ensure test can fail:
+    # assert result_1 == expected_fail
     assert result_1 == expected_1
+    # assert result_2 == expected_fail
     assert result_2 == expected_2
+    # assert result_3 == expected_fail
     assert result_3 == expected_3
+    # assert result_4 == expected_fail
     assert result_4 == expected_4
+    # assert result_5 == expected_fail
     assert result_5 == expected_5
+    # assert result_6 == expected_fail
     assert result_6 == expected_6
 

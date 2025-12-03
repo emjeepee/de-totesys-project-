@@ -12,6 +12,10 @@ from .put_pq_table_in_temp_file          import put_pq_table_in_temp_file
 
 logger = logging.getLogger(__name__)
 
+
+
+
+
 def convert_to_parquet(data: list, table_name: str):
     """
     This function:

@@ -6,7 +6,7 @@
 def format_value(value):
     """
     This function:
-        Converts a Python value 
+        Converts one Python value 
         (that comes from a table 
         row) into a string. 
         Another function will 
@@ -40,9 +40,17 @@ def format_value(value):
         # resulting value between 
         # double quotes (so that
         # 'O'Rourke' becomes 
-        # "O''Rourke"):
-        return f'"{value.replace("'", "''")}"'
+        # '"O''Rourke"').
+        # !r turns value into a 
+        # Python string literal, 
+        # which includes double 
+        # quotes:
+        if "'" in value:
+            value = value.replace("'", "''") # 'O''Mally', literal is O''Mally
+        return f'"{value}"' # '"O''Mally"', literal is "O''Mally"
+                            # or '"David Brent"', literal is "David Brent"
+
     elif isinstance(value, bool):
         return '"TRUE"' if value else '"FALSE"'
     else:
-        return str(value)
+        return str(value) # 5-> '5', 3.14->'3.14'

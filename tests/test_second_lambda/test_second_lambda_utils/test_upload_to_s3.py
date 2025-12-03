@@ -2,13 +2,15 @@ import boto3
 import pytest
 import os
 import json
+import logging
 
 from moto import mock_aws
 from unittest.mock import Mock, patch, call
 from botocore.exceptions import ClientError
 
 from src.second_lambda.second_lambda_utils.upload_to_s3 import upload_to_s3
-
+from src.second_lambda.second_lambda_utils.errors_lookup import errors_lookup
+from src.second_lambda.second_lambda_utils.info_lookup import info_lookup
 
 
 @pytest.fixture(scope="function")
@@ -113,7 +115,7 @@ def test_uploads_correct_data(general_setup):
 
 
 # @pytest.mark.skip
-def test_raises_RuntimeError(general_setup):
+def test_raises_ClientError(general_setup):
     # Arrange:
     (mock_S3_client, bucket_name, test_key, test_prefix, test_body) = general_setup
 
@@ -122,6 +124,33 @@ def test_raises_RuntimeError(general_setup):
     "PutObject"
                                         ))
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ClientError):
         # return
         upload_to_s3(mock_S3_client, bucket_name, test_key, test_body)
+
+
+
+
+# @pytest.mark.skip
+def test_raises_logs_correctly(general_setup, caplog):
+    # Arrange:
+    (mock_S3_client, bucket_name, test_key, test_prefix, test_body) = general_setup
+
+    mock_S3_client.put_object = Mock(side_effect=ClientError(
+    {"Error": {"Code": "500", "Message": "Failed to upload object to bucket"}},
+    "PutObject"
+                                        ))
+
+    # logging.ERROR below deals 
+    # with logger.exception() too:
+    caplog.set_level(logging.ERROR, logger="change_after_time_timestamp")
+
+    with pytest.raises(ClientError):
+        # return
+        upload_to_s3(mock_S3_client, bucket_name, test_key, test_body)     
+
+    # ensure test can fail:
+    # assert any("fail_message" in msg for msg in caplog.messages)           
+    assert any(errors_lookup['err_2'] in msg for msg in caplog.messages)           
+
+

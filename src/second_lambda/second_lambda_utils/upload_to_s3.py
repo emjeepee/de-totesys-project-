@@ -1,6 +1,8 @@
+import logging
+
 from botocore.exceptions import ClientError
 
-import logging
+from src.second_lambda.second_lambda_utils.errors_lookup import errors_lookup
 
 
 
@@ -32,7 +34,7 @@ def upload_to_s3(S3_client, bucket_name: str, key: str, body):
     except ClientError:
         # log the exception and 
         # stop the code:
-        logger.exception("err_2")
+        logger.exception(errors_lookup['err_2'])
         raise 
 
 

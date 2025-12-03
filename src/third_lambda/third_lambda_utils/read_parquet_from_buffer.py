@@ -9,6 +9,15 @@ from io import BytesIO
 def read_parquet_from_buffer(parquet_buffer, conn):
     """
     This function:
+        1. creates a string of 
+        column names so that 
+        the string can become 
+        part of an SQL INSERT 
+        query.
+
+        2. creates a list of tuples
+        where each tuple contains
+        the values of one row.
 
     
     Args:
@@ -27,10 +36,10 @@ def read_parquet_from_buffer(parquet_buffer, conn):
             column_str: a string 
             containing all column names, 
             eg
-            '"xx", "yyy", "zzz", "abcdef"'
+            '"col_1_name", "col_2_name", "col_3_name"'
             
-            rows: a list of tupls, each 
-             tuble being a row's values.
+            rows: a list of tuples, each 
+             tuple containing a row's values.
     """
 
     parquet_buffer.seek(0)
@@ -54,21 +63,21 @@ def read_parquet_from_buffer(parquet_buffer, conn):
     # desc[0] is the column name.
     # Get the column names:
     columns = [desc[0] for desc in result.description]
-    # ['xx', 'yyy', 'zzz', 'abcdef']
+    # ["xxx", "yyy", "zzz", "abc"]
 
     # make a string of all column 
     # names with the names in double
     # quotes:
     column_str = ', '.join([f'"{col}"' for col in columns])
-    # '"xx", "yyy", "zzz", "abcdef"'
+    # '"xxx", "yyy", "zzz", "abc"'
     
     # get all of the rows
     # as a list of tuples:
     rows = result.fetchall()
         # [
-        #   (1,  'xxx',   75.50,   datetime.date(2020, 1, 15) ),
-        #   (2,  'yyy',   82.00,   datetime.date(2019, 6, 10) ),
-        #   (3,  'zzz',   69.75,   datetime.date(2021, 3, 22) ),
+        #   (1,  'xxx',   75.50,   None, True ),
+        #   (2,  'yyy',   82.00,   None, False), 
+        #   (3,  'zzz',   69.75,   None, True ),
         #    etc
         # ]
 

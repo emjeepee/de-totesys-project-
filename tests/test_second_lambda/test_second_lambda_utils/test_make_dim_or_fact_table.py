@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 from datetime import datetime
 from decimal import Decimal
 
+
 from src.second_lambda.second_lambda_utils.make_dim_or_fact_table import make_dim_or_fact_table
 
 
@@ -33,10 +34,6 @@ def setup():
              {'sales_order_id': 15647, 'created_at': cre_at_iso_1, 'last_updated': las_up_iso_1,  'design_id': 648,  'staff_id': 19,  'counterparty_id': 14, 'units_sold': 62, 'unit_price': Decimal('2.40'), 'currency_id': 2, 'agreed_delivery_date': '2025-08-20', 'agreed_payment_date': '2025-08-16', 'agreed_delivery_location_id': 11},
              {'sales_order_id': 15648, 'created_at': cre_at_iso_2, 'last_updated': las_up_iso_2,  'design_id': 649,  'staff_id': 2,  'counterparty_id': 1, 'units_sold': 36, 'unit_price': Decimal('4.63'), 'currency_id': 1, 'agreed_delivery_date': '2025-09-20', 'agreed_payment_date': '2025-09-16', 'agreed_delivery_location_id': 12},
                         ]
-
-
-
-
 
         yield mock_so_table, mock_tbl_name_1, mock_tbl_name_2, mock_tbl_name_3, mock_tbl_1, mock_tbl_2, mock_tabl_python, mock_s3_client, mock_ing_bucket 
         

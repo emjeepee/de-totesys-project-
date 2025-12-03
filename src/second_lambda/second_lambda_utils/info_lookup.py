@@ -8,24 +8,16 @@ info_0 = """
 info_1 = """
     \n\n
     Second Lambda function has 
-    successfully zxxxx.
+    successfully saved a 
+    dimension table or fact 
+    table to the processed 
+    bucket as a Parquet file 
+    in a BytesIO buffer.\n\n
     \n\n"""
 
-info_2 = """
-    \n\n
-    Second Lambda function has 
-    successfully xxxx.\n\n
-    """
-
-info_3 = """
-    \n\n
-    Second Lambda function 
-    ending successfully.\n\n"""
 
 
 info_lookup = {
 'info_0': info_0,
 'info_1': info_1,
-'info_2': info_2,
-'info_3': info_3,
               }

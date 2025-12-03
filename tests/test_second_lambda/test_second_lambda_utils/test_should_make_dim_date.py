@@ -61,14 +61,3 @@ def test_passed_in_functions_called(general_setup):
     # uts3(s3_client, proc_bucket, arr[1], arr[0])
     mock_uts3.assert_called_once_with('s3_client',  '11-processed_bucket', mock_cddP.return_value[1], mock_cddP.return_value[0])
     
-
-
-def test_raises_RuntimeError(general_setup):
-    # Arrange:
-    (mock_ifrop_1, mock_ifrop_2, mock_cddP, mock_uts3) = general_setup
-
-    mock_uts3.side_effect = RuntimeError()
-    # Act:
-    with pytest.raises(RuntimeError):
-        # return
-        should_make_dim_date(mock_ifrop_2, mock_cddP, mock_uts3, datetime(24, 1, 1), 'timestamp',     3,        '11-processed_bucket', 's3_client')

@@ -6,8 +6,6 @@ from src.third_lambda.third_lambda_utils.make_query_string_for_one_row import ma
 
 
 
-
-# 
 @pytest.fixture(scope="function")
 def setup():
     formatted_vals = ['5', '"xyx"', '75.5', '"TRUE"']
@@ -35,7 +33,7 @@ def test_returns_string(setup):
 
 
 # @pytest.mark.skip
-def test_returns_correct_list(setup):
+def test_returns_correct_query_string(setup):
     # Arrange:
     formatted_vals, table_name, column_str  = setup
     

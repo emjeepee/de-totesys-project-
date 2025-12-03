@@ -1,8 +1,5 @@
 import pytest
-import duckdb
-import calendar
 
-from io import BytesIO
 from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 
