@@ -67,12 +67,10 @@ def test_calls_functions_correctly(general_setup):
         print("\n\n\nmddp calls =", mddp.call_args_list)
         print("ctp calls =", ctp.call_args_list)
 
-        # ensure test can fail:
-        # mddp.assert_called_once_with("They're dead, Dave")
         mddp.assert_called_once_with(start_date, nor)
-        # ensure test can fail:
-        # ctp.assert_called_once_with('Christine Kachansky')
         ctp.assert_called_once_with(mock_dim_date_py, 'dim_date')        
+
+
 
 
 
@@ -93,8 +91,6 @@ def test_returns_correct_Parquet_file_and_calls_functions_correctly(general_setu
         response = create_dim_date_Parquet(start_date, "2025-08-14_12-33-27", 3)
         result_0 = response[0]
         result_1 = response[1]
-        # result_0 = None
-        # result_1 = None
 
 
         # Assert:

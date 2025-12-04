@@ -61,8 +61,6 @@ def setup():
 def test_returns_a_string(setup):
     # Arrange:
     dim_date, cols, cols_str, tmp_path = setup
-    # Ensure test can fail:
-    # expected = int
     expected = str
 
     # Act:
@@ -77,8 +75,6 @@ def test_returns_a_string(setup):
 def test_returns_correct_string(setup):
     # Arrange:
     dim_date, cols, cols_str, tmp_path = setup
-    # Ensure test can fail:
-    # expected = 'a string to fail the test'
     expected = cols_str
 
     # Act:

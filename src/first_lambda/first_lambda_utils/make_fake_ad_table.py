@@ -157,7 +157,7 @@ def make_fake_ad_table():
     }
     ]
 
-    for i in range(1, 11):  # 1, 2, 3... 10
+    for i in range(1, 11):  # 1, 2, 3 ... 10
         add_table[i-1]['address_id'] = i
         add_table[i-1]['created_at'] = base_day
         add_table[i-1]['last_updated'] = base_day

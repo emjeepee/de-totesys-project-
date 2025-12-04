@@ -7,7 +7,6 @@ from src.first_lambda.first_lambda_utils.make_fake_ad_table import make_fake_ad_
 
 def test_returns_list():
     # Arrange:
-    expected_fail = str
     expected = list
 
     # Act:
@@ -15,14 +14,11 @@ def test_returns_list():
     result = type(response)
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
 
 
 def test_returns_list_of_ten_dicts():
     # Arrange:
-    expected_fail = 9
     expected = 10
 
     # Act:
@@ -30,21 +26,18 @@ def test_returns_list_of_ten_dicts():
     result = len(response)
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected    
 
 
 
 def test_returns_list_of_correct_dicts():
     # Arrange:
-    base_day = datetime(2025, 11, 13) 
-    expected_fail = {}
+    base_day = datetime(2025, 11, 13, 13, 17, 19) 
     expected =  {
     'address_id': 8, 
     'address_line_1': '0579 Durgan Common', 
-    'address_line_2': None, 
-    'district': None, 
+    'address_line_2': '', 
+    'district': '', 
     'city': 'Suffolk', 
     'postal_code': '56693-0660', 
     'country': 'United Kingdom', 
@@ -58,7 +51,5 @@ def test_returns_list_of_correct_dicts():
     result = response[7]
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected    
 

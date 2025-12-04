@@ -31,8 +31,6 @@ def test_returns_dict(setup):
     result = type(response)
 
     # assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
     
 
@@ -50,21 +48,12 @@ def test_returns_dict_with_correct_number_of_keys(setup):
     result = len(response)
 
     # assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
 
 
 def test_returns_dict_with_correct_key_value_pairs(setup):
     # arrange:
     key_pairs, src_dict = setup
-
-    expected_fail_key_1 = "fail_key_1"
-    expected_fail_key_2 = "fail_key_2"
-    expected_fail_key_3 = "fail_key_3"
-    expected_fail_val_1 = 'fail_val_1'
-    expected_fail_val_2 = 'fail_val_2'
-    expected_fail_val_3 = 'fail_val_3'
 
     expected_key_1 = "counterparty_legal_address_line_1"
     expected_key_2 = "counterparty_legal_address_line_2"
@@ -84,19 +73,9 @@ def test_returns_dict_with_correct_key_value_pairs(setup):
     result_val_3 = new_dict["counterparty_legal_district"]
 
     # assert:
-    # ensure test can fail:
-    # assert keys_list[0] == expected_fail_key_1
-    # assert keys_list[1] == expected_fail_key_2
-    # assert keys_list[2] == expected_fail_key_3
-
     assert keys_list[0] == expected_key_1
     assert keys_list[1] == expected_key_2
     assert keys_list[2] == expected_key_3
-
-    # ensure test can fail:
-    # assert result_val_1 == expected_fail_val_1
-    # assert result_val_2 == expected_fail_val_2
-    # assert result_val_3 == expected_fail_val_3
 
     assert result_val_1 == expected_val_1
     assert result_val_2 == expected_val_2

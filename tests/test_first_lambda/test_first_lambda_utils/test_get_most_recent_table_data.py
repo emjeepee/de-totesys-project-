@@ -164,11 +164,6 @@ def test_logs_correctly(
     with pytest.raises(ClientError):
         get_most_recent_table_data('design', S3_client, bucket_name)
 
-    error_message_fail = 'fail message'
-    error_message = errors_lookup['err_4'] + 'design'
-
-    # ensure test can fail:
-    # assert any(error_message_fail in msg for msg in caplog.messages)        
     assert any(errors_lookup['err_4'] in msg for msg in caplog.messages)        
 
 

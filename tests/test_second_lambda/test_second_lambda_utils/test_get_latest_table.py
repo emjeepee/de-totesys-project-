@@ -60,9 +60,6 @@ def general_setup():
 
 
 
-
-
-
 # @pytest.mark.skip
 def test_returns_a_list(general_setup):
     # Arrange:
@@ -78,7 +75,6 @@ def test_returns_a_list(general_setup):
     # get_latest_table(s3_client, bucket: str, table_name: str)
     response = get_latest_table(mock_S3_client, bucket_name, 'design')
     result = type(response) 
-    # result = None
 
     # Assert:
     assert result == expected
@@ -102,7 +98,7 @@ def test_returns_correct_list(general_setup):
 
     # Act:
     result = get_latest_table(mock_S3_client, bucket_name, 'design')
-    # result = None
+
 
     # Assert:
     assert result == expected
@@ -128,7 +124,6 @@ def test_raises_RuntimeError_when_list_objs_v2_fails(general_setup):
 
     # Act and assert:
     with pytest.raises(RuntimeError):
-        # return
         get_latest_table(mock_S3_client, bucket_name, 'design')
 
 
@@ -149,5 +144,4 @@ def test_raises_RuntimeError_when_get_object_fails(general_setup):
 
     # Act and assert:
     with pytest.raises(RuntimeError):
-        # return        
         get_latest_table(mock_S3_client, bucket_name, 'design')

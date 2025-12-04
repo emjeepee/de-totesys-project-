@@ -14,6 +14,7 @@ def test_conn_to_db_connects_to_the_database():
         os.environ[f"TF_{DB_NAME}_DB_PORT"] = "test_db_port"
 
         return_value = conn_to_db()
+        
         assert return_value == mock_Connection_to_db(ANY, ANY, ANY, ANY, ANY, ANY)
 
 

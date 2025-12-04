@@ -17,7 +17,6 @@ def test_returns_Currency_object():
     # Act: 
     response = make_curr_obj(mock_curr_row)
     result = type(response) 
-    # result = None
 
     # Assert:
     assert result == expected
@@ -35,7 +34,6 @@ def test_raises_RuntimeError():
     mock_curr_row = {'currency_id': 3, 'currency_code': 'Monopoly'}
 
     with pytest.raises(RuntimeError):
-        # return
         make_curr_obj(mock_curr_row)
 
 

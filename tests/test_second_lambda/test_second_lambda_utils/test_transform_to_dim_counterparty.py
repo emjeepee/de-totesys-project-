@@ -134,7 +134,6 @@ def test_returns_list(general_setup):
     response = transform_to_dim_counterparty(cp_table, add_tbl)
     
     result = type(response)
-    # result = None
 
     # Assert
     assert result == expected
@@ -152,11 +151,7 @@ def test_calls_function_make_dictionary_correctly(general_setup):
         # Act:
         result = transform_to_dim_counterparty(cp_table, add_tbl)
 
-        # ensure test can fail:
-        # assert mock_md.call_count == 2
         assert mock_md.call_count == 3
-        # ensure test can fail:
-        # mock_md.assert_any_call('ANY', 'key_pairs')
         mock_md.assert_any_call(ANY, key_pairs)
 
         
@@ -174,8 +169,6 @@ def test_returns_correct_list_with_correct_key_value_pairs(general_setup):
     result = transform_to_dim_counterparty(cp_table, add_tbl)
 
     # Assert
-    # ensure test can fail:
-    # assert result == []
     assert result == expected
 
 

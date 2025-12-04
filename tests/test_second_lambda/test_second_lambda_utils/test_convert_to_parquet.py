@@ -39,7 +39,6 @@ def test_calls_all_functions_correctly(setup):
     
     # Arrange:
     expected = 'buffer'
-    expected_fail = 'expected_fail'
 
     mock_tmp_obj = setup
 
@@ -75,26 +74,12 @@ def test_calls_all_functions_correctly(setup):
         result = convert_to_parquet(mock_table, mock_table_name)
 
         # Assert:
-        # Ensure test can fail:            
-        # mock_mcd.assert_called_once_with('xxx')                         
         mock_mcd.assert_called_once_with(mock_table)                         
-        # Ensure test can fail:            
-        # mock_mpois.assert_called_once_with('xxx')
         mock_mpois.assert_called_once_with(mock_table)
-        # Ensure test can fail:            
-        # mock_mpois.assert_called_once_with('xxx')
         mock_mpois.assert_called_once_with(mock_table)
-        # Ensure test can fail:            
-        # mock_ntf.assert_called_once_with('xxx')
         mock_ntf.assert_called_once_with(delete=False, suffix='.parquet')
-        # Ensure test can fail:            
-        # mock_pptitf.assert_called_once_with('xxx')
         mock_pptitf.assert_called_once_with(mock_table_name, 'mock_mcd_return', mock_vl, mock_ph, mock_path)
-        # Ensure test can fail:            
-        # mock_wtpb.assert_called_once_with('xxx')
         mock_wtpb.assert_called_once_with(mock_path)
-        # Ensure test can fail:            
-        # assert result == expected_fail
         assert result == expected
 
 

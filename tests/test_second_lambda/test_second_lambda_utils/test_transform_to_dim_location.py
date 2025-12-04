@@ -41,7 +41,6 @@ def test_returns_list(general_setup):
     response = transform_to_dim_location(add_tabl)
     
     result = type(response)
-    # result = None
 
     # Assert
     assert result == expected
@@ -58,7 +57,6 @@ def test_returns_correct_list(general_setup):
     # Act
     # transform_to_dim_location(address_data)
     result = transform_to_dim_location(add_tabl)
-    # result = None
    
 
     # Assert

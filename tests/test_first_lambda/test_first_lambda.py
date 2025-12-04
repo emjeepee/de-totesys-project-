@@ -103,8 +103,6 @@ def test_integrates_utility_functions_correctly(general_setup):
         first_lambda_handler(None, None)
 
         # Assert:
-        # ensure test can fail:
-        # mock_gev.assert_called_once_with('fail_arg')
         mock_gev.assert_called_once()
 
         mock_catts.assert_called_once_with(
@@ -150,7 +148,6 @@ def test_logs_info_messages_correctly(general_setup, caplog):
      ) = general_setup
     
     caplog.set_level(logging.INFO)
-    fail_message = 'fail_message'
 
     # patch all functions that first_lambda_handler
     # calls without having them passed in:
@@ -173,8 +170,6 @@ def test_logs_info_messages_correctly(general_setup, caplog):
         # # capture INFO-level logs from root logger
     
         # Assert — check that each message appears
-        # ensure test can fail: 
-        # assert any(fail_message in msg for msg in caplog.messages)
         assert any(info_lookup['info_0'] in msg for msg in caplog.messages)        
         assert any(info_lookup['info_1'] in msg for msg in caplog.messages)        
         assert any(info_lookup['info_2'] in msg for msg in caplog.messages)        

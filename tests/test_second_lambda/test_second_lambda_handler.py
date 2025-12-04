@@ -214,9 +214,5 @@ def test_logs_first_info_message_correctly(general_setup, caplog):
         second_lambda_handler(mock_event, 'context')
 
         # print("MESSAGES:", caplog.messages)  # debug 
-        # ensure test can fail:
-        # assert any('fail_message' in msg for msg in caplog.messages)
         assert any(info_lookup['info_0'] in msg for msg in caplog.messages)
-        # ensure test can fail:
-        # assert any('fail_message' in msg for msg in caplog.messages)
         assert any(info_lookup['info_1'] in msg for msg in caplog.messages)

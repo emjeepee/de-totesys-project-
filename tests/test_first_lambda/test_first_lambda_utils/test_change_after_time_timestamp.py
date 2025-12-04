@@ -97,7 +97,6 @@ def S3_setup(aws_credentials):
 
 def test_change_after_time_timestamp_returns_a_string(S3_setup):
     # arrange
-    expected_fail = list
     yield_list = S3_setup
     expected_timestamp = yield_list[3]
     bucket = yield_list[1]  # the empty bucket
@@ -110,8 +109,6 @@ def test_change_after_time_timestamp_returns_a_string(S3_setup):
     result = type(timestamp)
 
     # assert
-    # ensure the test can fail:
-    # assert result == expected_fail
     assert result == str
 
 
@@ -133,8 +130,6 @@ def test_change_after_time_timestamp_returns_default_timestamp_when_it_should(S3
     result_timestamp = change_after_time_timestamp(bucket, s3_client, ts_key, ts_1900)
 
     # assert
-    # ensure the test can fail:
-    # assert result_timestamp == expected_fail
     assert result_timestamp == expected_timestamp
 
 
@@ -157,8 +152,6 @@ def test_change_after_time_timestamp_returns_correct_timestamp_when_lambda_runs_
     result_timestamp = change_after_time_timestamp(bucket, s3_client, ts_key, ts_1900)
 
     # assert
-    # ensure test can fail:
-    # assert result_timestamp == expected_fail
     assert result_timestamp == expected_timestamp
 
 
@@ -210,8 +203,6 @@ def test_change_after_time_timestamp_saves_new_timestamp_to_bucket(
         result_time = response["Body"].read().decode("utf-8")
 
         # Assert
-        # ensure the test can fail:
-        # assert result_time == expected_fail
         assert result_time == expected_time
 
 
@@ -237,8 +228,6 @@ def test_gets_correct_object_after_the_function_raises_a_ClientError_after_get_o
     result = change_after_time_timestamp(bucket, s3_client, ts_key, default_ts)
 
     # Assert
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == default_ts  # the function should return default_ts on error
     s3_client.get_object.assert_called_once_with(Bucket=bucket, Key=ts_key)
 
@@ -277,8 +266,6 @@ def test_returns_default_timestamp_after_it_raises_ClientError_error_for_put_obj
     result = change_after_time_timestamp(bucket, s3_client, ts_key, default_ts)
 
     # Assert
-    # ensure test can fail:
-    # assert result == expected_fail    
     assert result == default_ts  # the function should return default_ts 
     s3_client.put_object.assert_called_once_with(Bucket=bucket, Key=ts_key, Body=ANY)
 
@@ -318,10 +305,7 @@ def test_logs_first_exception(caplog, S3_setup):
     # with logger.exception() too:
     caplog.set_level(logging.ERROR, logger="change_after_time_timestamp.py")
 
-    # ensure test can fail:
-    # change_after_time_timestamp('bucket', 's3_client', 'ts_key', 'default_timestamp')
     change_after_time_timestamp(empty_bucket, mock_s3_client, ts_key, 'default_timestamp')
-
 
     assert any(errors_lookup['err_0'] in msg for msg in caplog.messages)
 
@@ -375,8 +359,6 @@ def test_logs_second_exception(caplog, S3_setup):
     mock_body_read.decode.return_value = 'mock_timestamp'
     mock_s3_client.get_object.return_value = {"Body": mock_body}
 
-    # ensure test can fail:
-    # change_after_time_timestamp('bucket', 's3_client', 'ts_key', 'default_timestamp')
     change_after_time_timestamp(not_empty_bucket, mock_s3_client, ts_key, 'default_timestamp')
 
     assert any(errors_lookup['err_1'] in msg for msg in caplog.messages)

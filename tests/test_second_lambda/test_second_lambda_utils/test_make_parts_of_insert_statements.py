@@ -19,8 +19,6 @@ def test_returns_list():
 
     # Act
     response = make_parts_of_insert_statements(test_table)
-    # Ensure test can fail:
-    # result = str
     result = type(response)    
 
     # Assert:
@@ -34,9 +32,6 @@ def test_returned_list_is_correct():
 
     # Act
     response = make_parts_of_insert_statements(test_table)
-    # Ensure test can fail:
-    # result_1 = "do you want some toast?"
-    # result_2 = 'mr flibble'
 
     result_1 = response[0]    
     result_2 = response[1]    

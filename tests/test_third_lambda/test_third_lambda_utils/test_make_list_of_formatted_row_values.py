@@ -27,8 +27,6 @@ def test_returns_a_list(setup):
     result = type(response)
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail 
     assert result == expected 
 
 
@@ -53,8 +51,6 @@ def test_calls_format_value_correctly(setup):
         # 1 then  'xxx' then 75.50
         # then  None and, finally, 
         # True:
-        # ensure test can fail:
-        # mock_fv.assert_any_call('fail_arg')
         mock_fv.assert_any_call(1)
         mock_fv.assert_any_call('xxx')
         mock_fv.assert_any_call(75.50)
@@ -62,8 +58,6 @@ def test_calls_format_value_correctly(setup):
         mock_fv.assert_any_call(True)
 
         # check the result:
-        # ensure test can fail:
-        # assert result == ["1", "2", "3"]
         assert result == ["val1", "valxxx", "val75.5", "valNone", "valTrue"]
 
 

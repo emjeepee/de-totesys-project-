@@ -124,15 +124,9 @@ def test_that_the_function_logs_correctly(caplog):
     # and get it to return an 
     # Error exception:
     # Act
-    # ensure test can fail:
-    # result = get_column_names(conn, 'custard')
     with pytest.raises(Error):
-        # ensure test can fail:
-        # result = 'fail'
         result = get_column_names(mock_conn, 'table_name')
         
-    # ensure test can fail:    
-    # expected_err_msg = errors_lookup['err_2'] + 'aaaaa'
     expected_err_msg = errors_lookup['err_2'] + 'table_name'
     assert any(expected_err_msg in msg for msg in caplog.messages)
         

@@ -40,9 +40,7 @@ def test_returns_list(general_setup):
     # Act
     # transform_to_dim_location(address_data)
     response = transform_to_dim_currency(mock_pp_curr_table)
-    
     result = type(response)
-    # result = None
 
     # Assert
     assert result == expected
@@ -62,6 +60,5 @@ def test_raises_RuntimeError(general_setup):
     with patch('src.second_lambda.second_lambda_utils.transform_to_dim_currency.make_curr_obj') as mco:
         mco.side_effect = RuntimeError()
         with pytest.raises(RuntimeError):
-            # return
             response = transform_to_dim_currency(mock_pp_curr_table)
     

@@ -24,7 +24,6 @@ def test_returns_list(general_setup):
 
     # Act
     response = make_dim_date_python(start_date, loop_range)
-    # result = dict
     result = type(response)
 
     # Assert
@@ -44,7 +43,6 @@ def test_returns_list_of_correct_number_of_dicts(general_setup):
         if type(item) == dict:
             dict_counter += 1
 
-    # result = 2
     result = dict_counter
 
     # Assert
@@ -62,7 +60,6 @@ def test_returned_list_contains_dicts_of_correct_keys(general_setup):
 
     # Act
     response = make_dim_date_python(start_date, loop_range)
-    # result_0, result_1, result_2 = [], [], []
     result_0 = list(response[0].keys())
     result_1 = list(response[1].keys())
     result_2 = list(response[2].keys())
@@ -80,16 +77,6 @@ def test_returned_list_contains_dicts_of_correct_values(general_setup):
     (start_date, loop_range) = general_setup      
 
     third_day_dt = start_date + timedelta(days=2)
-
-    # to force the test to fail:
-    # expected_date_id = 'asdf' 
-    # expected_year = 'asdf' 
-    # expected_month = 'asdf' 
-    # expected_day = 'asdf' 
-    # expected_day_of_week = 'asdf' 
-    # expected_day_name = 'asdf' 
-    # expected_month_name = 'asdf' 
-    # expected_quarter = 'asdf' 
 
     expected_date_id = third_day_dt.date()
     expected_year = third_day_dt.year

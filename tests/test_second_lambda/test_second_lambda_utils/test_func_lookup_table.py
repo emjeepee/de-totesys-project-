@@ -33,13 +33,6 @@ def test_returns_correct_function(general_setup):
         result_5 = func_lookup_table(tables[5])    
 
         # Assert:
-        # assert result_0 is "fail"
-        # assert result_1 is "fail"
-        # assert result_2 is "fail"
-        # assert result_3 is "fail"
-        # assert result_4 is "fail"
-        # assert result_5 is "fail"
-
         assert result_0 is mock_ttssfc
         assert result_1 is mock_ttds
         assert result_2 is mock_ttdl

@@ -20,8 +20,6 @@ def test_returns_a_dict():
     result = type(response) 
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
 
 
@@ -55,8 +53,6 @@ def test_returns_correct_values_of_env_vars_():
         result_close_db = response['close_db']
 
         # Assert:
-        # ensure test can fail:
-        # assert result_tables == expected_fail
         assert  result_tables == expected_tables
         assert  result_bucket_name == expected_bucket_name 
         assert isinstance(result_s3_cl, BaseClient)

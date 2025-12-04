@@ -67,11 +67,7 @@ def test_calls_function_make_dictionary_correctly(general_setup):
         # Act:
         result = transform_to_dim_staff(mock_st_table, mock_de_table_1)
 
-        # ensure test can fail:
-        # assert mock_md.call_count == 2
         assert mock_md.call_count == 3
-        # ensure test can fail:
-        # mock_md.assert_any_call('ANY', 'key_pairs')
         mock_md.assert_any_call(ANY, key_pairs)
 
 

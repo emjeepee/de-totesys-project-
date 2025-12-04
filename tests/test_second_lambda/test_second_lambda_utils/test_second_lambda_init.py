@@ -83,13 +83,10 @@ def general_setup():
 def test_returns_a_dict(general_setup):
     (mock_event, mock_S3_client, mock_dt_now, mock_dt_start, num_rows) = general_setup
     # Arrange:
-    # ensure test can fail:
-    expected_fail = 'fail'
     expected = dict
 
     # Act:
     response = second_lambda_init(mock_event, mock_S3_client, mock_dt_now, mock_dt_start, num_rows)
-    # result = expected_fail
     result = type(response) 
 
     # Assert:
@@ -120,17 +117,6 @@ def test_returns_dict_with_correct_keys_and_values(general_setup):
                        datetime(24, 1, 1),
                        100]
     
-    # ensure test can fail:
-    expected_values_fail = ['mock_S3_client',
-                       "2025",
-                       "xxx",
-                       "yyy",
-                       'zzz',
-                       'aaa', 
-                       'bbb',
-                       200]
-
-
 
     # Act:
     response = second_lambda_init(mock_event, mock_S3_client, dt_now, dt_start, num_rows)
@@ -142,8 +128,6 @@ def test_returns_dict_with_correct_keys_and_values(general_setup):
         result_values.append(value)
         
     # Assert:
-    # ensure test can fail:
-    # assert result_values == expected_values_fail 
     assert result_keys == expected_keys
     assert result_values == expected_values
 

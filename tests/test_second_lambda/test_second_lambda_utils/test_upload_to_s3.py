@@ -72,7 +72,7 @@ def test_uploads_with_correct_key(general_setup):
     upload_to_s3(mock_S3_client, bucket_name, test_key, test_body)
     response = mock_S3_client.list_objects_v2(Bucket = bucket_name, Prefix = test_prefix)
     result = response['Contents'][0]['Key']
-    # result = None
+
 
     # Assert:
     assert result == expected
@@ -99,9 +99,6 @@ def test_uploads_correct_data(general_setup):
     result_0 = py_list[0]
     result_1 = py_list[1]
     result_2 = py_list[2]
-    # result_0 = None
-    # result_1 = None
-    # result_2 = None
 
 
     # Assert:
@@ -125,7 +122,6 @@ def test_raises_ClientError(general_setup):
                                         ))
 
     with pytest.raises(ClientError):
-        # return
         upload_to_s3(mock_S3_client, bucket_name, test_key, test_body)
 
 
@@ -146,11 +142,8 @@ def test_raises_logs_correctly(general_setup, caplog):
     caplog.set_level(logging.ERROR, logger="change_after_time_timestamp")
 
     with pytest.raises(ClientError):
-        # return
         upload_to_s3(mock_S3_client, bucket_name, test_key, test_body)     
 
-    # ensure test can fail:
-    # assert any("fail_message" in msg for msg in caplog.messages)           
     assert any(errors_lookup['err_2'] in msg for msg in caplog.messages)           
 
 

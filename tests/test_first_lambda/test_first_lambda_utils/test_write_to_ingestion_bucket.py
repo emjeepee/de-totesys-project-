@@ -127,7 +127,7 @@ def test_that_funcion_write_to_ingestion_bucket_correctly_integrates_utility_fun
         mock_cft.return_value = timestamp
         
         # write_to_ingestion_bucket(data: list, bucket: str, file_location: str, s3_client: boto3.client):
-        write_to_ingestion_bucket( # NOTE: FAILS HERE
+        write_to_ingestion_bucket(
                             updated_rows_of_mdt2, 
                             bucket_name, 
                             file_location, 
@@ -137,7 +137,7 @@ def test_that_funcion_write_to_ingestion_bucket_correctly_integrates_utility_fun
 
 
         # Assert:
-        mock_gmrtd.assert_called_once_with(file_location, S3_client, bucket_name) #NOTE: TEST FAILS HERE
+        mock_gmrtd.assert_called_once_with(file_location, S3_client, bucket_name) 
 
         mock_urit.assert_called_once_with(
                                     updated_rows_of_mdt2, 

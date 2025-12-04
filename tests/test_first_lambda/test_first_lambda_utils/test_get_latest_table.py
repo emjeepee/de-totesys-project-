@@ -154,9 +154,6 @@ def test_get_latest_table_logs_correctly(caplog, test_list):
     with pytest.raises(ClientError):
         get_latest_table(mock_resp_dict, mock_s3, 'ingestion bucket')
 
-    # ensure test can fail:
-    error_message_fail = 'message fail'
-    # assert any(error_message_fail in msg for msg in caplog.messages)        
     error_message = errors_lookup['err_5'] + 'design'
     assert any(error_message in msg for msg in caplog.messages)        
 

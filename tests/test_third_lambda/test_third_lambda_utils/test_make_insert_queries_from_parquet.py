@@ -35,8 +35,6 @@ def test_returns_a_list(setup):
     mock_so_table, mock_table_name = setup
 
     expected = list
-    # ensure test can fail:
-    expected_fail = str
 
     # convert_to_parquet() 
     # returns a BytesIO buffer 
@@ -49,7 +47,6 @@ def test_returns_a_list(setup):
     result = type(response)
 
     # assert:
-    # assert result == expected_fail
     assert result == expected
 
     

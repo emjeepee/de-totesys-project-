@@ -49,8 +49,31 @@ def general_setup():
 
 
         mock_so_table = [
-             {'sales_order_id': 15647, 'created_at': cre_at_iso_1, 'last_updated': las_up_iso_1,  'design_id': 648,  'staff_id': 19,  'counterparty_id': 14, 'units_sold': 62, 'unit_price': Decimal('2.40'), 'currency_id': 2, 'agreed_delivery_date': '2025-08-20', 'agreed_payment_date': '2025-08-16', 'agreed_delivery_location_id': 11},
-             {'sales_order_id': 15648, 'created_at': cre_at_iso_2, 'last_updated': las_up_iso_2,  'design_id': 649,  'staff_id': 2,  'counterparty_id': 1, 'units_sold': 36, 'unit_price': Decimal('4.63'), 'currency_id': 1, 'agreed_delivery_date': '2025-09-20', 'agreed_payment_date': '2025-09-16', 'agreed_delivery_location_id': 12},
+             {'sales_order_id': 15647, 
+              'created_at': cre_at_iso_1, 
+              'last_updated': las_up_iso_1,  
+              'design_id': 648,  
+              'staff_id': 19,  
+              'counterparty_id': 14, 
+              'units_sold': 62, 
+              'unit_price': Decimal('2.40'), 
+              'currency_id': 2, 
+              'agreed_delivery_date': '2025-08-20', 
+              'agreed_payment_date': '2025-08-16', 
+              'agreed_delivery_location_id': 11},
+
+             {'sales_order_id': 15648, 
+              'created_at': cre_at_iso_2, 
+              'last_updated': las_up_iso_2,  
+              'design_id': 649,  
+              'staff_id': 2,  
+              'counterparty_id': 1, 
+              'units_sold': 36, 
+              'unit_price': Decimal('4.63'), 
+              'currency_id': 1, 
+              'agreed_delivery_date': '2025-09-20', 
+              'agreed_payment_date': '2025-09-16', 
+              'agreed_delivery_location_id': 12},
                         ]
         
 
@@ -65,7 +88,6 @@ def test_returns_list(general_setup):
     # Arrange
     keys, types, mock_so_table = general_setup
     expected = list
-    expected_fail = str
 
 
     # Act
@@ -74,8 +96,6 @@ def test_returns_list(general_setup):
     
     
     # Assert
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
 
 
@@ -91,10 +111,8 @@ def test_fact_table_has_same_number_of_rows_as_sales_order_table(general_setup):
     # Act:
     response = transform_to_star_schema_fact_table(mock_so_table) # [{}, {}, {}, etc]
     result = len(response)
-    # result = None
     
     # Assert:
-    # result == expected_fail
     assert result == expected
 
 
@@ -115,11 +133,8 @@ def test_each_row_of_fact_table_has_correct_keys(general_setup):
                 break
 
     result = is_equal
-    # result = False
     
     # Assert:
-    # ensure test can fail:
-    # assert False
     assert result 
 
 
@@ -149,8 +164,6 @@ def test_each_row_of_fact_table_has_values_of_correct_type(general_setup):
     
 
     # Assert
-    # ensure test can fail:
-    # assert False
     assert result
 
 

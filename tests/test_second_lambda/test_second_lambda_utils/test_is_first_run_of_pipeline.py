@@ -75,7 +75,6 @@ def test_bucket_is_empty(general_setup):
     (mock_S3_client, bucket_name_empty, bucket_name_not_empty, test_obj_1, test_obj_2, test_key_1,  test_key_2) = general_setup
 
     # Act
-    # result = False
     result = is_first_run_of_pipeline(bucket_name_empty, mock_S3_client)
     
     
@@ -90,7 +89,6 @@ def test_correct_reaction_to_bucket_not_being_empty(general_setup):
     (mock_S3_client, bucket_name_empty, bucket_name_not_empty, test_obj_1, test_obj_2, test_key_1,  test_key_2) = general_setup
 
     # Act
-    # result = True
     result = is_first_run_of_pipeline(bucket_name_not_empty, mock_S3_client)
     
     
@@ -105,7 +103,6 @@ def test_raises_ClientError_and_logs_correctly(general_setup,caplog):
     (mock_S3_client, bucket_name_empty, bucket_name_not_empty, test_obj_1, test_obj_2, test_key_1,  test_key_2) = general_setup
 
     # Act
-    # result = True
     mock_S3_client.list_objects_v2 = Mock(side_effect=ClientError(
     {"Error": {"Code": "500", "Message": "Failed to list objects in bucket"}},
     "ListObjectsV2"
@@ -119,6 +116,4 @@ def test_raises_ClientError_and_logs_correctly(general_setup,caplog):
     with pytest.raises(ClientError):
         result = is_first_run_of_pipeline(bucket_name_not_empty, mock_S3_client)
 
-    # ensure test can fail:
-    # assert any("Richard Deckard" in msg for msg in caplog.messages)
     assert any(errors_lookup['err_1'] in msg for msg in caplog.messages)

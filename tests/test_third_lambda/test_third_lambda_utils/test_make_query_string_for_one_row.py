@@ -18,7 +18,6 @@ def setup():
 def test_returns_string(setup):
     # Arrange:
     formatted_vals, table_name, column_str  = setup
-    expected_fail = list
     expected = str
 
     # Act:
@@ -26,8 +25,6 @@ def test_returns_string(setup):
     result = type(response)
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
 
 
@@ -37,13 +34,11 @@ def test_returns_correct_query_string(setup):
     # Arrange:
     formatted_vals, table_name, column_str  = setup
     
-    expected_fail = 'INSERT'
+
     expected = 'INSERT INTO some_table (some_id, some_str, some_flt, some_bool) VALUES (5, "xyx", 75.5, "TRUE");'
 
     # Act:
     result = make_query_string_for_one_row(formatted_vals, table_name, column_str)    
 
     # Assert:
-    # Ensure test can fail:
-    # assert result == expected_fail
     assert result == expected

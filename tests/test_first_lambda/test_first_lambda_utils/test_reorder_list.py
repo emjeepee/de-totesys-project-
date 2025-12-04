@@ -43,7 +43,6 @@ def test_returns_list(setup):
     # Arrange:
     mock_arg_0, mock_arg_1, mock_list, expected_list = setup
 
-    expected_fail = 'list'
     expected = list
 
     # Act:
@@ -52,8 +51,6 @@ def test_returns_list(setup):
 
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
 
 
@@ -76,10 +73,6 @@ def test_returns_list_with_correct_items_at_the_beginning(setup):
     result_1 = response[1]
   
     # Assert:
-    # ensure test can fail:
-    # assert result_0 == expected_fail_0
-    # assert result_1 == expected_fail_1
-
     assert result_0 == expected_0
     assert result_1 == expected_1
 
@@ -97,6 +90,4 @@ def test_returns_correct_list(setup):
 
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected_list

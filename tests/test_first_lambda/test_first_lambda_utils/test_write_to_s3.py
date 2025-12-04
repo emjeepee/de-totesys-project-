@@ -409,11 +409,7 @@ def test_logs_exception_when_first_try_block_code_fails(S3_setup, caplog):
         # which raises the exception, 
         # will not run!
 
-    # print(f'\n\n\n  caplog.messages is {caplog.messages}   \n\n\n')
-    expected_err_msg_fail = 'fail'
     expected_err_msg = errors_lookup['err_7a']
-    # ensure test can fail:
-    # assert any(expected_err_msg_fail in msg for msg in caplog.messages)
     assert any(expected_err_msg in msg for msg in caplog.messages)
         
     
@@ -463,8 +459,5 @@ def test_logs_exception_when_second_try_block_code_fails(S3_setup, caplog):
         # which raises the exception, 
         # will not run!
 
-    expected_err_msg_fail = 'fail'
     expected_err_msg = errors_lookup['err_7b']
-    # ensure test can fail:
-    # assert any(expected_err_msg_fail in msg for msg in caplog.messages)
     assert any(expected_err_msg in msg for msg in caplog.messages)

@@ -47,7 +47,7 @@ def test_calls_internal_functions_correctly_when_table_name_is_staff(setup):
     # Arrange:
     mock_so_table, mock_tbl_name_1, mock_tbl_name_2, mock_tbl_name_3, mock_tbl_1, mock_tbl_2, mock_tabl_python, mock_s3_client, mock_ing_bucket = setup
     expected = ['staff_dim_table']
-    # expected = ''
+
 
     # Act:
     with patch('src.second_lambda.second_lambda_utils.make_dim_or_fact_table.make_staff_or_cp_dim_table') as mock_msocdt, \
@@ -63,7 +63,7 @@ def test_makes_calls_to_internal_functions_correct_when_table_name_is_counterpar
     # Arrange:
     mock_so_table, mock_tbl_name_1, mock_tbl_name_2, mock_tbl_name_3, mock_tbl_1, mock_tbl_2, mock_tabl_python, mock_s3_client, mock_ing_bucket = setup
     expected = ['counterparty_dim_table']
-    # expected = ''
+
 
     # Act:
     with patch('src.second_lambda.second_lambda_utils.make_dim_or_fact_table.make_staff_or_cp_dim_table') as mock_msocdt, \
@@ -81,7 +81,7 @@ def test_makes_calls_to_internal_functions_correct_when_table_name_is_location(s
     # Arrange:
     mock_so_table, mock_tbl_name_1, mock_tbl_name_2, mock_tbl_name_3, mock_tbl_1, mock_tbl_2, mock_tabl_python, mock_s3_client, mock_ing_bucket = setup
     expected = ['location_dim_table']
-    # expected = ''
+
 
     # Act:
     with patch('src.second_lambda.second_lambda_utils.make_dim_or_fact_table.func_lookup_table') as mock_flt: 
@@ -123,8 +123,6 @@ def test_returns_fact_table_correctly(setup):
     dt_updated = datetime.fromisoformat(iso_up_date_0)
     dt_updated_time = dt_updated.time() # extract time only
 
-
-    expected_fail = "boiled cabbage"
     expected_c_time = dt_created_time
     expected_lu_time = dt_updated_time
 
@@ -158,8 +156,6 @@ def test_returns_fact_table_correctly(setup):
 
 
     # Assert:
-    # ensure test can fail:
-    # assert result_c_time == expected_fail
     assert result_c_time == expected_c_time
     assert result_lu_time == expected_lu_time
  

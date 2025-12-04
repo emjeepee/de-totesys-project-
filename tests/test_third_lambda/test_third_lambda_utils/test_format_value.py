@@ -36,10 +36,7 @@ def test_returns_correct_string_value_for_strings():
     result_2 = format_value(value_2)
 
     # Assert:
-    # ensure test can fail:
-    # assert result_1 == expected_fail
     assert result_1 == expected_1
-    # assert result_2 == expected_fail
     assert result_2 == expected_2
 
 
@@ -53,8 +50,6 @@ def test_returns_correct_string_value_for_string():
     result = format_value(value)
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
 
 
@@ -69,8 +64,6 @@ def test_returns_correct_string_value_for_bool_True():
     result = format_value(value)
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
 
 
@@ -87,6 +80,4 @@ def test_returns_correct_string_value_for_bool_False():
     result = format_value(value)
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected

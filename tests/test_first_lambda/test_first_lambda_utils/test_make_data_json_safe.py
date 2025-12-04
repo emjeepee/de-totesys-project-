@@ -34,8 +34,6 @@ def test_returns_list(setup):
     result = type(reponse)
 
     # assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
 
 
@@ -51,8 +49,6 @@ def test_returns_different_list(setup):
     result = make_data_json_safe(mock_table)
 
     # assert:
-    # ensure test can fail:
-    # assert result is expected_fail
     assert result is not expected
     
     
@@ -68,9 +64,6 @@ def test_returns_list_whose_internals_are_different(setup):
     result_1 = response[1]
 
     # assert:
-    # ensure test can fail:
-    # assert result_0 is expected_fail
-    # assert result_1 is expected_fail
     assert result_0 is not dict_0
     assert result_1 is not dict_1
 
@@ -92,8 +85,6 @@ def test_returns_correct_list(setup):
     result_5 = res_dict_1["col_3"]
 
     # assert:
-    # ensure test can fail:
-    # assert result_0 is expected_fail
     assert result_0 == '2.47'
     assert result_1 == "2025-11-13T00:00:00"
     assert result_2 == 2

@@ -15,14 +15,11 @@ def test_returns_a_list():
     result = type(response)
 
     # Assert
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
 
 
 def test_returns_list_of_ten_dicts():
     # Arrange:
-    expected_fail = 9
     expected = 10
 
     # Act:
@@ -30,8 +27,6 @@ def test_returns_list_of_ten_dicts():
     result = len(response)
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected 
 
 
@@ -39,7 +34,6 @@ def test_returns_list_of_ten_dicts():
 def test_returns_correct_list():
     # Arrange:
     base_day = datetime(2025, 11, 13) 
-    expected_fail = {}
     expected = {
         'counterparty_id': 3, 
         'counterparty_legal_name': 'Armstrong Inc', 
@@ -56,6 +50,4 @@ def test_returns_correct_list():
     
 
     # Assert
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected

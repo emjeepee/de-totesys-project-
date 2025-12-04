@@ -114,14 +114,4 @@ def test_get_data_from_db_raises_runtime_error(test_vars):
 
     
 
-    # @pytest.mark.skip
-    # def test_xxxx(test_vars):
-    #     pass
-
-
-
-    # @pytest.mark.skip
-    # def test_xxxx(test_vars):
-    #     pass
-
 

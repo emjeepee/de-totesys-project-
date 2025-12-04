@@ -136,10 +136,6 @@ def test_function_save_updated_table_to_S3_logs_correctly(
         # save_updated_table_to_S3( updated_table, S3_client: boto3.client, new_key: str, bucket: str ):
         save_updated_table_to_S3(mdt_json, S3_client, key_1, bucket_name)        
 
-    # ensure test can fail:
-    # error_message_fail = 'message fail'
-    # assert any(error_message_fail in msg for msg in caplog.messages)        
-    
     error_message = errors_lookup['err_5'] + 'design'
     assert any(error_message in msg for msg in caplog.messages)        
 

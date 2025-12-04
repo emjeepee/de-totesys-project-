@@ -61,8 +61,6 @@ def test_returns_correct_object(general_setup):
 
     # Act
     response = read_from_s3(mock_S3_client, bucket_name, test_key)             
-    # ensure test can fail:
-    # result = None
     result = json.loads(response)
 
     # Assert
@@ -88,6 +86,4 @@ def test_ClientError_causes_error_logging(general_setup, caplog):
     with pytest.raises(ClientError):
         read_from_s3(mock_S3_client, bucket_name, test_key)
 
-    # ensure test can fail:
-    # assert any('fail_message' in msg for msg in caplog.messages)        
     assert any(errors_lookup['err_0'] in msg for msg in caplog.messages)        

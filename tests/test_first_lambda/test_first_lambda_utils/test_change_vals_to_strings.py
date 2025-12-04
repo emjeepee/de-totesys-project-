@@ -19,8 +19,6 @@ def test_changes_datetime_to_iso_string():
     change_vals_to_strings(ky, val, dct)
 
     # assert:
-    # ensure test can fail:
-    # assert dct[ky] == expected_fail
     assert dct[ky] == expected
 
 
@@ -36,8 +34,6 @@ def test_changes_Decimal_to_string():
     change_vals_to_strings(ky, val, dct)
 
     # assert:
-    # ensure test can fail:
-    # assert dct[ky] == expected_fail
     assert dct[ky] == expected    
 
 
@@ -58,8 +54,5 @@ def test_leaves_some_values_unchanged():
     change_vals_to_strings(ky_1, val_1, dct)
 
     # assert:
-    # ensure test can fail:
-    # assert dct[ky_0] == expected_fail
-    # assert dct[ky_1] == expected_fail
     assert dct[ky_0] == expected_0
     assert dct[ky_1] == expected_1    

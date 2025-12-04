@@ -61,12 +61,7 @@ def test_calls_functions_of_duckdb(setup):
         put_pq_table_in_temp_file(table_name, col_defs, vals_list, placeholders, tmp_path)
 
         # Assert:
-        # Ensure test can fail:
-        # mock_connect.assert_called_once_with('42')
         mock_connect.assert_called_once_with(':memory:')
-
-        # Ensure test can fail:
-        # assert mock_conn.execute.call_count == 8
         assert mock_conn.execute.call_count == 7 # 1 CREATE TABLE, 3 INSERT INTO, 3 COPY (SELECT ...
 
     # call_args_list gets info
@@ -84,8 +79,6 @@ def test_calls_functions_of_duckdb(setup):
     # Assert:
     # CREATE TABLE call
     the_create_call = calls[0] # call('CREATE TABLE etc')
-    #ensure test can fail:
-    # assert the_create_call.args[0].startswith("Despair squid")
     assert the_create_call.args[0].startswith("CREATE TABLE")
 
     # INSERT calls (next 3)
@@ -96,17 +89,11 @@ def test_calls_functions_of_duckdb(setup):
     for i in range (len(the_insert_and_copy_calls)):
         # for i is 0, 2, 4
         if i%2 == 0:
-            # ensure test can fail:
-            # assert the_insert_and_copy_calls[i].args[0].startswith("artechoke")
             assert the_insert_and_copy_calls[i].args[0].startswith("INSERT INTO")
         else:
         # for i is 1, 3, 5
-            # ensure test can fail:
-            # assert the_insert_and_copy_calls[i].args[0].startswith("skinned-over cold custard")
             assert the_insert_and_copy_calls[i].args[0].startswith("COPY (SELECT * FROM ")
 
-    # ensure test can fail:
-    # assert len(the_insert_and_copy_calls) == 3
     assert len(the_insert_and_copy_calls) == 6
 
         

@@ -9,7 +9,6 @@ from src.first_lambda.first_lambda_utils.make_fake_cu_table import make_fake_cu_
 
 def test_returns_a_list():
     # Arrange:
-    expected_fail = str
     expected = list
 
     # Act
@@ -17,8 +16,6 @@ def test_returns_a_list():
     result = type(response)
 
     # Assert
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
 
 
@@ -27,7 +24,6 @@ def test_returns_a_list():
 # @pytest.mark.skip
 def test_returns_list_of_three_dicts():
     # Arrange:
-    expected_fail = 1
     expected = 3
 
     # Act:
@@ -35,8 +31,6 @@ def test_returns_list_of_three_dicts():
     result = len(response)
 
     # Assert:
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected 
 
 
@@ -57,8 +51,5 @@ def test_returns_correct_list():
     response = make_fake_cu_table()
     result = response[1]
     
-
     # Assert
-    # ensure test can fail:
-    # assert result == expected_fail
     assert result == expected
