@@ -58,7 +58,7 @@ def get_latest_table(s3_client, bucket: str, table_name: str):
     except ClientError as e:
         # log the exception 
         # and stop the code:
-        logger.error(errors_lookup['err_3'])
+        logger.error(errors_lookup['err_4'])
         raise 
 
     data = response["Body"].read().decode("utf-8")

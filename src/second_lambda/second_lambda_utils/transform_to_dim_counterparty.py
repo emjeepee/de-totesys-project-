@@ -18,9 +18,8 @@ def transform_to_dim_counterparty(counterparty_table, address_table):
         tables from the 
         ingestion bucket. 
         
-        2) achieves 1) by looping 
-        through the rows 
-        (dictionaries)of the 
+        2) loops through the rows 
+        (dictionaries) of the 
         counterparty table. For 
         each row, this function 
         finds the value of the key 
@@ -30,9 +29,10 @@ def transform_to_dim_counterparty(counterparty_table, address_table):
         same value for its key 
         'address_id'.
         
-        3) This function then creates 
-        new keys in the counterparty 
-        table, setting the values of 
+        3) This function then 
+        creates new keys in the 
+        counterparty table, 
+        setting the values of 
         those keys to the values of 
         certain keys in the address 
         table row identified in 2) 
@@ -80,8 +80,8 @@ def transform_to_dim_counterparty(counterparty_table, address_table):
     # 'legal_address_id': 'xxx',           DELETE THIS
     # 'commercial_contact': 'xxx',         DELETE THIS
     # 'delivery_contact': 'xxx',           DELETE THIS
-    # 'created_at':     'xxx',             
-    # 'last_updated': 'xxx'                
+    # 'created_at':     'xxx',             DELETE THIS
+    # 'last_updated': 'xxx'                DELETE THIS
     #   }]
 
 
@@ -126,9 +126,14 @@ def transform_to_dim_counterparty(counterparty_table, address_table):
     #    "counterparty_legal_postal_code"
     #    "counterparty_legal_country"
     #    "counterparty_legal_phone_number"
-    #   'created_at'             
-    #   'last_updated' 
 
+    # dim_counterparty does not 
+    # need these cols of the 
+    # counterparty table: 
+    # commercial_contact, 
+    # delivery_contact, 
+    # created_at and 
+    # last-updated.
     
  
     # 1):
@@ -160,8 +165,6 @@ def transform_to_dim_counterparty(counterparty_table, address_table):
                 new_cp_row = make_dictionary(addr_row, key_pairs)
                 new_cp_row['counterparty_id'] = CP_row['counterparty_id'] #
                 new_cp_row['counterparty_legal_name'] = CP_row['counterparty_legal_name'] 
-                new_cp_row['created_at'] = CP_row['created_at']
-                new_cp_row['last_updated'] = CP_row['last_updated']
                 cp_dim_table.append(new_cp_row) #
 
     

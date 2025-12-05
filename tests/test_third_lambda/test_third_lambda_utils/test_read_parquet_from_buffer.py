@@ -1,7 +1,8 @@
 import pytest
 
-from unittest.mock import Mock, patch
-from datetime import datetime, timedelta
+
+from unittest.mock import Mock, ANY
+from datetime import datetime
 
 from src.third_lambda.third_lambda_utils.read_parquet_from_buffer import read_parquet_from_buffer
 
@@ -48,7 +49,15 @@ def setup():
     
     cols_str = '"date_id", "year", "month", "day"'
 
-    yield dim_date, table_name, cols, cols_str
+    
+
+    # buffer = BytesIO() # create an empty bytes buffer
+    # buffer.write(b"mock_parquet_file") # write bytes obj to buffer
+    # data = buffer.getvalue()
+    buffer = b"mock parquet bytes"    
+
+
+    yield dim_date, table_name, cols, cols_str, buffer
 
 
 
@@ -61,11 +70,13 @@ def test_calls_functions_correctly(setup):
     Also tests that the function returns the correct list
     """
     # Arrange:
-    dim_date, table_name, cols, cols_str = setup
+    dim_date, table_name, cols, cols_str, buffer = setup
 
-    mock_buff = Mock()
-    mock_buff.seek = Mock()
+    mock_pq_in_buff = Mock()
+    mock_pq_in_buff.seek = Mock()
+    mock_pq_in_buff.getvalue = Mock()
     mock_parquet = Mock()
+    mock_pq_in_buff.getvalue.return_value = buffer
     mock_parquet.fetchall = Mock()
     mock_parquet.fetchall.return_value = [
     (1, 'mock_year_1', 'mock_month_1', 'mock_day_1'),
@@ -78,33 +89,22 @@ def test_calls_functions_correctly(setup):
                 ["year"], 
                 ["month"],
                 ["day"]]
+
     mock_conn = Mock()
     mock_conn.execute = Mock()
     mock_conn.execute.return_value = mock_parquet
 
     # Act:
-    result = read_parquet_from_buffer(mock_buff, mock_conn)
+    result = read_parquet_from_buffer(mock_pq_in_buff, mock_conn)
 
     # Assert:
     result_type = type(result)
-    # Ensure test can fail:    
-    # expected_type_fail = 'list'
-    # assert result_type == expected_type_fail
     expected_type = list 
     assert result_type == expected_type
 
-
-    # ensure test can fail:
-    # mock_buff.seek.assert_called_once_with('0')
-    mock_buff.seek.assert_called_once_with(0)
-    # ensure test can fail:
-    # mock_conn.execute.assert_called_once_with("SELECT * FROM parquet_scan(?)", ['mock_buff'])
-    mock_conn.execute.assert_called_once_with("SELECT * FROM parquet_scan(?)", [mock_buff])
-    # ensure test can fail:
-    # mock_parquet.fetchall.assert_called_once('xxx')
+    mock_pq_in_buff.seek.assert_called_once_with(0)
+    mock_conn.execute.assert_called_once_with("SELECT * FROM parquet_scan(?)", [ANY])
     mock_parquet.fetchall.assert_called_once()
-    # ensure test can fail:
-    # expected_fail = ['aaa', 'bbb']
-    # assert result == expected_fail
     expected = [cols_str, mock_parquet.fetchall.return_value]
+
     assert result == expected

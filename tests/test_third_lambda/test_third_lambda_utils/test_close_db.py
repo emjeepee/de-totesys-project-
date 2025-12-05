@@ -5,8 +5,10 @@ import logging
 from pg8000.native import Error, Connection
 from unittest.mock import Mock, patch, ANY
 
-from src.first_lambda.first_lambda_utils.conn_to_db import conn_to_db
-from src.first_lambda.first_lambda_utils.errors_lookup import errors_lookup
+from src.third_lambda.third_lambda_utils.conn_to_db import close_db
+from src.third_lambda.third_lambda_utils.errors_lookup import errors_lookup
+
+
 
 
 @pytest.fixture
@@ -44,65 +46,48 @@ def setup_test_env():
 
 
 
-def test_conn_to_db_returns_Connection_object(setup_test_env):
+def test_close_db_calls_method_close_(setup_test_env):
     # arrange:
 
-    with patch('src.first_lambda.first_lambda_utils.conn_to_db.Connection') as mock_Conn:
-        mock_Conn.return_value = Connection
+    with patch('src.third_lambda.third_lambda_utils.conn_to_db.Connection') as mock_Conn:
+        close = Mock()
+        close.return_value = None
+        mock_Conn.close = close
         # act:
-        response = conn_to_db('TESTING')
-        result = type(response) 
+        close_db(mock_Conn)
 
     # assert  
-    assert result == type(Connection)
-        
+    close.assert_called_once()
 
 
-def test_conn_to_db_calls_Connection_correctly(setup_test_env):
-    # arrange:
-    test_user, test_password, test_database, test_host, test_port = setup_test_env
-
-    with patch('src.first_lambda.first_lambda_utils.conn_to_db.Connection') as mock_Conn:
-        # mock_Conn.return_value = Mock()
-        # act:
-        response = conn_to_db('TESTING')
-
-
-        mock_Conn.assert_called_once_with(
-                        user=test_user,
-                        password=test_password,
-                        database=test_database,
-                        host=test_host,
-                        port=test_port,
-                        ssl_context=True,
-                                            )
-        
-
-
-
-def test_conn_to_db_logs_exception_correctly(setup_test_env, caplog):
+def test_close_db_logs_exception_correctly(caplog):
     # arrange:
 
     # logging.ERROR below deals 
     # with logger.exception() too:
     caplog.set_level(logging.ERROR, logger="conn_to_db")
 
-    with patch('src.first_lambda.first_lambda_utils.conn_to_db.Connection') as mock_Conn:
+    with patch('src.third_lambda.third_lambda_utils.conn_to_db.Connection') as mock_Conn:
         # Make Connection() raise 
         # Error immediately:
-        mock_Conn.side_effect = Error(
+        close = Mock()
+        close.side_effect = Error(
             {"Error": {
                 "Code": "500",
                 "Message": "Failed to connect to database"
             }},
             "Connection"
-        )
+                                )
+        mock_Conn.close = close
 
         # because the function 
         # re-raises the error:
         with pytest.raises(Error): 
-            conn_to_db('TESTING')
+            close_db(mock_Conn)        
+
 
     # check that error 
     # was logged:
-    assert any(errors_lookup['err_8'] in msg for msg in caplog.messages)
+    assert any(errors_lookup['err_3'] in msg for msg in caplog.messages)
+
+

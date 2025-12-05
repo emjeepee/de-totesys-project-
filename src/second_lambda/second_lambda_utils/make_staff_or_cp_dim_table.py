@@ -15,18 +15,20 @@ def make_staff_or_cp_dim_table(
             i)  the staff dimension table or 
             ii) the counterparty dimension 
                 table. 
-        2) achieves 1)i) by creating the 
-            staff table, for which this 
+        2) makes the staff dimension 
+            table, for which this 
             function requires data from 
             the department table, which 
             it retrieves from the 
             ingestion bucket. 
-        3) achieves 1)ii) by getting from 
+        3) makes the the counterparty 
+            dimension by getting from 
             the address table the data 
-            the counterparty dimensions 
-            table requires. This function 
-            gets the address table from 
-            the ingestion bucket.
+            the counterparty dimension 
+            table requires. This 
+            function gets the address 
+            table from the ingestion 
+            bucket.
         
         Function 
         make_staff_or_cp_dim_table()

@@ -170,5 +170,3 @@ def test_returns_correct_list_with_correct_key_value_pairs(general_setup):
 
     # Assert
     assert result == expected
-
-

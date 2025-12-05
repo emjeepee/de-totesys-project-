@@ -44,7 +44,11 @@ def test_returns_correct_list_of_dictionaries(general_setup):
         mock_flt_returned_function = Mock()
         mock_flt.return_value = mock_flt_returned_function
         mock_flt_returned_function.return_value = [{}, {}, {}]
-        result = make_staff_or_cp_dim_table(mock_table_name, mock_table, mock_flt, mock_bucket_name, mock_aux_table_name, mock_s3_client)
+        result = make_staff_or_cp_dim_table(mock_table_name, 
+                                            mock_table, 
+                                            mock_bucket_name, 
+                                            mock_aux_table_name, 
+                                            mock_s3_client)
         
         # Assert:
         mock_glt.assert_called_once_with(mock_s3_client, mock_bucket_name, mock_aux_table_name)

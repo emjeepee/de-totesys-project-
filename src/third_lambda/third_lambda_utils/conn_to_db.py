@@ -18,14 +18,19 @@ def conn_to_db(DB_NAME):
     port     = os.environ[f"{DB_NAME}_DB_PORT"] # default: 5432?
 
     try:
-        return Connection(
+        # make an instance of 
+        # Connection:
+        conn_obj = Connection(
         user=user,
-        database=database,
         password=password,
+        database=database,
         host=host,
         port=port,
         ssl_context=True,
-                    )
+                            )
+        
+        return conn_obj
+    
     except Error:
         # log exception 
         # and stop code:

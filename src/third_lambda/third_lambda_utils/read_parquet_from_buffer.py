@@ -1,31 +1,28 @@
 import tempfile
 
 
-from io import BytesIO
 
-
-
-
-def read_parquet_from_buffer(parquet_buffer, conn):
+def read_parquet_from_buffer(parq_in_buffer, conn):
     """
     This function:
         1. creates a string of 
         column names so that 
         the string can become 
         part of an SQL INSERT 
-        query.
+        query in another 
+        function.
 
         2. creates a list of tuples
+        for use in another function 
         where each tuple contains
         the values of one row.
 
     
     Args:
-        parquet_buffer: a
-        dimension table or the 
-        fact table table in 
-        Parquet form in a BytesIO 
-        buffer.
+        parq_in_buffer: a dimension 
+        table or the fact table 
+        table in Parquet form in a 
+        BytesIO buffer.
 
         conn: a duckdb connection 
         object.
@@ -42,12 +39,12 @@ def read_parquet_from_buffer(parquet_buffer, conn):
              tuple containing a row's values.
     """
 
-    parquet_buffer.seek(0)
+    parq_in_buffer.seek(0)
     
     # Write BytesIO to a 
     # temp file:
     with tempfile.NamedTemporaryFile(suffix=".parquet") as tmp:
-        tmp.write(parquet_buffer.getvalue())
+        tmp.write(parq_in_buffer.getvalue())
         tmp.flush()  # Ensure all bytes are written
 
         # Now pass the file path (string) to DuckDB

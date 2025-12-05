@@ -1,5 +1,5 @@
 from .make_data_json_safe import make_data_json_safe
-
+from .clean_data import clean_data
 
 
 
@@ -9,41 +9,37 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
         1) loops through a list of 
             names of all tables in 
             the ToteSys database
-        2) in the loop calls 
-            read_table() for each 
-            table name to get the 
-            updated rows for that 
-            table from the ToteSys 
-            database, where 'updated' 
-            means modified in the 
-            ToteSys database after 
-            passed-in time 
-            after_time.
-        3) appends each updated row 
-            (which is in the form of 
-            a dictionary) to a list.
-        4) returns that list of 
-           dictionaries.            
+        2) in the loop, for each 
+           table name gets the 
+           table from the totesys 
+           database if the database 
+           has updated the field 
+           data in any row of that 
+           table after passed-in
+           time after_time. 
+        3) creates a list of such 
+           tables.
+        4) returns that list.            
 
     Args:
         table_names: a list of 
-            strings, each string
-            being the name of a 
-            table in the ToteSys 
-            database, eg 'sales_orders'.
+            strings, each being the 
+            name of a table in the 
+            totesys database, eg 
+            'sales_orders'.
         
         after_time: for each table 
-            in the ToteSys database 
+            in the totesys database 
             get_data_from_db() gets 
-            rows that contain data 
-            that have been modified 
-            after after_time. 
+            rows if totesys has updated
+            any of their field data 
+            after time after_time. 
         
         conn: an instance of pg8000's 
             Connection object
         
         read_table: a function that reads 
-            the ToteSys database and gets 
+            the totesys database and gets 
             a table's updated rows from 
             it.
 
@@ -58,9 +54,9 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
         of which represents an 
         updated row of that table. 
         The key-value pairs of that 
-        dictionary are columnname-
-        fieldvalue pairs. The 
-        list takes this form:
+        dictionary are 
+        columnname-fieldvalue pairs. 
+        The list takes this form:
          [
          {'design': [{<updated-row data>}, {<updated-row data>}, etc]},
          {'staff': [{<updated-row data>}, {<updated-row data>}, etc]},
@@ -72,14 +68,7 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
     data_list = []
     for table in table_names:
         table_dict = read_table(table, conn, after_time)  # {'design': [{<updated-row data>}, {<updated-row data>}, etc]}
-        
-        # change 
-        # datetime.datetime objects 
-        # to iso strings and 
-        # decimal.Decimal objects 
-        # to strings:
-        clean_table_list = make_data_json_safe(table_dict[table]) # [{<updated-row data>}, {<updated-row data>}, etc]
-        clean_table_dict = {table: clean_table_list}
+        clean_table_dict = clean_data(table, table_dict)
         data_list.append(clean_table_dict) # [{'design': [{<updated-row data>}, etc]}, {'sales': [{<updated-row data>}, etc]}, etc].
                                  # where {<updated-row data>} is eg {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
     return data_list

@@ -24,16 +24,25 @@ the processed bucket.
 
 err_3 = """
 Error caught in get_latest_table() 
-while trying to read the 
-ingestion bucket.
+while trying to list the objects
+in the ingestion bucket.
 """
+
+err_4 = """
+Error caught in get_latest_table() 
+while trying to get an object
+from the ingestion bucket.
+"""
+
+
 
  
 errors_lookup = {
 'err_0': err_0,    
 "err_1": err_1,
 "err_2": err_2,    
-"err_3": err_3
+"err_3": err_3,
+"err_4": err_4
                 }
 
 

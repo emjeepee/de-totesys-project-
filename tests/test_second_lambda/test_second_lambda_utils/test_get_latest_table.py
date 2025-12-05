@@ -2,13 +2,14 @@ import boto3
 import pytest
 import os
 import json
+import logging
 
 from moto import mock_aws
 from unittest.mock import Mock, patch, call
 from botocore.exceptions import ClientError
 
 from src.second_lambda.second_lambda_utils.get_latest_table import get_latest_table
-
+from src.second_lambda.second_lambda_utils.errors_lookup import errors_lookup
 
 
 
@@ -109,7 +110,7 @@ def test_returns_correct_list(general_setup):
 
 
 # @pytest.mark.skip
-def test_raises_RuntimeError_when_list_objs_v2_fails(general_setup):
+def test_raises_ClientError_when_list_objs_v2_fails_and_logs_exception(general_setup, caplog):
     # Arrange:
     (mock_S3_client, 
      bucket_name, 
@@ -121,15 +122,23 @@ def test_raises_RuntimeError_when_list_objs_v2_fails(general_setup):
     {"Error": {"Code": "500", "Message": "Failed to list objects in bucket"}},
     "ListObjectsV2"
                                         ))
+    
+    # logging.ERROR below deals 
+    # with logger.exception() too:
+    caplog.set_level(logging.ERROR, logger="get_latest_table")
 
     # Act and assert:
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ClientError):
         get_latest_table(mock_S3_client, bucket_name, 'design')
+
+    assert any(errors_lookup['err_3'] in msg for msg in caplog.messages)
+
+
 
 
 
 # @pytest.mark.skip
-def test_raises_RuntimeError_when_get_object_fails(general_setup):
+def test_raises_ClientError_when_get_object_fails_and_logs_exception(general_setup, caplog):
     # Arrange:
     (mock_S3_client, 
      bucket_name, 
@@ -141,7 +150,14 @@ def test_raises_RuntimeError_when_get_object_fails(general_setup):
     {"Error": {"Code": "500", "Message": "Failed to get object in bucket"}},
     "GetObject"
                                         ))
+    
+    # logging.ERROR below deals 
+    # with logger.exception() too:
+    caplog.set_level(logging.ERROR, logger="get_latest_table")
+
 
     # Act and assert:
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ClientError):
         get_latest_table(mock_S3_client, bucket_name, 'design')
+
+    assert any(errors_lookup['err_4'] in msg for msg in caplog.messages)

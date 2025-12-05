@@ -26,7 +26,7 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     This function:
          1) makes a dictionary that 
             contains those rows of a 
-            table in the ToteSys 
+            table in the toteSys 
             database that have been 
             updated. The dictionary's 
             sole key is the name of 

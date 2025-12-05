@@ -2,12 +2,15 @@ import boto3
 import logging
 import io
 
-from third_lambda_utils.third_lambda_init                import third_lambda_init
-from third_lambda_utils.make_insert_queries_from_parquet import make_insert_queries_from_parquet
-from third_lambda_utils.make_SQL_queries_to_warehouse    import make_SQL_queries_to_warehouse
-from third_lambda_utils.conn_to_db                       import conn_to_db, close_db
-from third_lambda_utils.errors_lookup                    import errors_lookup
-from third_lambda_utils.info_lookup                      import info_lookup
+from botocore.exceptions import ClientError
+
+
+from src.third_lambda.third_lambda_utils.third_lambda_init                import third_lambda_init
+from src.third_lambda.third_lambda_utils.make_insert_queries_from_parquet import make_insert_queries_from_parquet
+from src.third_lambda.third_lambda_utils.make_SQL_queries_to_warehouse    import make_SQL_queries_to_warehouse
+from src.third_lambda.third_lambda_utils.conn_to_db                       import conn_to_db, close_db
+from src.third_lambda.third_lambda_utils.errors_lookup                    import errors_lookup
+from src.third_lambda.third_lambda_utils.info_lookup                      import info_lookup
 
 
 
@@ -16,7 +19,7 @@ root_logger = logging.getLogger()
 # Create and configure a logger 
 # that writes to a file:
 logging.basicConfig(
-    level=logging.DEBUG, 
+    level=logging.DEBUG, # log anything above level DEBUG, the lowest level  
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s", 
     filemode="a"  
                    )
@@ -94,7 +97,7 @@ def third_lambda_handler(event, context):
         strmng_bod_obj = dict_from_s3["Body"]
         raw_bytes = strmng_bod_obj.read()
         pq_buff = io.BytesIO(raw_bytes) 
-    except Exception:
+    except ClientError:
         # log the exception 
         # and stop the code:
         root_logger.error(errors_lookup['err_0'] + f'{lookup['table_name']}')
