@@ -96,20 +96,14 @@ def second_lambda_handler(event, context):
                                 2557)
     
 
-
-
-    # Set vars to values in lookup table: 
-    num_rows = lookup['num_rows'] # an int. number of rows in dimensions table
- 
-
     # If the table just put in the 
     # ingestion bucket is "department"
     # go no further (because there 
     # is no need to create a department
     # dimension table):
     if lookup['table_name'] == "department":
-        # simply stop this lambda 
-        # handler:
+        # simply stop this 
+        # lambda handler:
         return {
             "status": "code skipped",
             "reason": "because table_name is 'department' "

@@ -112,7 +112,27 @@ def general_setup():
         
         mock_ts = "dim_design/2025-08-22_15-30-00.parquet"
 
-        yield mock_event, mock_py_tbl, mock_json_tbl, mock_mdoft_return, mock_pq, mock_sli_return, mock_ts 
+
+        mock_sli_return_1 = {
+        's3_client': mock_S3_client, # boto3 S3 client object
+        'timestamp_string' : "2025-08-22_15-30-00", # string of format "2025-08-14_12-33-27"
+        'ingestion_bucket': mock_event["Records"][0]["s3"]["bucket"]["name"], # name of ingestion bucket   
+        'object_key': object_key, # # key for object in ingestion bucket, eg sales_order/2025-06-04_09-21-32.json
+        'proc_bucket': "11-processed-bucket", # name of processed bucket:
+        'table_name': 'department', # name of table, eg 'sales_order'
+        'start_date': datetime(24, 1, 1), # datetime object for 1 Jan 2024 (includes time info for midnight)
+        'num_rows' : 3 # a datetime object for 1 Jan 2024
+                            }
+
+
+        yield (mock_event, 
+               mock_py_tbl, 
+               mock_json_tbl, 
+               mock_mdoft_return, 
+               mock_pq, 
+               mock_sli_return, 
+               mock_ts, 
+               mock_sli_return_1) 
 
 
 
@@ -130,7 +150,8 @@ def test_integrates_all_utility_functions(general_setup):
      mock_mdoft_return, 
      mock_pq, 
      mock_sli_return, 
-     mock_ts ) = general_setup
+     mock_ts,
+     mock_sli_return_1  ) = general_setup
     
 
     # Act and assert:
@@ -190,7 +211,8 @@ def test_logs_first_info_message_correctly(general_setup, caplog):
      mock_mdoft_return, 
      mock_pq, 
      mock_sli_return, 
-     mock_ts ) = general_setup
+     mock_ts,
+     mock_sli_return_1 ) = general_setup
     
     # logging.ERROR below deals 
     # with logger.exception() too:
@@ -216,3 +238,33 @@ def test_logs_first_info_message_correctly(general_setup, caplog):
         # print("MESSAGES:", caplog.messages)  # debug 
         assert any(info_lookup['info_0'] in msg for msg in caplog.messages)
         assert any(info_lookup['info_1'] in msg for msg in caplog.messages)
+
+
+
+
+def test_handler_code_stops_if_table_is_department(general_setup):
+    # Arrange:
+    (mock_event, 
+     mock_py_tbl, 
+     mock_json_tbl, 
+     mock_mdoft_return, 
+     mock_pq, 
+     mock_sli_return, 
+     mock_ts,
+     mock_sli_return_1 ) = general_setup
+
+
+    with patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli:
+        mock_sli.return_value = mock_sli_return_1
+
+        # act:
+        response = second_lambda_handler(mock_event, 'context')
+
+        # assert:
+        assert response == {
+            "status": "code skipped",
+            "reason": "because table_name is 'department' "
+                           }
+                  
+
+    
