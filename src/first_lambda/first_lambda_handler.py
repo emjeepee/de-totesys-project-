@@ -96,7 +96,11 @@ def first_lambda_handler(event, context):
 
     # Find only those tables 
     # in the totesys database 
-    # that have updated rows:
+    # that have updated rows
+    # (for the first ever 
+    # run of the pipeline 
+    # that will be all tables 
+    # and all rows in them):
     updated_tables = get_data_from_db(
                 lookup['tables'], # list of names of tables of interest 
                 after_time, 

@@ -22,11 +22,9 @@ def should_make_dim_date(ifrop,
           table in Parquet form 
           if it is the first ever 
           run.
-      3) uploads the Parquet file 
-          to the processed bucket.
-      4) does nothing if this is 
-          NOT the first ever run 
-          of the pipeline.
+      3) does nothing if this is 
+          the 2nd-plus run of the 
+          pipeline.
 
     Args:
         1) ifrop: utility function 
@@ -35,29 +33,27 @@ def should_make_dim_date(ifrop,
         2) cddP: utility function 
             create_dim_date_Parquet().
         
-        3) uts3:             
-        
-        4) start_date: a datetime object 
+        3) start_date: a datetime object 
             for the date from which the 
             date dimension table should 
             start.
         
-        5) timestamp_string: a string 
+        4) timestamp_string: a string 
             that will form part of the 
             key under which to store 
             the date dimension table in 
             the processed bucket
         
-        6) num_rows: the number of rows 
+        5) num_rows: the number of rows 
             that the date dimension table 
             should have (ie the number of 
             days the table should cover 
             from the start date).             
         
-        7) proc_bucket: the name of the 
+        6) proc_bucket: the name of the 
             processed bucket
         
-        8) s3_client: boto3 s3 client 
+        7) s3_client: boto3 s3 client 
             object.            
 
     Returns:

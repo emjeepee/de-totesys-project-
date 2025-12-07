@@ -11,9 +11,10 @@ from src.second_lambda.second_lambda_utils.upload_to_s3             import uploa
 from src.second_lambda.second_lambda_utils.second_lambda_init       import second_lambda_init
 from src.second_lambda.second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
 from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
+from src.second_lambda.second_lambda_utils.make_date_dim_table_if_needed import make_date_dim_table_if_needed
 from src.second_lambda.second_lambda_utils.should_make_dim_date     import should_make_dim_date
 from src.second_lambda.second_lambda_utils.info_lookup              import info_lookup
-from src.second_lambda.second_lambda_utils.errors_lookup            import errors_lookup
+
 
 root_logger = logging.getLogger()
 
@@ -84,10 +85,11 @@ def second_lambda_handler(event, context):
     Returns:
         None                    
     """
-
+    
+    # log status:
     root_logger.info(info_lookup['info_0'])        
 
-    # Get lookup table that contains 
+    # Make lookup table that contains 
     # values this handler requires:
     lookup = second_lambda_init(event, 
                                 boto3.client("s3"), 
@@ -99,14 +101,14 @@ def second_lambda_handler(event, context):
     # If the table just put in the 
     # ingestion bucket is "department"
     # go no further (because there 
-    # is no need to create a department
-    # dimension table):
+    # is no need to create a 
+    # department dimension table):
     if lookup['table_name'] == "department":
         # simply stop this 
         # lambda handler:
         return {
-            "status": "code skipped",
-            "reason": "because table_name is 'department' "
+            "status": "Second lambda handler code skipped",
+            "reason": "Because table_name is 'department' "
                }
 
 
@@ -115,17 +117,24 @@ def second_lambda_handler(event, context):
     # table that this lambda 
     # handler has just been 
     # notified about:
-    
     table_json = read_from_s3(lookup['s3_client'], # boto3 S3 client object,
-                        lookup['ingestion_bucket'], # name of bucket,
-                        lookup['object_key']) # bucket stores object under this key 
-                                    # jsonified [{<row data>}, {<row data>}, etc]
+                              lookup['ingestion_bucket'], # name of bucket,
+                              lookup['object_key']) # bucket stores object 
+                                    # under this key. 
+                                    # table_json is 
+                                    # jsonified [
+                                    # {<row data>}, 
+                                    # {<row data>}, 
+                                    # etc
+                                    #           ]
                                     # where {<row data>} is, eg,
-                                    # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}        
-    
-    
-    # convert the table 
-    # into a list:
+                                    # {'design_id': 123, 
+                                    # 'created_at': 'xxx', 
+                                    # 'design_name': 'yyy', 
+                                    # etc}  
+        
+    # convert the table into 
+    # a list:
     table_python = json.loads(table_json) # [{<row data>}, {<row data>}, etc]
                                           # where {<row data>} is, eg,
                                           # {
@@ -134,22 +143,36 @@ def second_lambda_handler(event, context):
                                           # 'design_name': 'yyy', 
                                           # etc
                                           # }    
-       
 
-    should_make_dim_date(is_first_run_of_pipeline, 
-                        create_dim_date_Parquet, 
-                        upload_to_s3, 
-                        lookup['start_date'], # a datetime object for 1 Jan 2024 
-                        lookup['timestamp_string'], # a timestamp string 
-                        lookup['num_rows'], # number of rows in date dimension table 
-                        lookup['proc_bucket'], # name of processed bucket 
-                        lookup['s3_client']) # boto3 S3 client
-        
-      
-    # Make the fact table 
-    # or a dimension table 
-    # that looks like this:
-    # [{<row data>}, {<row data>}, etc] 
+    # Determine whether a 
+    # date dimension table 
+    # needs to be created 
+    # and if yes, make it:
+    should_make_date_dim = make_date_dim_table_if_needed(lookup['proc_bucket'], 
+                                                  lookup['s3_client'],
+                                                  lookup['timestamp_string'],
+                                                  lookup['start_date'],
+                                                  lookup['num_rows']
+                                                  )
+
+    # if code has made a 
+    # date dimension table, 
+    # put it in the 
+    # processed bucket:
+    if should_make_date_dim[0]:
+        upload_to_s3(lookup['s3_client'], 
+                     lookup['proc_bucket'], 
+                     should_make_date_dim[2], 
+                     should_make_date_dim[1])
+
+
+
+    # Make the fact table or 
+    # a dimension table that 
+    # looks like this:
+    # [{<row data>}, 
+    # {<row data>}, 
+    # etc] 
     # where {<row data>} is, eg,
     # {
     # 'design_id': 123, 
@@ -180,14 +203,15 @@ def second_lambda_handler(event, context):
         table_key = f"dim_{lookup['table_name']}/{lookup['timestamp_string']}.parquet"
 
 
-    # Put the Parquet file in 
-    # the processed bucket:
+    # Put the dim/fact table 
+    # Parquet file in the 
+    # processed bucket:
     upload_to_s3(lookup['s3_client'], 
                 lookup['proc_bucket'], 
                 table_key, 
                 pq_file)
     
 
-    
+    # log status:
     root_logger.info(info_lookup['info_1'])
         

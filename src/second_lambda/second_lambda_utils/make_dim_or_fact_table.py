@@ -72,7 +72,8 @@ def make_dim_or_fact_table(table_name: str, table_python: list, s3_client, inges
         # func_lookup_table 
         # returns a function 
         # that converts the table 
-        # into a dimension table.
+        # into the appropriate 
+        # dimension table.
         # If the table name is  
         # 'sales_order' the 
         # function returned 

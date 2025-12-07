@@ -24,8 +24,8 @@ def is_first_run_of_pipeline(proc_bucket: str, s3_client):
             object.        
 
     Returns:
-        True if the processed bucket is 
-        empty.
+        True if the processed 
+        bucket is empty, returns
         False otherwise.
     """
 
@@ -39,8 +39,5 @@ def is_first_run_of_pipeline(proc_bucket: str, s3_client):
         raise 
    
     
-    if objects_list["KeyCount"] == 0:
-        return True
-    
-    return False        
+    return objects_list["KeyCount"] == 0
 

@@ -47,8 +47,10 @@ def read_parquet_from_buffer(parq_in_buffer, conn):
         tmp.write(parq_in_buffer.getvalue())
         tmp.flush()  # Ensure all bytes are written
 
-        # Now pass the file path (string) to DuckDB
-        # to read the parquet data:
+        # Now pass the file path 
+        # (string) to DuckDB
+        # to read the parquet 
+        # data:
         result = conn.execute(
             "SELECT * FROM parquet_scan(?)",
             [tmp.name]

@@ -1,11 +1,10 @@
 
 
-def return_a_list():
-    return ['5', 'xyz']
-
-
-var_1, var_2 = return_a_list()
-
-
-print(f'var_1 is {var_1}')
-print(f'var_2 is {var_2}')
+    # should_make_dim_date(is_first_run_of_pipeline, 
+    #                     create_dim_date_Parquet, 
+    #                     upload_to_s3, 
+    #                     lookup['start_date'], # a datetime object for 1 Jan 2024 
+    #                     lookup['timestamp_string'], # a timestamp string 
+    #                     lookup['num_rows'], # number of rows in date dimension table 
+    #                     lookup['proc_bucket'], # name of processed bucket 
+    #                     lookup['s3_client']) # boto3 S3 client
