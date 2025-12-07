@@ -25,19 +25,21 @@ def write_parquet_to_buffer(tmp_path):
         the contents of the Parquet file. 
     """
  
-    # Create an empty 
-    # container in RAM that 
-    # acts like a file:
+    # Create an empty container 
+    # in RAM (ie one that never 
+    # touches the filesystem) 
+    # that holds bytes and acts 
+    # like a file:
     buffer = BytesIO()
 
     # The if statement below takes
-    # care of the problem of testing
-    # this function with a mock 
-    # tmp_path (ie when the file 
-    # path is not real):
+    # care of the problem of 
+    # testing this function with 
+    # a mock tmp_path (ie when the 
+    # file path is not real):
     if os.path.exists(tmp_path):
-        # Open the temp file in 
-        # read-binary ('rb') mode and 
+        # Open the file in path tmp_path
+        # in read-binary ('rb') mode and 
         # write it to the buffer:
         with open(tmp_path, 'rb') as f:
             buffer.write(f.read())

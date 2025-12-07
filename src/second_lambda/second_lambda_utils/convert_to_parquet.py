@@ -50,13 +50,12 @@ def convert_to_parquet(data: list, table_name: str):
     # make a string of column names:
     col_defs = make_column_defs(data) # "some_col_name INT, some_col_name TEXT ..."
 
-    # makes parts of the insert 
-    # statements that will insert 
-    # row data from the table
-    # into the duckdb Parquet 
-    # file that this function 
-    # will make:
-    # print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run function make_parts_of_insert_statements().")    
+    # make parts of the insert 
+    # statements that DuckDB 
+    # will use to insert row 
+    # data from the table into 
+    # a Parquet file that this 
+    # function will later make:
     ph_and_v_list = make_parts_of_insert_statements(data)
     values_list  = ph_and_v_list[1]
     placeholders = ph_and_v_list[0]
@@ -69,14 +68,12 @@ def convert_to_parquet(data: list, table_name: str):
     # random character string instead of 
     # xyz123. Don't delete the temporary 
     # file when the with block ends:
-    # print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run with tempfile.NamedTemporaryFile().")    
     with tempfile.NamedTemporaryFile(delete=False, suffix='.parquet') as tmp:
         tmp_path = tmp.name
 
     # make a duckdb table in Parquet 
     # format and save it to the temp
     # location:
-    # print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run put_pq_table_in_temp_file().")
     put_pq_table_in_temp_file(table_name, col_defs, values_list, placeholders, tmp_path)
 
     # Write the Parquet file in the 
@@ -84,7 +81,6 @@ def convert_to_parquet(data: list, table_name: str):
     # buffer and permanently delete 
     # the temporary Parquet file 
     # at path tmp_path: 
-    # print(f"MY_INFO >>>>> In function convert_to_Parquet(). About to run write_parquet_to_buffer().")
     pq_buffer = write_parquet_to_buffer(tmp_path)
 
     return pq_buffer
