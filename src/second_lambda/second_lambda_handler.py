@@ -141,9 +141,9 @@ def second_lambda_handler(event, context):
                         upload_to_s3, 
                         lookup['start_date'], # a datetime object for 1 Jan 2024 
                         lookup['timestamp_string'], # a timestamp string 
-                        lookup['num_rows'], # number of rows in dimensions table 
+                        lookup['num_rows'], # number of rows in date dimension table 
                         lookup['proc_bucket'], # name of processed bucket 
-                        lookup['s3_client'])
+                        lookup['s3_client']) # boto3 S3 client
         
       
     # Make the fact table 

@@ -56,32 +56,39 @@ def convert_to_parquet(data: list, table_name: str):
     # data from the table into 
     # a Parquet file that this 
     # function will later make:
-    ph_and_v_list = make_parts_of_insert_statements(data)
-    values_list  = ph_and_v_list[1]
-    placeholders = ph_and_v_list[0]
-    
-    # Create a temporary file with  
-    # extension .parquet, put the file
-    # in tmp_path. The location will 
-    # be similar to '/tmp/xyz123.parquet'
-    # (where library tempfile generates 
-    # random character string instead of 
-    # xyz123. Don't delete the temporary 
-    # file when the with block ends:
+    # ph_and_v_list = make_parts_of_insert_statements(data)
+    # values_list  = ph_and_v_list[1]
+    # placeholders = ph_and_v_list[0]
+    placeholders, values_list = make_parts_of_insert_statements(data)
+
+    # Create a temp file with  
+    # extension .parquet, put the 
+    # file in tmp_path (which 
+    # tempfile sets up). The 
+    # location will be 
+    # '/tmp/xyz123.parquet',
+    # where tempfile generates 
+    # random character string 
+    # xyz123. Don't delete the 
+    # temp file when with block 
+    # ends:
     with tempfile.NamedTemporaryFile(delete=False, suffix='.parquet') as tmp:
         tmp_path = tmp.name
 
-    # make a duckdb table in Parquet 
-    # format and save it to the temp
-    # location:
+    # use DuckDB to make a 
+    # Parquet version of the 
+    # table and save it to 
+    # the temp path:
     put_pq_table_in_temp_file(table_name, col_defs, values_list, placeholders, tmp_path)
 
-    # Write the Parquet file in the 
-    # temporary location to a BytesIO
-    # buffer and permanently delete 
-    # the temporary Parquet file 
-    # at path tmp_path: 
-    pq_buffer = write_parquet_to_buffer(tmp_path)
+    # Write the Parquet file 
+    # in the temp location to 
+    # a BytesIO buffer,
+    # permanently delete the 
+    # temp Parquet file at 
+    # path tmp_path and 
+    # return the buffer: 
+    return write_parquet_to_buffer(tmp_path) # a buffer containing the parquet file
 
-    return pq_buffer
+    
     

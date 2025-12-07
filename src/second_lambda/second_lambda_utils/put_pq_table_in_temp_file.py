@@ -83,11 +83,10 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
     # the column names:
     conn.execute(f"CREATE TABLE {table_name} ({col_defs});")
             # eg CREATE TABLE staff  /
-            # (department_name TEXT, / 
-            # location TEXT, staff_id INT, / 
-            # first_name TEXT, / 
-            # last_name TEXT, / 
-            # email_address TEXT);
+            # (design_id INT, / 
+            # xxxx TEXT, yyyy INT, / 
+            # zzzzz TEXT, / 
+            # etc );
 
     # Insert the table's rows:
     for values in values_list: # for each list
@@ -108,8 +107,7 @@ def put_pq_table_in_temp_file(table_name: str, col_defs: str, values_list, place
     # Close the connection to 
     # the database:
     conn.close()
-    
-    return None
+
             
 
 
