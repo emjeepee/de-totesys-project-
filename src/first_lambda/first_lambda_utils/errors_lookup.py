@@ -16,33 +16,47 @@ err_1 = (
 
 
 err_2 = (
+    """\n\n\nis_first_run_of_pipeline() 
+    caught an error while trying to 
+    list objects in the processed bucket 
+    to determine whether or not it is 
+    empty."""
+        )
+
+# CHANGE!!:
+err_x = (
     """\n\n\nget_column_names() caught an error 
     while trying to read from the totesys 
     database the table """
         )
 
+# CHANGE!!:
 err_3 = (
     """\n\n\nget_updated_rows() caught an error 
     while trying to read from the totesys 
     database the table """
         )
 
+# OK:
 err_4 = (
     """\n\n\nget_most_recent_table_data() caught 
     an error while trying to read ingestion 
     bucket for the latest table of name """)
 
+# OK:
 err_5 = (
     """\n\n\nget_latest_table() caught an error 
     while trying to read ingestion bucket 
     for the latest table under key """
     )
 
+# OK:
 err_6 = (
     """\n\n\nsave_updated_table_to_S3() caught an 
-    error while trying to write to the 
-    ingestion bucket upodated table """)
+    error while trying to write this updated 
+    table to the ingestion bucket: """)
 
+# CHANGE!!:
 err_7a = (
     """\n\n\n
     write_to_s3() caught an error while 
@@ -51,17 +65,20 @@ err_7a = (
     """
         )
 
+# CHANGE!!:
 err_7b = (
     """\n\n\nwrite_to_s3() caught an error while 
     trying to write to the ingestion bucket the
     table of name """
         )
 
+# CHANGE!!:
 err_8 = (
     """\n\n\nconn_to_db() caught an error while 
     trying to connect to the totesys database."""
         )
 
+# CHANGE!!:
 err_9 = (
     """\n\n\nclose_db() caught an error while trying 
     to close the connection to the totesys 

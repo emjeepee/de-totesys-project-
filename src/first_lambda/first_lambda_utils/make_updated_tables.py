@@ -88,19 +88,11 @@ def make_updated_tables(data_for_s3: list,
         # get the object that holds 
         # the most recently updated 
         # table of name table_name.
-        try:
-            latest_table = get_most_recent_table_data(
+        latest_table = get_most_recent_table_data(
                             table_name, 
                             s3_client, 
                             bucket) # a list of dictionaries.
             
-        except ClientError as e:
-            # log exception and 
-            # stop the code:
-            logger.exception(errors_lookup['err_x'] + f'{table_name}')
-            raise 
-
-
         # Insert the updated rows into the 
         # retrieved whole table, replacing 
         # the outdated ones:

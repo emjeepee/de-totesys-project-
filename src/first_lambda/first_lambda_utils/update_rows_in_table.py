@@ -1,6 +1,6 @@
+from .insert_updated_rows import insert_updated_rows
 
-
-def update_rows_in_table( updated_rows: list, 
+def update_rows_in_table(updated_rows: list, 
                          whole_table: list, 
                          table_name: str ):
     
@@ -77,42 +77,20 @@ def update_rows_in_table( updated_rows: list,
         
     """
 
+    # Replace a row in the 
+    # whole_table with the 
+    # corresponsing row in 
+    # updated_rows:
+    name_of_id_col = table_name + "_id" # 'design_id'
+    num_of_rows = len(whole_table)
 
-    # update_row and 
-    # table_row below are 
-    # dictionaries that 
-    # include, eg, the key 
-    # 'design_id' (for the 
-    # design table).
-    # Find a row in the 
-    # table and find an
-    # updated row where both 
-    # have the same values 
-    # for key 'design_id'. 
-    # Then replace the table 
-    # row with the updated 
-    # row:
-    id_col_name = table_name + "_id" # 'design_id'
-    updated_table = []
-    lngth = len(whole_table)
-
-    for i in range(lngth):
-        match = False
-        
-        for dictn in updated_rows:
-            if whole_table[i][id_col_name] == dictn[id_col_name]: 
-                match = True
-                break
-
-        if match:
-            # append the updated row:
-            updated_table.append(dictn)
-        else:
-            # append the updated row:
-            updated_table.append(whole_table[i])        
-
+    updated_table = insert_updated_rows(num_of_rows, 
+                                        whole_table, 
+                                        updated_rows, 
+                                        name_of_id_col)
 
     return updated_table
 
 
-    
+
+

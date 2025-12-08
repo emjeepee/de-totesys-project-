@@ -11,7 +11,7 @@ from src.third_lambda.third_lambda_utils.make_SQL_queries_to_warehouse    import
 from src.third_lambda.third_lambda_utils.conn_to_db                       import conn_to_db, close_db
 from src.third_lambda.third_lambda_utils.errors_lookup                    import errors_lookup
 from src.third_lambda.third_lambda_utils.info_lookup                      import info_lookup
-
+from src.third_lambda.third_lambda_utils.get_inbuffer_parquet             import get_inbuffer_parquet 
 
 
 root_logger = logging.getLogger()
@@ -78,7 +78,6 @@ def third_lambda_handler(event, context):
     # log the status:
     root_logger.info(info_lookup['info_0'])        
 
-
     # Get lookup table that contains 
     # values this lambda handler requires:
     # lookup['proc_bucket'] -- name of processed bucket
@@ -89,19 +88,14 @@ def third_lambda_handler(event, context):
     lookup = third_lambda_init(event, conn_to_db, close_db, boto3.client('s3'))   
 
 
-    try:
-        # Get the buffer that contains 
-        # the Parquet file that represents
-        # the dimension table/facts table:
-        dict_from_s3 = lookup['s3_client'].get_object(Key=lookup['object_key'], Bucket=lookup['proc_bucket'])
-        strmng_bod_obj = dict_from_s3["Body"]
-        raw_bytes = strmng_bod_obj.read()
-        pq_buff = io.BytesIO(raw_bytes) 
-    except ClientError:
-        # log the exception 
-        # and stop the code:
-        root_logger.error(errors_lookup['err_0'] + f'{lookup['table_name']}')
-        raise
+    # Get the buffer that contains 
+    # the Parquet file that represents
+    # the dimension table/facts table:
+    pq_buff = get_inbuffer_parquet(lookup['s3_client'],
+                             lookup['object_key'],
+                             lookup['proc_bucket'],
+                             lookup['table_name']
+                             )
 
 
     # create SQL query strings from
@@ -111,8 +105,6 @@ def third_lambda_handler(event, context):
     # table into that table in the 
     # warehouse:
     queries_list = make_insert_queries_from_parquet(pq_buff, lookup['table_name'])
-    
-
 
     # Use the SQL queries to put
     # table data into the 

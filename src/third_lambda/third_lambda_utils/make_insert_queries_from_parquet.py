@@ -2,8 +2,7 @@ import duckdb
 
 from .read_parquet_from_buffer   import read_parquet_from_buffer
 from .make_list_of_query_strings import make_list_of_query_strings
-
-
+from .get_columns_and_rows       import get_columns_and_rows
 
 
 
@@ -41,9 +40,18 @@ def make_insert_queries_from_parquet(parquet_buffer, table_name):
     # duckdb database:
     conn = duckdb.connect(':memory:')
 
-    # get the rows and columns
-    # from the parquet table:
-    rows_cols = read_parquet_from_buffer(parquet_buffer, conn) # [column_str, rows]
+    # get a DuckDB query 
+    # result object from 
+    # the buffer:
+    DDB_q_result_obj = read_parquet_from_buffer(parquet_buffer, conn)
+
+    # Make a string 
+    # containing all column 
+    # names and a list 
+    # containing tuples 
+    # each of which 
+    # contains row values:
+    rows_cols = get_columns_and_rows(DDB_q_result_obj)  # [column_str, rows]
 
     # generate INSERT query  
     # strings and put them in 

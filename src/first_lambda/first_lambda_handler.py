@@ -1,15 +1,13 @@
-from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
 from src.first_lambda.first_lambda_utils.read_table                  import read_table
 from src.first_lambda.first_lambda_utils.get_data_from_db            import get_data_from_db
-from src.first_lambda.first_lambda_utils.write_to_s3                 import write_to_s3
-from src.first_lambda.first_lambda_utils.write_to_ingestion_bucket   import write_to_ingestion_bucket
+from src.first_lambda.first_lambda_utils.write_tables_to_ing_buck    import write_tables_to_ing_buck
 from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
 from src.first_lambda.first_lambda_utils.get_env_vars                import get_env_vars
 from src.first_lambda.first_lambda_utils.reorder_list                import reorder_list
 from src.first_lambda.first_lambda_utils.errors_lookup               import errors_lookup
 from src.first_lambda.first_lambda_utils.info_lookup                 import info_lookup
 from src.first_lambda.first_lambda_utils.is_first_run_of_pipeline    import is_first_run_of_pipeline
-from first_lambda.first_lambda_utils.write_tables_to_ing_buck        import write_tables_to_ing_buck
+from src.first_lambda.first_lambda_utils.write_tables_to_ing_buck    import write_tables_to_ing_buck
 from src.first_lambda.first_lambda_utils.make_updated_tables         import make_updated_tables
 
 
@@ -105,7 +103,7 @@ def first_lambda_handler(event, context):
     # run of the pipeline 
     # that will be all tables 
     # and all rows in them):
-    updated_tables = get_data_from_db(
+    new_table_data = get_data_from_db(
                 lookup['tables'], # list of names of tables of interest 
                 after_time, 
                 lookup['conn'], # pg8000.native Connection object 
@@ -137,7 +135,7 @@ def first_lambda_handler(event, context):
     # that creates the dim_staff 
     # and dim_counterparty tables:
     data_for_s3 = reorder_list(
-                updated_tables, 
+                new_table_data, 
                 "address", 
                 "department")
 
@@ -178,20 +176,6 @@ def first_lambda_handler(event, context):
         
 
 
-
-# +===============================
-# OLD CODE OLD CODE OLD CODE:
-    # write updated row data 
-    # from each table to the 
-    # ingestion bucket: 
-    # write_to_s3(data_for_s3, 
-    #             lookup['s3_client'], # boto3 S3 client object, 
-    #             write_to_ingestion_bucket, 
-    #             lookup['ing_bucket_name'])
-  # OLD CODE OLD CODE OLD CODE
-# +===============================
-
-
     # Log status:
     root_logger.info(info_lookup['info_2'])
 
@@ -201,7 +185,7 @@ def first_lambda_handler(event, context):
     # totesys database.
     # lookup['close_db'] 
     # returns function 
-    # conn_to_db(), which
+    # close_db, which
     # closes the 
     # connection to a
     # database:

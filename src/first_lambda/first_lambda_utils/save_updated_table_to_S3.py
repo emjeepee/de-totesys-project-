@@ -55,5 +55,5 @@ def save_updated_table_to_S3(
     except ClientError as e:
         # log exception and 
         # stop the code:
-        logger.exception(errors_lookup['err_5'] + f'{table_name}')
+        logger.exception(errors_lookup['err_6'] + f'{table_name}')
         raise 
