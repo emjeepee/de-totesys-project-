@@ -13,7 +13,7 @@ from .update_rows_in_table import update_rows_in_table
 
 
 # This is the main function:
-def write_to_ingestion_bucket(data: list, bucket: str, file_location: str, s3_client: boto3.client):
+def write_to_ingestion_bucket(data: list, bucket: str, table_name: str, s3_client: boto3.client):
     """
     This function:
     1. searches the ingestion 
@@ -66,11 +66,11 @@ def write_to_ingestion_bucket(data: list, bucket: str, file_location: str, s3_cl
         2) bucket_name: name of the 
             ingestion S3 bucket.
 
-        3) file_location: the name 
+        3) table_name: the name 
             of the table (in the 
-            ToteSys database) that 
+            totesys database) that 
             has had its rows updated. 
-            file_location is also the 
+            is also the 
             first part of the key 
             under which this function 
             will store the updated 
@@ -92,11 +92,11 @@ def write_to_ingestion_bucket(data: list, bucket: str, file_location: str, s3_cl
 
     # From the bucket get the object that 
     # holds the most recently updated table 
-    # whose name is given by file_location.
+    # whose name is given by table_name.
     latest_table = get_most_recent_table_data(
-                        file_location, 
-                        s3_client, bucket)
-    # a python list of dictionaries.
+                        table_name, 
+                        s3_client, 
+                        bucket) # a list of dictionaries.
 
 
     # Insert the updated rows into the 
@@ -105,7 +105,7 @@ def write_to_ingestion_bucket(data: list, bucket: str, file_location: str, s3_cl
     updated_table = update_rows_in_table(
                         data, 
                         latest_table, 
-                        file_location)
+                        table_name)
 
     # convert updated_table into json:
     updated_table_json = json.dumps(updated_table)
@@ -116,7 +116,7 @@ def write_to_ingestion_bucket(data: list, bucket: str, file_location: str, s3_cl
     # Make a key under which to store the 
     # json list that represents the updated 
     # table:
-    new_key = file_location + "/" + formatted_ts + ".json"
+    new_key = table_name + "/" + formatted_ts + ".json"
         
     # Store the json list 
     # that represents the 

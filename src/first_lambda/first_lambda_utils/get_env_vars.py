@@ -34,17 +34,25 @@ def get_env_vars():
     # values, return the dict:
     tables_list_string = os.environ['AWS_TABLES_LIST'] # 'design, sales_order, 
                                                        # ...etc'
+
     lookup['tables'] = [item.strip() 
                         for item in 
                         tables_list_string.split(",")] # names of all tables 
                                      # of interest: 
                                      # [<name string>, <name string>, etc]
 
+
     lookup['s3_client'] = boto3.client("s3") 
 
-    lookup['bucket_name'] = os.environ['AWS_INGEST_BUCKET'] # Name of 
+
+    lookup['ing_bucket_name'] = os.environ['AWS_INGEST_BUCKET'] # Name of 
                                         # S3 ingestion bucket, a string.
-                                        
+    
+    
+    lookup['proc_bucket_name'] = os.environ['AWS_PROCESS_BUCKET'] # Name of 
+                                        # S3 ingestion bucket, a string.
+
+
     lookup['conn'] = conn_to_db(os.environ['OLTP_NAME']) # pg8000.native 
                                                          # Connection object
                                                          # with access to 

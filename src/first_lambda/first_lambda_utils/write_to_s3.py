@@ -24,14 +24,14 @@ def write_to_s3(data_list, s3_client, write_to_ingestion_bucket, bucket_name: st
         deals with two scenarios:
         1) data_list contains all tables and
          all rows of all tables because this 
-         is the first ever run of this project.
+         is the first ever run of the pipeline.
          This function then saves each table 
          and all of its rows in the ingestion 
          bucket under a key that looks like 
          this: 'design/<timestamp-here>'
 
         2) data_list contains only those tables
-         that the ToteSys database has updated.
+         that the totesys database has updated.
          Each of those tables contains only 
          updated rows.
          In this case this function creates a 
