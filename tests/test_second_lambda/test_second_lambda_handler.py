@@ -142,7 +142,13 @@ def general_setup():
 
 
 # @pytest.mark.skip
-def test_integrates_all_utility_functions(general_setup):
+def test_integrates_correct_utility_functions_when_first_run_of_pipeline(general_setup):
+    """
+    this tests the correct integration 
+    of functions when utility function 
+    is_first_run_of_pipeline() returns 
+    True
+    """
     # Arrange:
     (mock_event, 
      mock_py_tbl, 
@@ -165,39 +171,174 @@ def test_integrates_all_utility_functions(general_setup):
     # upload_to_s3(s3_client, proc_bucket, table_key, pq_file)
 
     with patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
-         patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
-         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
-         patch('src.second_lambda.second_lambda_handler.boto3.client') as mock_mb3c, \
-         patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
-         patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
-         patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
-         patch('src.second_lambda.second_lambda_handler.is_first_run_of_pipeline') as mock_ifrop, \
-         patch('src.second_lambda.second_lambda_handler.create_dim_date_Parquet') as mock_cddP:     
+        patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
+        patch('src.second_lambda.second_lambda_handler.is_first_run_of_pipeline') as mock_ifrop, \
+        patch('src.second_lambda.second_lambda_handler.create_dim_date_Parquet') as mock_cddP, \
+        patch('src.second_lambda.second_lambda_handler.create_formatted_timestamp') as mock_cfts, \
+        patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
+        patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
+        patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
+        patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table_keystring') as mock_mdoftk:
+              
             mock_sli.return_value = mock_sli_return
             mock_rfs3.return_value = mock_json_tbl
+            mock_ifrop.return_value = True
+            mock_cddP.return_value = 'mock_pq_table_in_buff'
+            mock_cfts.return_value = 'mock_timestamp'
             mock_mdoft.return_value = mock_mdoft_return
             mock_ctp.return_value = mock_pq
+            mock_mdoftk.return_value = 'mock_dim_or_fact_keystring'
+            
 
             # Act:
             second_lambda_handler(mock_event, 'context')
-            mock_sli.assert_called_once_with(mock_event, mock_mb3c("s3"), ANY, datetime(2024, 1, 1), 2557)
+            mock_sli.assert_called_once_with(mock_event, 
+                                             ANY, 
+                                             ANY, 
+                                             ANY, 
+                                             2557)
+            
             # read_from_s3(s3_client from lookup, ingestion_bucket from lookup, object_key from lookup)
-            mock_rfs3.assert_called_once_with(mock_sli_return['s3_client'],  mock_sli_return['ingestion_bucket'],  mock_sli_return['object_key'] )
-
-            # should_make_dim_date(ifrop, cddP, uts3, start_date, timestamp_string, num_rows, proc_bucket, s3_client)    
-            mock_smdd.assert_called_once_with(mock_ifrop, mock_cddP, mock_uts3, 
-                                              mock_sli_return['start_date'], mock_sli_return['timestamp_string'],
-                                              mock_sli_return['num_rows'], mock_sli_return['proc_bucket'],
-                                              mock_sli_return['s3_client'])
+            mock_rfs3.assert_called_once_with(mock_sli_return['s3_client'],  
+                                              mock_sli_return['ingestion_bucket'],  
+                                              mock_sli_return['object_key'] )
+            
+            # is_first_run_of_pipeline(lookup['proc_bucket'],  lookup['s3_client'])
+            mock_ifrop.assert_called_once_with(mock_sli_return['proc_bucket'], 
+                                               mock_sli_return['s3_client'] )
+            
+            # create_dim_date_Parquet(lookup['start_date'], lookup['timestamp_string'], lookup['num_rows'])
+            mock_cddP.assert_called_once_with(mock_sli_return['start_date'],
+                                              mock_sli_return['timestamp_string'],
+                                              mock_sli_return['num_rows'])
+            
+            mock_cfts.assert_called_once()
 
             # make_dim_or_fact_table(table_name--from lookup, table_python, s3_client--from lookup, ingestion_bucket--from lookup)
-            mock_mdoft.assert_called_once_with(mock_sli_return['table_name'], mock_py_tbl, mock_sli_return['s3_client'], mock_sli_return['ingestion_bucket'])
+            mock_mdoft.assert_called_once_with(mock_sli_return['table_name'], 
+                                               mock_py_tbl, 
+                                               mock_sli_return['s3_client'], 
+                                               mock_sli_return['ingestion_bucket'])
 
             # convert_to_parquet(dim_or_fact_table--return of mdoft)
-            mock_ctp.assert_called_once_with(mock_mdoft_return, mock_sli_return['table_name'])
+            mock_ctp.assert_called_once_with(mock_mdoft_return, 
+                                             mock_sli_return['table_name'])
+            
+            mock_mdoftk.assert_called_once_with(mock_sli_return['table_name'],
+                                                mock_sli_return['timestamp_string'])
 
             # upload_to_s3(s3_client, proc_bucket, table_key, pq_file)
-            mock_uts3.assert_called_once_with(mock_sli_return['s3_client'], mock_sli_return['proc_bucket'], mock_ts, mock_pq)
+            assert mock_uts3.call_count == 2
+
+            # 2️⃣ Assert the exact calls in order
+            mock_uts3.assert_has_calls(
+            [
+                call(mock_sli_return['s3_client'], 
+                     mock_sli_return['proc_bucket'], 
+                     "dim_date/mock_timestamp.parquet", 
+                     'mock_pq_table_in_buff'),
+
+                call(mock_sli_return['s3_client'], 
+                     mock_sli_return['proc_bucket'],  
+                     'mock_dim_or_fact_keystring', 
+                     mock_pq),
+            ],
+            any_order=False
+                                    )
+
+
+
+
+# @pytest.mark.skip
+def test_integrates_correct_utility_functions_when_2nd_plus_run_of_pipeline(general_setup):
+    """
+    this tests the correct integration 
+    of functions when utility function 
+    is_first_run_of_pipeline() returns 
+    False
+    """
+    # Arrange:
+    (mock_event, 
+     mock_py_tbl, 
+     mock_json_tbl, 
+     mock_mdoft_return, 
+     mock_pq, 
+     mock_sli_return, 
+     mock_ts,
+     mock_sli_return_1  ) = general_setup
+    
+
+    # Act and assert:
+    # lookup = second_lambda_init(event, boto3.client("s3"), datetime.now(), datetime(2024, 1, 1))
+    # table_json = read_from_s3(s3_client, ingestion_bucket, object_key)
+    # if is_first_run_of_pipeline(proc_bucket, s3_client):
+        # arr = create_dim_date_Parquet(start_date, timestamp_string, num_rows)
+        # upload_to_s3(s3_client, proc_bucket, arr[1], arr[0])
+    # dim_or_fact_table = make_dim_or_fact_table(table_name, table_python, s3_client, ingestion_bucket)
+    # pq_file = convert_to_parquet(dim_or_fact_table)
+    # upload_to_s3(s3_client, proc_bucket, table_key, pq_file)
+
+    with patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
+        patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
+        patch('src.second_lambda.second_lambda_handler.is_first_run_of_pipeline') as mock_ifrop, \
+        patch('src.second_lambda.second_lambda_handler.create_dim_date_Parquet') as mock_cddP, \
+        patch('src.second_lambda.second_lambda_handler.create_formatted_timestamp') as mock_cfts, \
+        patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
+        patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
+        patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
+        patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table_keystring') as mock_mdoftk:
+              
+            mock_sli.return_value = mock_sli_return
+            mock_rfs3.return_value = mock_json_tbl
+            mock_ifrop.return_value = False
+            mock_cddP.return_value = 'mock_pq_table_in_buff'
+            mock_cfts.return_value = 'mock_timestamp'
+            mock_mdoft.return_value = mock_mdoft_return
+            mock_ctp.return_value = mock_pq
+            mock_mdoftk.return_value = 'mock_dim_or_fact_keystring'
+            
+
+            # Act:
+            second_lambda_handler(mock_event, 'context')
+            mock_sli.assert_called_once_with(mock_event, 
+                                             ANY, 
+                                             ANY, 
+                                             ANY, 
+                                             2557)
+            
+            # read_from_s3(s3_client from lookup, ingestion_bucket from lookup, object_key from lookup)
+            mock_rfs3.assert_called_once_with(mock_sli_return['s3_client'],  
+                                              mock_sli_return['ingestion_bucket'],  
+                                              mock_sli_return['object_key'] )
+            
+            # is_first_run_of_pipeline(lookup['proc_bucket'],  lookup['s3_client'])
+            mock_ifrop.assert_called_once_with(mock_sli_return['proc_bucket'], 
+                                               mock_sli_return['s3_client'] )
+            
+
+            # make_dim_or_fact_table(table_name--from lookup, table_python, s3_client--from lookup, ingestion_bucket--from lookup)
+            mock_mdoft.assert_called_once_with(mock_sli_return['table_name'], 
+                                               mock_py_tbl, 
+                                               mock_sli_return['s3_client'], 
+                                               mock_sli_return['ingestion_bucket'])
+
+            # convert_to_parquet(dim_or_fact_table--return of mdoft)
+            mock_ctp.assert_called_once_with(mock_mdoft_return, 
+                                             mock_sli_return['table_name'])
+            
+            mock_mdoftk.assert_called_once_with(mock_sli_return['table_name'],
+                                                mock_sli_return['timestamp_string'])
+
+            # 2️⃣ Assert the exact calls in order
+            mock_uts3.assert_called_once_with(
+                            mock_sli_return['s3_client'], 
+                            mock_sli_return['proc_bucket'],  
+                            'mock_dim_or_fact_keystring', 
+                            mock_pq),
+
+
+
+
 
 
 
@@ -220,8 +361,6 @@ def test_logs_first_info_message_correctly(general_setup, caplog):
     
     with patch('src.second_lambda.second_lambda_handler.second_lambda_init') as mock_sli, \
          patch('src.second_lambda.second_lambda_handler.read_from_s3') as mock_rfs3, \
-         patch('src.second_lambda.second_lambda_handler.should_make_dim_date') as mock_smdd, \
-         patch('src.second_lambda.second_lambda_handler.boto3.client') as mock_mb3c, \
          patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
          patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
          patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
@@ -241,7 +380,7 @@ def test_logs_first_info_message_correctly(general_setup, caplog):
 
 
 
-
+# @pytest.mark.skip
 def test_handler_code_stops_if_table_is_department(general_setup):
     # Arrange:
     (mock_event, 
@@ -262,8 +401,8 @@ def test_handler_code_stops_if_table_is_department(general_setup):
 
         # assert:
         assert response == {
-            "status": "code skipped",
-            "reason": "because table_name is 'department' "
+            "status": "Second lambda handler code skipped",
+            "reason": "Because table_name is 'department' "
                            }
                   
 

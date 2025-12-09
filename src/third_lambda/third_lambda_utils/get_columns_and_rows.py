@@ -6,15 +6,18 @@ def get_columns_and_rows(result):
     This function:
         extracts data from a 
         DuckDB query result 
-        object and from it 
-        creates a string that 
+        object, creates a 
+        string from it that 
         contains all of the 
-        column names of a table 
-        and a list that 
+        column names of a 
+        table. 
+        This function also 
+        creates a list that 
         contains tuples, each 
-        tuple containing the 
-        values in a row of the 
-        table.
+        tuple representing a 
+        row of the table and 
+        containing the values 
+        of the row.
 
 
     Args:
@@ -29,9 +32,10 @@ def get_columns_and_rows(result):
         column names of a 
         table and rows is a 
         list of tuples where 
-        each tuple contains 
-        the values in a row of 
-        the table.
+        each tuple represents 
+        a row of the table and 
+        contains the row's 
+        field values.
         
     """
 

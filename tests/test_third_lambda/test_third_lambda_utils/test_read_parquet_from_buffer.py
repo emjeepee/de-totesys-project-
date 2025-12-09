@@ -1,7 +1,9 @@
 import pytest
+import duckdb
 
 
-from unittest.mock import Mock, ANY
+from io import BytesIO
+from unittest.mock import Mock, patch, ANY
 from datetime import datetime
 
 from src.third_lambda.third_lambda_utils.read_parquet_from_buffer import read_parquet_from_buffer
@@ -14,31 +16,36 @@ def setup():
     # Make a mock dimension date 
     # table as a Python list
     # of dictionaries:
-    start_date = datetime(24, 1, 1)
+
     dim_date = []
-
-    table_name = 'dim_date'
-
-    dim_date.append( {                                                          
+    row_1 =  {                                                          
                 "date_id": 1,
                 "year": 'mock_year_1',
                 "month": 'mock_month_1',
                 "day": 'mock_day_1'
-                    })
+                    }
     
-    dim_date.append( {                                                          
+    row_2 =  {                                                          
                 "date_id": 2,
                 "year": 'mock_year_2',
                 "month": 'mock_month_2',
                 "day": 'mock_day_2'
-                    })
+            }
 
-    dim_date.append( {                                                          
+
+    row_3 =  {                                                          
                 "date_id": 3,
-                "year": 'mock_year_2',
-                "month": 'mock_month_2',
-                "day": 'mock_day_2'
-                    })
+                "year": 'mock_year_3',
+                "month": 'mock_month_3',
+                "day": 'mock_day_3'
+            }
+
+    dim_date.append(row_1)
+    dim_date.append(row_2)
+    dim_date.append(row_3)
+
+
+    table_name = 'dim_date'
 
 
     cols = [ "date_id",
@@ -49,62 +56,61 @@ def setup():
     
     cols_str = '"date_id", "year", "month", "day"'
 
+    conn = duckdb.connect()
     
 
-    # buffer = BytesIO() # create an empty bytes buffer
-    # buffer.write(b"mock_parquet_file") # write bytes obj to buffer
-    # data = buffer.getvalue()
-    buffer = b"mock parquet bytes"    
+    # Create test data:
+    conn.execute("""
+        CREATE TABLE dim_date (
+            date_id INTEGER,
+            year VARCHAR,
+            month VARCHAR,
+            day VARCHAR,
+                            )
+                """)
 
+
+
+    conn.execute("""
+        INSERT INTO dim_date VALUES
+        (1, 'mock_year_1', 'mock_month_1', 'mock_day_1'),
+        (2, 'mock_year_2', 'mock_month_2', 'mock_day_2'),
+        (3, 'mock_year_3', 'mock_month_3', 'mock_day_3'),
+                """)
+
+    buffer = BytesIO()
+
+    # get DuckDB to write 
+    # Parquet data
+    # directly to a file:
+    with open("/tmp/test.parquet", "wb") as f:
+        conn.execute(
+            "COPY dim_date TO '/tmp/test.parquet' (FORMAT 'parquet')"
+                    )
+
+    # Load the parquet data 
+    # in the file into a 
+    # BytesIO buffer:
+    with open("/tmp/test.parquet", "rb") as f:
+        buffer.write(f.read())
+
+    buffer.seek(0)
+    conn.close()
 
     yield dim_date, table_name, cols, cols_str, buffer
 
 
 
 
-   
-    
-# @pytest.mark.skip    
-def test_calls_functions_correctly(setup):
-    """
-    Also tests that the function returns the correct list
-    """
-    # Arrange:
+
+
+def test_returns_duckdb_result(setup):
+        # Arrange:
     dim_date, table_name, cols, cols_str, buffer = setup
 
-    mock_pq_in_buff = Mock()
-    mock_pq_in_buff.seek = Mock()
-    mock_pq_in_buff.getvalue = Mock()
-    mock_parquet = Mock()
-    mock_pq_in_buff.getvalue.return_value = buffer
-    mock_parquet.fetchall = Mock()
-    mock_parquet.fetchall.return_value = [
-    (1, 'mock_year_1', 'mock_month_1', 'mock_day_1'),
-    (2, 'mock_year_2', 'mock_month_2', 'mock_day_2'),
-    (3, 'mock_year_3', 'mock_month_3', 'mock_day_3'),
-                                        ]
+    conn = duckdb.connect()
 
-    mock_parquet.description = [
-                ["date_id"],
-                ["year"], 
-                ["month"],
-                ["day"]]
+    result = read_parquet_from_buffer(buffer, conn)
 
-    mock_conn = Mock()
-    mock_conn.execute = Mock()
-    mock_conn.execute.return_value = mock_parquet
-
-    # Act:
-    result = read_parquet_from_buffer(mock_pq_in_buff, mock_conn)
-
-    # Assert:
-    result_type = type(result)
-    expected_type = list 
-    assert result_type == expected_type
-
-    mock_pq_in_buff.seek.assert_called_once_with(0)
-    mock_conn.execute.assert_called_once_with("SELECT * FROM parquet_scan(?)", [ANY])
-    mock_parquet.fetchall.assert_called_once()
-    expected = [cols_str, mock_parquet.fetchall.return_value]
-
-    assert result == expected
+    # DuckDB returns DuckDBPyRelation
+    assert hasattr(result, "fetchall")

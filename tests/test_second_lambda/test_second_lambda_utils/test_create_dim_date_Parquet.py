@@ -1,8 +1,12 @@
 import pytest
-import calendar
+import duckdb
+import tempfile
 
 from unittest.mock import patch
-from datetime import datetime, timedelta
+from datetime import datetime 
+from io import BytesIO
+
+
 from src.second_lambda.second_lambda_utils.create_dim_date_Parquet import create_dim_date_Parquet
 
 
@@ -29,20 +33,46 @@ def general_setup():
 
 
 # @pytest.mark.skip
-def test_returns_a_list(general_setup):
+def test_returns_a_buffer(general_setup):
     # Arrange:
     ( start_date, mock_dim_date_py, mock_Parquet, ts, nor, dim_date_key ) = general_setup
     expected = list
 
     # Act:
-    # create_dim_date_Parquet(start_date, timestamp_string: str, num_rows: int)
-    # result = None
-    reponse = create_dim_date_Parquet(start_date, ts, nor)
-    result = type(reponse)
+    result = create_dim_date_Parquet(start_date, ts, nor)
 
     # Assert:
-    assert result == expected 
-    pass
+    assert isinstance(result, BytesIO)
+    
+
+
+# @pytest.mark.skip
+def test_returned_buffer_contains_parquet_file(general_setup):
+    # Arrange:
+    ( start_date, mock_dim_date_py, mock_Parquet, ts, nor, dim_date_key ) = general_setup
+    conn = duckdb.connect()
+    expected = list
+
+    # Act:
+    response = create_dim_date_Parquet(start_date, ts, nor)
+    response.seek(0)
+
+
+    with tempfile.NamedTemporaryFile(suffix=".parquet") as tmp:
+        tmp.write(response.getvalue())  # write BytesIO to file
+        tmp.flush()
+        # NOTE fetchall() returns a 
+        # list of tuples, not the 
+        # original list of 
+        # dictionaries:
+        output = conn.execute("SELECT * FROM parquet_scan(?)", [tmp.name]).fetchall()
+        result = type(output)
+        
+        assert result == expected
+        assert len(output) == 3
+        
+    
+
 
 
 
@@ -69,30 +99,3 @@ def test_calls_functions_correctly(general_setup):
 
         mddp.assert_called_once_with(start_date, nor)
         ctp.assert_called_once_with(mock_dim_date_py, 'dim_date')        
-
-
-
-
-
-# @pytest.mark.skip
-def test_returns_correct_Parquet_file_and_calls_functions_correctly(general_setup):
-    # Arrange:
-    ( start_date, mock_dim_date_py, mock_Parquet, ts, nor, dim_date_key ) = general_setup
-    expected_0 = mock_Parquet
-    expected_1 = dim_date_key
-
-    # Act:
-    with patch('src.second_lambda.second_lambda_utils.create_dim_date_Parquet.make_dim_date_python') as mddp, \
-         patch('src.second_lambda.second_lambda_utils.create_dim_date_Parquet.convert_to_parquet') as ctp: \
-
-        mddp.return_value = mock_dim_date_py            
-        ctp.return_value  = mock_Parquet
-
-        response = create_dim_date_Parquet(start_date, "2025-08-14_12-33-27", 3)
-        result_0 = response[0]
-        result_1 = response[1]
-
-
-        # Assert:
-        assert result_0 == expected_0
-        assert result_1 == expected_1

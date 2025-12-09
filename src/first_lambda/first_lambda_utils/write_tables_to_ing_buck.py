@@ -2,10 +2,8 @@ import json
 import logging
 
 
-from botocore.exceptions import ClientError
-from .errors_lookup import errors_lookup
-
 from .create_formatted_timestamp import create_formatted_timestamp
+from .errors_lookup import errors_lookup
 from .save_updated_table_to_S3 import save_updated_table_to_S3
 
 

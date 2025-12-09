@@ -45,11 +45,11 @@ def make_insert_queries_from_parquet(parquet_buffer, table_name):
     # the buffer:
     DDB_q_result_obj = read_parquet_from_buffer(parquet_buffer, conn)
 
-    # Make a string 
-    # containing all column 
-    # names and a list 
-    # containing tuples 
-    # each of which 
+    # Make a list contaning
+    # 1. a string made up of 
+    # all column names 
+    # 2. a list containing 
+    # tuples each of which 
     # contains row values:
     rows_cols = get_columns_and_rows(DDB_q_result_obj)  # [column_str, rows]
 

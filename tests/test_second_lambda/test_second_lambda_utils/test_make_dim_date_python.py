@@ -115,14 +115,14 @@ def test_returned_list_contains_dicts_of_correct_values(general_setup):
 
 #-------------#-------------#-------------#-------------#-------------#-------------#-------------#-------------
 
-    row = {                                                              # 19Aug25 --HAVE CHECKED THESE:
-                "date_id": start_date.date(),                            # is datetime.date object. In warehouse, must be SQL date
-                "year": start_date.year,                                 # is int. In warehouse, must be SQL INT
-                "month": start_date.month,                               # is int (1 for January). In warehouse, must be SQL INT
-                "day": start_date.day,                                   # is int. In warehouse, must be SQL INT
-                "day_of_week": start_date.weekday() + 1,                 # is int (1 for Monday). In warehouse, must be SQL INT
-                "day_name": calendar.day_name[start_date.weekday()],     # is str (eg 'Monday'). In warehouse, must be SQL VARCHAR
-                "month_name": calendar.month_name[start_date.month],     # is str (eg 'January'). In warehouse, must be SQL VARCHAR
-                "quarter": (start_date.month - 1) // 3 + 1               # is int. In warehouse, must be SQL INT
-              }
+    # row = {                                                              # 19Aug25 --HAVE CHECKED THESE:
+    #             "date_id": start_date.date(),                            # is datetime.date object. In warehouse, must be SQL date
+    #             "year": start_date.year,                                 # is int. In warehouse, must be SQL INT
+    #             "month": start_date.month,                               # is int (1 for January). In warehouse, must be SQL INT
+    #             "day": start_date.day,                                   # is int. In warehouse, must be SQL INT
+    #             "day_of_week": start_date.weekday() + 1,                 # is int (1 for Monday). In warehouse, must be SQL INT
+    #             "day_name": calendar.day_name[start_date.weekday()],     # is str (eg 'Monday'). In warehouse, must be SQL VARCHAR
+    #             "month_name": calendar.month_name[start_date.month],     # is str (eg 'January'). In warehouse, must be SQL VARCHAR
+    #             "quarter": (start_date.month - 1) // 3 + 1               # is int. In warehouse, must be SQL INT
+    #           }
 

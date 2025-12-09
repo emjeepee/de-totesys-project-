@@ -63,7 +63,11 @@ def make_dim_or_fact_table(table_name: str, table_python: list, s3_client, inges
         # requires this extra 
         # data:
         aux_table_name = 'department' if table_name == 'staff' else 'address'           
-        tbl_to_return = make_staff_or_cp_dim_table( table_name, table_python, ingestion_bucket, aux_table_name, s3_client)
+        tbl_to_return = make_staff_or_cp_dim_table( table_name, 
+                                                   table_python, 
+                                                   ingestion_bucket, 
+                                                   aux_table_name, 
+                                                   s3_client)
         
     else:
         # If the table name is 

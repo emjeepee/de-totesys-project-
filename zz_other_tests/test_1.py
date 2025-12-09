@@ -31,3 +31,26 @@
         # strmng_bod_obj = dict_from_s3["Body"]
         # raw_bytes = strmng_bod_obj.read()
         # pq_buff = io.BytesIO(raw_bytes) 
+
+
+    # Determine whether a 
+    # date dimension table 
+    # needs to be created 
+    # and if yes, make it:
+    # should_make_date_dim = make_date_dim_table_if_needed(lookup['proc_bucket'], 
+    #                                               lookup['s3_client'],
+    #                                               lookup['timestamp_string'],
+    #                                               lookup['start_date'],
+    #                                               lookup['num_rows']
+    #                                               )
+
+
+    # if code has made a 
+    # date dimension table, 
+    # put it in the 
+    # processed bucket:
+    # if should_make_date_dim[0]:
+    #     upload_to_s3(lookup['s3_client'], 
+    #                  lookup['proc_bucket'], 
+    #                  should_make_date_dim[2], 
+    #                  should_make_date_dim[1])

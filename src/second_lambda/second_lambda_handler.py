@@ -4,16 +4,19 @@ import logging
 
 from datetime import datetime
 
-from src.second_lambda.second_lambda_utils.create_dim_date_Parquet  import create_dim_date_Parquet
-from src.second_lambda.second_lambda_utils.read_from_s3             import read_from_s3
-from src.second_lambda.second_lambda_utils.convert_to_parquet       import convert_to_parquet
-from src.second_lambda.second_lambda_utils.upload_to_s3             import upload_to_s3
-from src.second_lambda.second_lambda_utils.second_lambda_init       import second_lambda_init
-from src.second_lambda.second_lambda_utils.make_dim_or_fact_table   import make_dim_or_fact_table
-from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline import is_first_run_of_pipeline
-from src.second_lambda.second_lambda_utils.make_date_dim_table_if_needed import make_date_dim_table_if_needed
-from src.second_lambda.second_lambda_utils.should_make_dim_date     import should_make_dim_date
-from src.second_lambda.second_lambda_utils.info_lookup              import info_lookup
+from src.second_lambda.second_lambda_utils.create_dim_date_Parquet          import create_dim_date_Parquet
+from src.second_lambda.second_lambda_utils.read_from_s3                     import read_from_s3
+from src.second_lambda.second_lambda_utils.convert_to_parquet               import convert_to_parquet
+from src.second_lambda.second_lambda_utils.upload_to_s3                     import upload_to_s3
+from src.second_lambda.second_lambda_utils.second_lambda_init               import second_lambda_init
+from src.second_lambda.second_lambda_utils.make_dim_or_fact_table           import make_dim_or_fact_table
+from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline         import is_first_run_of_pipeline
+from src.second_lambda.second_lambda_utils.info_lookup                      import info_lookup
+from src.second_lambda.second_lambda_utils.create_formatted_timestamp       import create_formatted_timestamp
+from src.second_lambda.second_lambda_utils.make_dim_or_fact_table_keystring import make_dim_or_fact_table_keystring
+
+
+
 
 
 root_logger = logging.getLogger()
@@ -144,27 +147,27 @@ def second_lambda_handler(event, context):
                                           # etc
                                           # }    
 
-    # Determine whether a 
-    # date dimension table 
-    # needs to be created 
-    # and if yes, make it:
-    should_make_date_dim = make_date_dim_table_if_needed(lookup['proc_bucket'], 
-                                                  lookup['s3_client'],
-                                                  lookup['timestamp_string'],
-                                                  lookup['start_date'],
-                                                  lookup['num_rows']
-                                                  )
+    # determine whether this 
+    # is the first ever run 
+    # of the pipeline:  
+    is_first_run = is_first_run_of_pipeline(lookup['proc_bucket'],  
+                                            lookup['s3_client'])
 
-    # if code has made a 
-    # date dimension table, 
-    # put it in the 
-    # processed bucket:
-    if should_make_date_dim[0]:
+    if is_first_run:
+        # make Parquet table,
+        # put it in a buffer
+        # and return it:
+        pq_table_in_buff = create_dim_date_Parquet(lookup['start_date'], 
+                                    lookup['timestamp_string'], 
+                                    lookup['num_rows'])
+        
+        ts = create_formatted_timestamp()
+        dim_date_key = f"dim_date/{ts}.parquet"
+
         upload_to_s3(lookup['s3_client'], 
                      lookup['proc_bucket'], 
-                     should_make_date_dim[2], 
-                     should_make_date_dim[1])
-
+                     dim_date_key, 
+                     pq_table_in_buff)
 
 
     # Make the fact table or 
@@ -189,7 +192,7 @@ def second_lambda_handler(event, context):
     # Convert the dim/fact 
     # table into a Parquet 
     # file in a buffer: 
-    pq_file = convert_to_parquet(dim_or_fact_table, 
+    pq_dim_or_fact = convert_to_parquet(dim_or_fact_table, 
                                  lookup['table_name']) # a buffer
 
 
@@ -197,19 +200,17 @@ def second_lambda_handler(event, context):
     # under which to save 
     # the dim/fact table in 
     # the processed bucket:
-    if lookup['table_name'] == "sales_order": 
-        table_key = f"fact_{lookup['table_name']}/{lookup['timestamp_string']}.parquet"    
-    else:
-        table_key = f"dim_{lookup['table_name']}/{lookup['timestamp_string']}.parquet"
-
+    key = make_dim_or_fact_table_keystring(lookup['table_name'],
+                                           lookup['timestamp_string'])
+    
 
     # Put the dim/fact table 
     # Parquet file in the 
     # processed bucket:
     upload_to_s3(lookup['s3_client'], 
                 lookup['proc_bucket'], 
-                table_key, 
-                pq_file)
+                key, 
+                pq_dim_or_fact)
     
 
     # log status:

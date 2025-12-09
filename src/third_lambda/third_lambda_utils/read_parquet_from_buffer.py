@@ -22,7 +22,7 @@ def read_parquet_from_buffer(parq_in_buffer, conn):
     Args:
         parq_in_buffer: a dimension 
         table or the fact table 
-        table in Parquet form in a 
+        in Parquet form in a 
         BytesIO buffer.
 
         conn: a duckdb connection 

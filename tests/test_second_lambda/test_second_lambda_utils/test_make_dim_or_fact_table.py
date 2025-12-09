@@ -31,64 +31,167 @@ def setup():
 
 
         mock_so_table = [
-             {'sales_order_id': 15647, 'created_at': cre_at_iso_1, 'last_updated': las_up_iso_1,  'design_id': 648,  'staff_id': 19,  'counterparty_id': 14, 'units_sold': 62, 'unit_price': Decimal('2.40'), 'currency_id': 2, 'agreed_delivery_date': '2025-08-20', 'agreed_payment_date': '2025-08-16', 'agreed_delivery_location_id': 11},
-             {'sales_order_id': 15648, 'created_at': cre_at_iso_2, 'last_updated': las_up_iso_2,  'design_id': 649,  'staff_id': 2,  'counterparty_id': 1, 'units_sold': 36, 'unit_price': Decimal('4.63'), 'currency_id': 1, 'agreed_delivery_date': '2025-09-20', 'agreed_payment_date': '2025-09-16', 'agreed_delivery_location_id': 12},
+             {'sales_order_id': 15647, 
+              'created_at': cre_at_iso_1, 
+              'last_updated': las_up_iso_1,  
+              'design_id': 648,  
+              'staff_id': 19,  
+              'counterparty_id': 14, 
+              'units_sold': 62, 
+              'unit_price': Decimal('2.40'), 
+              'currency_id': 2, 
+              'agreed_delivery_date': '2025-08-20', 
+              'agreed_payment_date': '2025-08-16', 
+              'agreed_delivery_location_id': 11},
+
+             {'sales_order_id': 15648, 
+              'created_at': cre_at_iso_2, 
+              'last_updated': las_up_iso_2,  
+              'design_id': 649,  
+              'staff_id': 2,  
+              'counterparty_id': 1, 
+              'units_sold': 36, 
+              'unit_price': Decimal('4.63'), 
+              'currency_id': 1, 
+              'agreed_delivery_date': '2025-09-20', 
+              'agreed_payment_date': '2025-09-16', 
+              'agreed_delivery_location_id': 12},
                         ]
 
-        yield mock_so_table, mock_tbl_name_1, mock_tbl_name_2, mock_tbl_name_3, mock_tbl_1, mock_tbl_2, mock_tabl_python, mock_s3_client, mock_ing_bucket 
+        yield (mock_so_table, 
+        mock_tbl_name_1, 
+        mock_tbl_name_2, 
+        mock_tbl_name_3, 
+        mock_tbl_1, 
+        mock_tbl_2, 
+        mock_tabl_python,
+        mock_s3_client, 
+        mock_ing_bucket )
         
 
 
 
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_calls_internal_functions_correctly_when_table_name_is_staff(setup):
     # Arrange:
-    mock_so_table, mock_tbl_name_1, mock_tbl_name_2, mock_tbl_name_3, mock_tbl_1, mock_tbl_2, mock_tabl_python, mock_s3_client, mock_ing_bucket = setup
+    ( mock_so_table, 
+     mock_tbl_name_1, 
+     mock_tbl_name_2, 
+     mock_tbl_name_3, 
+     mock_tbl_1, 
+     mock_tbl_2, 
+     mock_tabl_python, 
+     mock_s3_client, 
+    mock_ing_bucket) = setup
+
     expected = ['staff_dim_table']
 
+    path_to_msocdt = ('src.second_lambda.'
+                      'second_lambda_utils.'
+                      'make_dim_or_fact_table.'
+                      'make_staff_or_cp_dim_table'
+                      )
+
+    path_to_flt = ('src.second_lambda.'
+                    'second_lambda_utils.'
+                    'make_dim_or_fact_table.'
+                    'func_lookup_table')
 
     # Act:
-    with patch('src.second_lambda.second_lambda_utils.make_dim_or_fact_table.make_staff_or_cp_dim_table') as mock_msocdt, \
-        patch('src.second_lambda.second_lambda_utils.make_dim_or_fact_table.func_lookup_table') as mock_flt: 
+    with patch(path_to_msocdt) as mock_msocdt, \
+        patch(path_to_flt) as mock_flt: 
         mock_msocdt.return_value = ['staff_dim_table']
-        result = make_dim_or_fact_table(mock_tbl_name_1, mock_tabl_python, mock_s3_client, mock_ing_bucket)
-        mock_msocdt.assert_called_once_with(mock_tbl_name_1, mock_tabl_python, mock_flt, mock_ing_bucket, 'department', mock_s3_client)
+
+        result = make_dim_or_fact_table(mock_tbl_name_1, 
+                                        mock_tabl_python, 
+                                        mock_s3_client, 
+                                        mock_ing_bucket)
+        
+        mock_msocdt.assert_called_once_with(mock_tbl_name_1, 
+                                            mock_tabl_python, 
+                                            mock_ing_bucket, 
+                                            'department', 
+                                            mock_s3_client)
         assert result == expected
 
 
-@pytest.mark.skip
+# s@pytest.mark.skip
 def test_makes_calls_to_internal_functions_correct_when_table_name_is_counterparty(setup):
     # Arrange:
-    mock_so_table, mock_tbl_name_1, mock_tbl_name_2, mock_tbl_name_3, mock_tbl_1, mock_tbl_2, mock_tabl_python, mock_s3_client, mock_ing_bucket = setup
+    (mock_so_table, 
+     mock_tbl_name_1, 
+     mock_tbl_name_2, 
+     mock_tbl_name_3, 
+     mock_tbl_1, 
+     mock_tbl_2, 
+     mock_tabl_python, 
+     mock_s3_client, 
+     mock_ing_bucket) = setup
+    
     expected = ['counterparty_dim_table']
 
+    path_to_msocdt = ('src.second_lambda.'
+                      'second_lambda_utils.'
+                      'make_dim_or_fact_table.'
+                      'make_staff_or_cp_dim_table'
+                      ) 
+       
+    path_to_flt = ('src.second_lambda.'
+                    'second_lambda_utils.'
+                    'make_dim_or_fact_table.'
+                    'func_lookup_table')
 
     # Act:
-    with patch('src.second_lambda.second_lambda_utils.make_dim_or_fact_table.make_staff_or_cp_dim_table') as mock_msocdt, \
-        patch('src.second_lambda.second_lambda_utils.make_dim_or_fact_table.func_lookup_table') as mock_flt: 
+    with patch(path_to_msocdt) as mock_msocdt, \
+        patch(path_to_flt) as mock_flt: 
         mock_msocdt.return_value = ['counterparty_dim_table']
-        result = make_dim_or_fact_table(mock_tbl_name_2, mock_tabl_python, mock_s3_client, mock_ing_bucket)
+        result = make_dim_or_fact_table(mock_tbl_name_2, 
+                                        mock_tabl_python, 
+                                        mock_s3_client, 
+                                        mock_ing_bucket)
 
         # Assert:
-        mock_msocdt.assert_called_once_with(mock_tbl_name_2, mock_tabl_python, mock_flt, mock_ing_bucket, 'address', mock_s3_client)
+        mock_msocdt.assert_called_once_with(mock_tbl_name_2, 
+                                            mock_tabl_python, 
+                                            mock_ing_bucket, 
+                                            'address', 
+                                            mock_s3_client)
         assert result == expected
 
 
 # @pytest.mark.skip
 def test_makes_calls_to_internal_functions_correct_when_table_name_is_location(setup):
     # Arrange:
-    mock_so_table, mock_tbl_name_1, mock_tbl_name_2, mock_tbl_name_3, mock_tbl_1, mock_tbl_2, mock_tabl_python, mock_s3_client, mock_ing_bucket = setup
+    (mock_so_table, 
+     mock_tbl_name_1, 
+     mock_tbl_name_2, 
+     mock_tbl_name_3, 
+     mock_tbl_1, 
+     mock_tbl_2, 
+     mock_tabl_python, 
+     mock_s3_client, 
+     mock_ing_bucket) = setup
+    
     expected = ['location_dim_table']
+
+    path_to_flt = ('src.second_lambda.'
+                    'second_lambda_utils.'
+                    'make_dim_or_fact_table.'
+                    'func_lookup_table')
+    
 
 
     # Act:
-    with patch('src.second_lambda.second_lambda_utils.make_dim_or_fact_table.func_lookup_table') as mock_flt: 
+    with patch(path_to_flt) as mock_flt: 
         mock_flt_returned_func = Mock()
         mock_flt_returned_func.return_value = ['location_dim_table']
         mock_flt.return_value = mock_flt_returned_func
-        result = make_dim_or_fact_table(mock_tbl_name_3, mock_tabl_python, mock_s3_client, mock_ing_bucket)
+        result = make_dim_or_fact_table(mock_tbl_name_3, 
+                                        mock_tabl_python, 
+                                        mock_s3_client, 
+                                        mock_ing_bucket)
 
         # Assert:
         mock_flt.assert_called_once_with(mock_tbl_name_3)
@@ -103,7 +206,15 @@ def test_makes_calls_to_internal_functions_correct_when_table_name_is_location(s
  # @pytest.mark.skip
 def test_returns_fact_table_correctly(setup):
     # Arrange:
-    mock_so_table, mock_tbl_name_1, mock_tbl_name_2, mock_tbl_name_3, mock_tbl_1, mock_tbl_2, mock_tabl_python, mock_s3_client, mock_ing_bucket = setup
+    (mock_so_table, 
+     mock_tbl_name_1, 
+     mock_tbl_name_2, 
+     mock_tbl_name_3, 
+     mock_tbl_1, 
+     mock_tbl_2, 
+     mock_tabl_python, 
+     mock_s3_client, 
+     mock_ing_bucket) = setup
 
         # cre_at_iso_1 = datetime(2025, 8, 13, 9, 47, 9).isoformat()
         # cre_at_iso_2 = datetime(2025, 8, 13, 9, 47, 9).isoformat()
@@ -150,7 +261,10 @@ def test_returns_fact_table_correctly(setup):
 
     # Act:
     # make_dim_or_fact_table(table_name: str, table_python: list, s3_client, ingestion_bucket: str)
-    response = make_dim_or_fact_table('sales_order', mock_so_table, mock_s3_client, mock_ing_bucket)
+    response = make_dim_or_fact_table('sales_order', 
+                                      mock_so_table, 
+                                      mock_s3_client, 
+                                      mock_ing_bucket)
     result_c_time  = response[0]["created_time"]
     result_lu_time = response[0]["last_updated_time"]
 
