@@ -1,17 +1,21 @@
+import os
+import logging
+
+from dotenv import load_dotenv
+
 from src.first_lambda.first_lambda_utils.read_table                  import read_table
 from src.first_lambda.first_lambda_utils.get_data_from_db            import get_data_from_db
 from src.first_lambda.first_lambda_utils.write_tables_to_ing_buck    import write_tables_to_ing_buck
 from src.first_lambda.first_lambda_utils.change_after_time_timestamp import change_after_time_timestamp
 from src.first_lambda.first_lambda_utils.get_env_vars                import get_env_vars
 from src.first_lambda.first_lambda_utils.reorder_list                import reorder_list
-from src.first_lambda.first_lambda_utils.errors_lookup               import errors_lookup
 from src.first_lambda.first_lambda_utils.info_lookup                 import info_lookup
 from src.first_lambda.first_lambda_utils.is_first_run_of_pipeline    import is_first_run_of_pipeline
 from src.first_lambda.first_lambda_utils.write_tables_to_ing_buck    import write_tables_to_ing_buck
 from src.first_lambda.first_lambda_utils.make_updated_tables         import make_updated_tables
 
 
-import logging
+
 
 
 root_logger = logging.getLogger()
@@ -67,6 +71,17 @@ def first_lambda_handler(event, context):
     Returns:
         None
     """
+
+    # The .env file sets 
+    # WHAT_ENV to "dev". The 
+    # Lambda resource block in 
+    # the child module's 
+    # main.tf file sets it to 
+    # "prod":
+    if os.environ.get("WHAT_ENV") == "dev":
+        load_dotenv(override=True)
+
+
     root_logger.info(info_lookup['info_0'])
 
     if event is None:

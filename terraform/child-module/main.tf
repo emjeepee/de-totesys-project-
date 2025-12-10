@@ -40,6 +40,22 @@
 
 locals {
   common_env_vars = {
+
+    # set env var WHAT_ENV
+    # to "dev" on the local 
+    # machine for development. 
+    # Code at the top of the 
+    # first lambda handler 
+    # runs non-standard 
+    # library dotenv's 
+    # load_env() if the value 
+    # of WHAT_ENV is "dev". 
+    # The same code does 
+    # nothing when the value 
+    # of WHAT_ENV is anything 
+    # else:
+    WHAT_ENV="prod"
+
     # OLAP_OK has value True 
     # if the totesys database 
     # still contains valid info, 
