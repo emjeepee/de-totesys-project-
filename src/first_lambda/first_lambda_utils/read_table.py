@@ -145,13 +145,12 @@ def read_table(table_name: str, conn: Connection, after_time: str):
         cleaned_rows = convert_values(query_result_1) 
 
    
-        # Make a dictionary for each
-        # updated row where the 
-        # key-value pairs of each
-        # dictionary represent 
-        # <column-name>: <cell-value>:
+        # Make a dictionary for 
+        # each updated row where
+        # the key-value pairs of
+        # each dictionary represent 
+        # <column-name>: <field-value>:
         row_list_of_dicts = make_row_dicts(clean_col_names, cleaned_rows)
-        # row_data looks like this:
         # [ ... 
         #   {"design_id": 6,  "name": "aaa",  "value": 3.14,  "date": '2024-05-01T10:30:00.123456', etc},         
         #   {"design_id": 7,  "name": "bbb",  "value": 3.15,  "date": '2024-06-01T10:30:00.123456', etc},

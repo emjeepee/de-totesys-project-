@@ -42,11 +42,22 @@ def get_updated_rows(conn_obj, after_time: str, table_name: str):
     
     """
     
+    # Select all columns (*) from table table_name.
+	# Return rows where last_updated is later than time after_time
+	# Return at most 20 rows.
+	# :after_time is a named parameter:
+    # query = f"SELECT * FROM {table_name} WHERE last_updated > :after_time LIMIT 20;"
 
-    query = f"SELECT * FROM {table_name} WHERE last_updated > :after_time LIMIT 20;"
+    # Same as above but 
+    # without a limit for 
+    # the number of rows:
+    query = f"SELECT * FROM {table_name} WHERE last_updated > :after_time ;"
 
     try: 
-        response = conn_obj.run(query, after_time=after_time)
+        # send the SQL query 
+        # to postgresql database 
+        # totesys:
+        response = conn_obj.run(query, after_time=after_time) # [[...], [...], etc]
         # log status:
         return response
     

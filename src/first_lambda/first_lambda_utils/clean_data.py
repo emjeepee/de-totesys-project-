@@ -1,5 +1,7 @@
-from .make_data_json_safe import make_data_json_safe
+import copy
 
+from .make_data_json_safe import make_data_json_safe
+from .change_vals_to_strings import change_vals_to_strings
 
 
 
@@ -14,12 +16,18 @@ def clean_data(table, table_dict):
         a the last run of this 
         pipeline.
 
-        2. changes field data in
-        the rows such that 
+        2. makes field data in
+        the rows json safe (to
+        allow a later function 
+        to put the table into 
+        the ingestion bucket in 
+        json form). This means 
+        changing
         datetime.datetime objects
-        become iso strings and
+        to iso strings 
+        and
         decimal.Decimal objects 
-        become strings.
+        to strings.
 
         
     args:
@@ -34,17 +42,18 @@ def clean_data(table, table_dict):
         row of the table. Each
         row contains field data 
         that database totesys has 
-        updated since the last run 
-        of this pipeline.
+        updated since the last 
+        run of this pipeline.
  
 
 
     returns:
         a dictionary with sole key
-        "table", whose value is a list
-        of dictionaries, each 
+        is the name of a table and 
+        whose value is a list of 
+        dictionaries, each 
         dictionary representing a 
-        row of table table if that row 
+        row of the table if that row 
         contains updated field data.
         The field data in the row is 
         now clean (ie of the correct 
@@ -56,7 +65,11 @@ def clean_data(table, table_dict):
     # change 
     # datetime.datetime objs ->  iso strings
     # decimal.Decimal obj -> strings:
-    clean_table_list = make_data_json_safe(table_dict[table]) # [{<updated-row data>}, {<updated-row data>}, etc]
-    clean_table_dict = {table: clean_table_list}
 
-    return clean_table_dict
+    lst_deep_copy = copy.deepcopy(table_dict[table]) # [{...}, {...}, {...}, etc]
+    for dct in lst_deep_copy:
+        for ky, val in dct.items(): 
+            change_vals_to_strings(ky, val, dct)
+
+    return  {table: lst_deep_copy} 
+

@@ -139,277 +139,159 @@ To carry this out the following occurs: <br>
 
 ### Operation of the first lambda function   <br> <br>
 
-The first lambda function <br><br>
-**1)** calls function `get_env_vars()`, which creates a lookup table of values that the first lambda function requires, such as a pg8000.Native Connection object, which the first lambda function needs to connect to the totesys OLTP database.
+Operation of the first lambda function
+-------------------------------------------------
+The first lambda function: 
 
-**2)** calls function `change_after_time_timestamp()`. <br>
-`change_after_time_timestamp()` tries to read the timestamp string stored in the ingestion bucket. <br>
-If it succeeds it returns that string. <br>
-If it fails it returns the default timestamps string, which represents the year 1900 ("1900-01-01T00-00-00"). <br>
+1)
+Checks the value of environment variable WHAT_ENV. If the value is “dev” then code employs library dotenv (which behind the scenes emloys os.environ) to load all environmnet variables from the .env file. If the value is “prod” (which it will be in AWS Lambda because the Lambda resource block of the Terraform child module’s main.tf file sets the value to “prod”)
+
+2) Runs  lookup = get_env_vars(), which creates a lookup table that contains various values the first lambda hanler will employ, eg a boto3 S3 client object and a the names of the ingestion and processed buckets.
 
 
-**3)** calls function `get_data_from_db()`. <br>
-`get_data_from_db()` employs a loop in which it calls function `read_table()` on every table name.
+3) calls change_after_time_timestamp()
+This tries to read the timestamp string stored in the ingestion bucket.
+If it succeeds it returns that string.
+If it fails it returns the default timestamps string, which represents the year 1900 ("1900-01-01T00-00-00")
 
-**4)** In the loop, `read_table()` does this for each table: <br>
 
-At this point the first lambda function behaves differently depending on the boolean value of environment variable IS_OLTP_OK. <br>
-Database totesys stopped containing data of interest in November 2025, so the behaviour of function `read_table()` has to take this into account. <br>
+4) The first lambda function then calls function get_data_from_db(),
+which employs a loop in which it calls read_table() on every table name.
 
-After November 2025 IS_OLTP_OK is set to False. This makes function `read_table()` create fake tables. <br>
-Before November 2025 IS_OLTP_OK is set to True. This makes function `read_table()` read real tables from OLTP database totesys. <br>
- <br>
-If IS_OLAP_OK is True:  <br>
+3) 
+read_table(table, conn, after_time)behaves differently depending on the value of environment variable 
+IS_OLTP_OK. This environment variable has value True for when database totesys contains useful data (pre-Nov2025) or False for when database totesys no longer contains useful data (post-Nov2025).   
 
-<br>
-
-**i)** function `read_table()` calls function `get_column_names()`. 
-<br>
-
-`get_column_names()` makes an SQL query to database totesys to get the column names of the table in question. <br>
-This function returns a lists of lists, each member list containing one string, which is a column name. 
-<br>
-
-**ii)** calls function `get_updated_rows()`. 
-<br>
-
-`get_updated_rows()` makes an SQL query to the totesys database to get those rows of the table in question that have been updated after the time indicated in the timestamp returned by function `change_after_time_timestamp()`. <br> 
-<br>
-This function returns a lists of lists, each member list representing a row. In the first ever run of the pipeline, this function retrieves all of the rows of a table. 
-<br>	
-<br>
-
-**iii)** Changes the columns list of lists to a list of strings, like this: <br>
-	['name', 'location', etc] 
-<br>
-
-**iv)** calls function `convert_values()`.
-	`convert_values()` changes cell value types like this: 
-<br>
-	 datetime.datetime object -> ISO string
-     Decimal value            -> float
-     json                     -> string
-<br>
-
-**v)** calls function `make_row_dicts()` to make a list of row data like this: <br>
-
-`	[ 
-   {"design_id": 6,  "name": "aaa",  "value": 3.14,  "date": '2024-05-01T10:30:00.123456', etc},         
-   {"design_id": 7,  "name": "bbb",  "value": 3.15,  "date": '2024-06-01T10:30:00.123456', etc},
-    #   etc 
-	]
-`	
-
-<br>
-
-**vi)** makes the list of rows the value of a dictionary key that is the name of the table, like this: <br>
-<br> 
- `{ "sales_order”: # ‘sales_order’ is name of the table
+When the value of  IS_OLTP_OK is True:
+In the loop, read_table() does this for each table:
+	i) calls get_column_names(conn, table_name), which makes an SQL 
+	query to the totesys database to get the column names of the table in 
+	question. 
+	This function returns a lists of lists, each member list 
+	containing one member, a string for a column name
+ 	ii) calls get_updated_rows(conn_obj, after_time, table_name), 
+	which makes an SQL query to the totesys database to get the rows of the
+	table in question that have been updated after time after_time. 
+	This function returns a lists of lists, each member list representing a row and 
+	containing field values. In the first ever run of the pipeline, this function   
+	retrieves all of the rows of a table.
+	iii) Changes the columns list of lists to a list of strings, like this:
+	[‘xxx’_id, 'location', etc]
+	iv) calls convert_values() to change cell value types like this:
+	# datetime.datetime object -> ISO string
+     # Decimal value            -> float
+     # json                     -> string:
+	v) calls make_row_dicts(clean_col_names, cleaned_rows)
+	 to make a list of rows like this:
+    	 [ 
+   {"design_id": 6,  "name": "aaa", etc},         
+   {"design_id": 7,  "name": "bbb", etc},
+    #   etc ]
+	and to return the list of rows in a dictionary as the value of a key that is the name of the table like this:
+ { "sales_order”: # ‘sales_order’ is name of the table
 	[  
-{"Name": "xx", "Month": "January", “sales”_id”: 3, etc}, <-a row
-{"Name": "yy", "Month": "January", "sales”_id": 4, etc}, <-a row
-{"Name": "zz", "Month": "January", "sales”_id": 9, etc}, <-a row
+{"Name": "xx", "Month": "January", “sales”_id”: 3, etc},#a row
+{"Name": "yy", "Month": "January", "sales”_id": 4, etc},#a row 
+{"Name": "zz", "Month": "January", "sales”_id": 9, etc},#a row 
     etc
      ] 
- }`
- <br>
+ }
+	vi) returns the dict above
 
-**vii)** returns the dictionary above.
+When the value of  IS_OLTP_OK is True:
+In the loop, read_table() creates fake tables and returns  dictionary  {table_name: row_list_of_dicts}
 
-<br>
+In the same loop get_data_from_db() calls clean_data(table, table_dict), which calls converts datetime.datetime objects
+into iso strings and converts decimal.Decimal objects into strings (ie making the data json safe), and appends the cleaned dict (ie the dict in code 1 above) to a list. get_data_from_db() returns that list.
+On the first ever run of the first lambda function the list will contain 
+every table and every row of each table. 
+On subsequent runs of the first lambda function the list will more likely contain 
+less than all of the tables (only the ones containing data that database totesys has changed since the last run of this pipeline) and within those tables only the updated rows (so most likely not all of the rows):
 
-Function read_table() then makes the list of dictionaries the value of a key in a dictionary. The key is the name of the table in question.
-<br>
-In the same loop function `get_data_from_db()` appends the dict returned by read_table() to a list.
-<br>
-On the first ever run of the first lambda function the list will contain every table and every row of each table. 
-<br>
-On subsequent runs of the first lambda function the list will more likely contain dictionaries for less than all of the tables (only the ones that have had rows updated) and each list in such a dictionary will contain only the updated rows of the table (most likely not all of the rows):
-<br>
-Function `get_data_from_db()` then returns this dict:
-`	[ 
+get_data_from_db() returns a list like this:
+	[ 
   {sales_orders: [{...}, {...}, etc}]},
   {design: 	  [{...}, {...}, etc}]},
 	etc
 	]
-`
-<br>
-
-If IS_OLAP_OK is False:  <br>
-
-Function `read_table()` calls function `make_fake_xx_table()`,  where xx is one of so, de, ad, st, cu, cp, dp. Function `make_fake_xx_table()` makes a fake version of the table in question. For example `make_fake_cp_table()` makes a fake counterparty table. <br>
-
-Function 'read_table()' then returns the table in a dictionary, for example: <br>
-{'design': -*-list of design table rows here-*-}  <br>
-
-
-Still in the loop, function `get_data_from_db()` calls function `make_data_json_safe()`, which converts data in the table into a form that allows its conversion to json.  <br>
-
-Function `get_data_from_db()` then appends the table to a list and returns the list, which looks like this: <br>
-`[{'design': [{<updated-row data>}, etc]}, {'sales_order': [{<updated-row data>}, etc]}, etc]` <br>
-
-The first lambda handler then:  <br>
-
-4) Calls function `write_to_s3()`, passing in the list of dictionaries returned by `get_data_from_db()`.
-<br>
-
-`write_to_s3()` 
-<br>
 
 
 
-`write_to_s3()` then loops through the dictionaries passed in and for each determines whether one or more tables of the same name already exist in the ingestion bucket and: 
-<br>
-	i)  if no such table exists already that means this is the first ever run of the pipeline, so `write_to_s3()` jsonifies the list in each dictionary (ie this list:  <br>
-<br>	
+5) calls reorder_list(
+                new_table_data, 
+                "address", 
+                "department")
+where new_table_data is the list that get_data_from_db() returned.
+reorder_list() puts the address table and department table at the top of the list if they are present in that list.
 
-` [  
-{"sales_order_id": 1, "Name": "xx xx", "Month": "January", etc},  #a row
-{"sales_order_id": 2, "Name": "yy yy", "Month": "January", etc},  #a row 
-{"sales_order_id": 3, "Name": "zz zz", "Month": "January",  etc}, #a row 
-    etc  
- ] `
-	 
-for example)	 <br>
-<br>	 
-	and saves it in the ingestion bucket under the key timestamp/table-name.json <br>
+6) runs is_first_run = is_first_run_of_pipeline(). That function lists the objects in the processed bucket. If there are some this function returns false (meaning that this is the 2nd-plus run of the pipeline), if there are none (meaning this is the first ever run of the pipline), this function returns True.
 
-ii)  if such a table already exists in the ingestion bucket that means this is the 2nd-plus run of the pipeline, so the list in the dictionary contains only     updated rows of the table in question. <br>
+7) If is_first_run is True the first lambda handler calls 
+write_tables_to_ing_buck(lookup['s3_client'], 
+                                lookup['ing_bucket_name'],
+                                data_for_s3
+                                ) to save the table in the ingestion bucket in json format.
 
-So `write_to_s3()` calls function `write_to_ingestion_bucket()`. 	<br>
+Function write_tables_to_ing_buck() calls create_formatted_timestamp() to make a timestamp, then calls save_updated_table_to_S3() to put the table in the ingestion bucket under a key that includes the timestamp and in json format.
 
-`write_to_ingestion_bucket()` reads from the ingestion bucket the most recent table of the given name, updates the appropriate rows in latest_table and saves the table as a new table in the ingestion bucket under the key timestamp/table-name.json. The pre-existing table remains in the ingestion bucket. <br>
+If is_first_run is False the first lambda handler calls 
+make_updated_tables(data_for_s3, 
+                        lookup['s3_client'], 
+                        lookup['ing_bucket_name’]),
+which calls get_most_recent_table_data(), which calls get_latest_table()
 
-The table stored under that key looks like a jsonified version of this: <br>
+data_for_s3 contains representations of tables and their updated rows only.
 
-`		       [  
-{"Name": "xx", "Month": "January", “sales”_id”: 1, etc},#a row
-{"Name": "yy", "Month": "January", "sales”_id": 2, etc},#a row 
-{"Name": "zz", "Month": "January", "sales”_id": 3, etc},#a row 
-    etc
-     	   ]
-`
+For each table in data_for_s3, make_updated_tables() gets the lastest all-rows version of that table in the ingestion bucket and updates its rows with the rows in data_for_s3. make_updated_data() then returns a dictionary that looks like this:
+          [
+          {'design': [{row}, {row}, {row}, etc]},
+          {'sales_order': [{row}, {row}, {row}, etc]},
+          etc
+          ]
+The list that is the value of the key ‘design’, for example, contains all rows of the design table now containing updated rows. 
 
- <br>	     
-
-ie it’s just the table data, not the name of the table.   <br>
-The name of the table is in the key (along with the timestamp).   <br>
-The table contains all rows, some of which will have been updated.   <br>
-The previous table remains in the ingestion bucket.	 <br>
-
-When the first lambda puts a table in the ingestion bucket, AWS S3 sends an event to the second lambda, which triggers it.
+The first lambda handler then calls  write_tables_to_ing_buck() to save the each table in the list above to the ingestion bucket under a new key and as a jsonified dictionary. In this way the previous versions of each table remain in the ingestion bucket.
  
+8) calls   lookup['close_db'](lookup['conn’]), which closes the connection to database totesys.
+
+When the first lambda handler puts a new table (with updated rows) in the ingestion bucket, AWS S3 triggers the second lambda.
+
+
+Operation of the second lambda function
+------------------------------------------------------
+second_lambda_handler(event, context) 
+1) runs in response to an event sent by AWS S3 to the second lambda when the first lambda has put a table into the ingestion bucket (in the form of a .json file).
+
+2) calls second_lambda_init() to create a lookup table in the form of a dictionary from which it can access values that the second lambda handler requires.
+
+3) determines whether the table just put into the ingestion bucket is the department table. If so the second lambda handler stops running because it has no need to create a department dimension table.
+
+4) if the table just put into the ingestion bucket is NOT the department table 
+the first lambda handler calls read_from_s3() to retrieve that table from the ingestion bucket. The table is in the form of data in json format. The second lambda handler converts the table into a list.
+
+5) calls is_first_run = is_first_run_of_pipeline(lookup['proc_bucket'],                                            lookup['s3_client']) to determine whether this is the first ever run of the pipeline. is_first_run_of_pipeline() does just as the function of the same name that is a first lambda handler utility function does. 
+
+6) If this is the first ever run of the pipeline calls create_dim_date_Parquet()
+to convert the table into a Parquet file in a BytesIO buffer. 
+calls make_dim_date_python(), makes a date dimension table, which 
+create_dim_date_Parquet() returns.
+
+7) calls upload_to_s3() to save the date dimension table (which is in the form of Parquet data in a BytesIO buffer) to the processed bucket.
 
 
 
+8) If this is the 2nd-plus run of the pipeline the second lambda handler calls make_dim_or_fact_table(), which returns a dimension table or the fact table. 
 
-### Operation of the second lambda function <br>
-<br>
+If the table name is ‘staff’ or ‘counterparty’ make_dim_or_fact_table() calls make_staff_or_cp_dim_table(), which returns either the staff dimension table or the counterparty dimension table. 
 
-The second lambda handler <br>
-1) runs in response to the event it received from AWS S3 when the first lambda has put a table into the ingestion bucket.   <br>
-2) calls second_lambda_init() to create a lookup table in the form of a dictionary. Functions that the second lambda handler calls employ values they obtain from the lookup table.  <br> 
-3) receives info about which table the first lambda just saved in the ingestion bucket in parameter events   <br>
-4) calls function `read_from_s3()` to retrieve that table from the ingestion bucket. The second lambda handler then converts the data from json format to a python list that looks like this:   <br>
-
-`		       [  
-{"Name": "xx", "Month": "January", “sales”_id”: 1, etc},#a row
-{"Name": "yy", "Month": "January", "sales”_id": 2, etc},#a row 
-{"Name": "zz", "Month": "January", "sales”_id": 3, etc},#a row 
-    etc
-     	   ]
-`
-<br>
-
-5) calls function `should_make_dim_date()`, which determines whether this is the first ever run of the pipeline. If it is, `should_make_dim_date()` creates a date dimension table and puts it in the processed bucket. <br>
-`should_make_dim_date()` calls  <br>
-&nbsp;&nbsp;&nbsp;&nbsp; function `is_first_run_of_pipeline()`, which determines whether the processed bucket is empty (which would mean that it is the first ever run of the pipeline). This function returns True if it is the first ever run of the pipleline, in which case  <br>
-&nbsp;&nbsp;&nbsp;&nbsp; should_make_dim_date() also calls  <br>
-
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; function `create_dim_date_Parquet()`, which calls:  <br>
-
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;&nbsp; function `make_dim_date_python()` to make the date dimension table <br>
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;&nbsp; calls function convert_to_parquet(), which converts the date dimension table to Parquet form, puts it in a BytesIO buffer and returns the buffer.  <br>
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;&nbsp; calls function `make_column_defs()`, which makes a string of column names,  <br>
-	
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;&nbsp; calls function `make_parts_of_insert_statements()`,  which makes parts of insert statements that this function will use to create a DuckDB table from the Python list table.  <br>
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;&nbsp; calls function `put_pq_table_in_temp_file()`, which creates a DuckDB database, creates the Parquet file in it and calls function `write_parquet_to_buffer()`, which writes the Parquet file to a BytesIO buffer and returns the buffer, which convert_to_parquet() returns.  <br>
-
-&nbsp;&nbsp;&nbsp;&nbsp; `create_dim_date_Parquet()` then creates a key for the Parquet-in-buffer and returns it and the key as members of a list.
-&nbsp;&nbsp;&nbsp;&nbsp; `should_make_dim_date()` then calls function `upload_to_s3()` to save the Parquet-in-buffer to the processed bucket.  <br>
-
-6) calls function `make_dim_or_fact_table()`, which creates the fact table if the table name is 'sales_order' and makes a dimension table if the table name is anything else.  <br>
-
-If the table name is 'staff', making a staff dimension table needs special attention because that table needs information from the 'department' table, so `make_dim_or_fact_table()` calls function `make_staff_or_cp_dim_table()`, which gets the 'department' table from the ingestion bucket, takes the required information from it. creates the 'staff' dimension table and returns it.  <br>
-
-Similarly if the table name is 'counterparty', the function gets the address table, retrieves information from it and makes the counterparty dimension table and returns it.  <br>
-
-The table takes the usual form: [{<row-data>}, {<row-data>}, {<row-data>}, etc], without the table name.  <br>
-
-7) calls `convert_to_parquet()` directly to convert the dimension/fact table to Parquet form inside an IOBytes buffer.
-	convert_to_parquet(data) (where data is a list representing either a 
-	dimension table or the fact table) follows this procedure:
-	1) takes values out of the table represented by python list data
-	2) makes insert statement strings from those values. the insert statements are 	necessary to put the data into a table in duckdb and dave the table in duckdb 
-	in Parquet format.
-	3) saves the duckdb Parquet table in and IObytes buffer.
-	To achieve 1) to 3) convert_to_parquet(data) calls these functions:
-	make_column_defs(data), which makes a string of column names
-	make_insert_statements(data), which is badly names and actually 
-	makes parts of the insert statements
-	convert_to_parquet(data) then makes temporary file path tmp_path
-	put_pq_table_in_temp_file(), which makes the Parquet table and 
-	puts it in the temporary file path.
-	write_parquet_to_buffer(tmp_path), which makes a BytesIO()
-	buffer, opens the Parquet file in tmp_path and saves the Parquet file into the
-	buffer, then deletes tmp_path and returns the buffer
-	convert_to_parquet(data) then returns the buffer
-	
-8) makes the appropriate key for the table, either:  <br>
-	i) fact_sales_order/<timestamp-here>.parquet  <br>
-		or  <br>
-	ii) dim_design/<timestamp-here>/.parquet   <br>
-9) Calls function `upload_to_s3()` to save the table (now in Parquet form in a buffer) to the processed bucket under the appropriate key  <br>
-10) Putting the table in the processed bucket makes S3 trigger the third lambda function.  <br>
- <br>
+To create the staff dimension table this function must get data from the latest department table in the ingestion bucket. It retrieves that table and calls func_lookup_table(table_name). which returns function transform_to_dim_staff()
+make_staff_or_cp_dim_table()calls transform_to_dim_staff(), which makes and returns the staff dimension table. It calls make_dictionary(), a helper function. 
 
 
-
-Operation of the third lambda function  <br>
---------------------------------------  <br>
-The third lambda handler
-1) receives information about which table the second lambda handler just saved in the ingestion bucket in parameter events and calls xxxx()  <br>
+To create the counterparty dimension table this function must get data from the latest address table in the ingestion bucket. It retrieves that table and calls func_lookup_table(table_name). which returns function transform_to_dim_counterparty()
+make_staff_or_cp_dim_table()calls transform_to_dim_staff(), which makes and returns the staff dimension table. It calls make_dictionary(), a helper function. 
 
 
-
-3) calls function `make_insert_queries_from_parquet()`, which makes a list of INSERT SQL query strings to direct at the data warehouse to insert row data into table in question in the warehouse.  <br>
-
-`make_insert_queries_from_parquet()` calls <br>
-
-`read_parquet_from_buffer()`, which returns [conn, columns, column_str, rows],  <br>
-where conn is a Duckdb in-memory database  <br>
-columns is a list of column names, eg  <br>
-`				['xx', 'yyy', 'zzz', 'abcdef'] 
-				column_str is a comma-seprated string of col names, eg
-				'xx, yyy, zzz, abcdef'] 
-`  <br>
-rows is a list of tuples, each tuple containing row data, eg  <br>
-`				[ 
-					(1,  'xxx',   75.50)  	,
-		               (2,  'yyy',   82.00),
-				     (3,  'zzz',   69.75),
-	        			  etc
-			     ]
-`   <br>		
-
-`make_insert_queries_from_parquet()` then calls <br>
-`make_list_of_query_strings()`, which generates a list of SQL INSERT statements. <br>
-`make_list_of_query_strings()`, employs a loop inside which it calls:  <br>
-		
-`make_list_of_formatted_row_values()`, which employs a loop inside which is a call to  <br>
-`format_value(value)`, which formats the values of each row so that they can be put inside an SQL INSERT string.
-			
-4) calls `make_SQL_queries_to_warehouse()`, which reads the list of SQL queries and makes the queries to the warehouse, thus putting the row data in the appropriate table in the warehouse. Each table in the warehouse may have several versions of a particular row, each version showing data that was current when the row was written to the table in the warehouse.
 	  
  <br><br><br>
 

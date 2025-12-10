@@ -1,3 +1,9 @@
+
+# OLD CODE:
+# clean_table_list = make_data_json_safe(table_dict[table]) # [{<updated-row data>}, {<updated-row data>}, etc]
+
+
+
     # should_make_dim_date(is_first_run_of_pipeline, 
     #                     create_dim_date_Parquet, 
     #                     upload_to_s3, 
