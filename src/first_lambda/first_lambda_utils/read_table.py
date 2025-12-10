@@ -137,7 +137,7 @@ def read_table(table_name: str, conn: Connection, after_time: str):
         clean_col_names = [col[0] for col in query_result_2] # ['name', 'location', etc]
 
 
-        # convert cell values in the 
+        # convert field values in the 
         # updated rows llike this: 
         # datetime.datetime object -> ISO string
         # Decimal value            -> float
