@@ -12,7 +12,6 @@ def test_changes_datetime_to_iso_string():
     ky = "col_1"
     val = datetime(2025, 11, 13)
     dct = {ky: val}
-    expected_fail = "artechoke"
     expected = "2025-11-13T00:00:00"
 
     # act:
@@ -45,7 +44,6 @@ def test_leaves_some_values_unchanged():
     ky_1 = "col_2"
     val_1 = "kebab"
     dct = {ky_0: val_0, ky_1: val_1}
-    expected_fail = "artechoke"
     expected_0 = 5
     expected_1 = "kebab"
 
