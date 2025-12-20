@@ -5,8 +5,6 @@ import logging
 from .errors_lookup import errors_lookup
 
 
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -16,56 +14,57 @@ def get_updated_rows(conn_obj, after_time: str, table_name: str):
         Makes an SQL query to the ToteSys
          database to get the updated rows
          of a table.
-    
+
     Args:
-        1) conn_obj: an instance of the 
-         pg8000.native Connection class.        
+        1) conn_obj: an instance of the
+         pg8000.native Connection class.
         2) after_time: a time stamp of the form
           "2025-06-04T08:28:12". If the ToteSys
           database has changed a row of the table
-          after this time, this function 
-          considers the row updated. 
-          On the very first run of this handler 
-          after_time has a value that represents 
-          1January1900. On subsequent runs its 
-          value represents the time of the 
-          previous run of the first lambda 
+          after this time, this function
+          considers the row updated.
+          On the very first run of this handler
+          after_time has a value that represents
+          1January1900. On subsequent runs its
+          value represents the time of the
+          previous run of the first lambda
           handler.
-        3) table_name: the name of the table in 
+        3) table_name: the name of the table in
          the ToteSys database whose updated rows
          this function wants to fetch.
-        
-    Returns:
-        A list of lists. Each member list 
-         represents a row and contains values 
-         that are cell values.
-    
-    """
-    
-    # Select all columns (*) from table table_name.
-	# Return rows where last_updated is later than time after_time
-	# Return at most 20 rows.
-	# :after_time is a named parameter:
-    # query = f"SELECT * FROM {table_name} WHERE last_updated > :after_time LIMIT 20;"
 
-    # Same as above but 
-    # without a limit for 
+    Returns:
+        A list of lists. Each member list
+         represents a row and contains values
+         that are cell values.
+
+    """
+
+    # Select all columns (*) from table table_name.
+    # Return rows where last_updated is later than time after_time
+    # Return at most 20 rows.
+    # :after_time is a named parameter:
+    # query = (f"SELECT * FROM {table_name}
+    # WHERE last_updated > :after_time LIMIT 20;")
+
+    # Same as above but
+    # without a limit for
     # the number of rows:
     query = f"SELECT * FROM {table_name} WHERE last_updated > :after_time ;"
 
-    try: 
-        # send the SQL query 
-        # to postgresql database 
+    try:
+        # send the SQL query
+        # to postgresql database
         # totesys:
-        response = conn_obj.run(query, after_time=after_time) # [[...], [...], etc]
+        response = conn_obj.run(query,
+                                after_time=after_time)  # [[...], [...], etc]
         # log status:
         return response
-    
-    except Error:
-        # log the error 
-        # and stop the code:
-        logger.exception(errors_lookup['err_3'] + f'{table_name}')  # <-- logs full stacktrace
-        raise
 
-        
-        
+    except Error:
+        # log the error
+        # and stop the code:
+        logger.exception(
+            errors_lookup["err_3"] + f"{table_name}"
+        )  # <-- logs full stacktrace
+        raise

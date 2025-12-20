@@ -5,26 +5,24 @@ import logging
 from .errors_lookup import errors_lookup
 
 
-
-
 logger = logging.getLogger(__name__)
 
 
 def is_first_run_of_pipeline(proc_bucket: str, s3_client):
     """
     This function:
-        1) Determines whether there are 
-            any objects in the processed 
+        1) Determines whether there are
+            any objects in the processed
             bucket.
 
     Args:
-        1) proc_bucket: the name of the 
+        1) proc_bucket: the name of the
             processed bucket.
-        2) s3_client: a boto3 S3 client 
-            object.        
+        2) s3_client: a boto3 S3 client
+            object.
 
     Returns:
-        True if the processed 
+        True if the processed
         bucket is empty, returns
         False otherwise.
     """
@@ -35,9 +33,7 @@ def is_first_run_of_pipeline(proc_bucket: str, s3_client):
     except ClientError:
         # log exception and
         # stop the code:
-        logger.exception(errors_lookup['err_1'])
-        raise 
-   
-    
-    return objects_list["KeyCount"] == 0
+        logger.exception(errors_lookup["err_1"])
+        raise
 
+    return objects_list["KeyCount"] == 0

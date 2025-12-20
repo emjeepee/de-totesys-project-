@@ -10,34 +10,32 @@ logger = logging.getLogger(__name__)
 
 
 def conn_to_db(DB_NAME):
-    
-    user     = os.environ[f"{DB_NAME}_DB_USER"]
+
+    user = os.environ[f"{DB_NAME}_DB_USER"]
     password = os.environ[f"{DB_NAME}_DB_PASSWORD"]
     database = os.environ[f"{DB_NAME}_DB_DB"]
-    host     = os.environ[f"{DB_NAME}_DB_HOST"]
-    port     = os.environ[f"{DB_NAME}_DB_PORT"] # default: 5432?
+    host = os.environ[f"{DB_NAME}_DB_HOST"]
+    port = os.environ[f"{DB_NAME}_DB_PORT"]  # default: 5432?
 
     try:
-        # make an instance of 
+        # make an instance of
         # Connection:
         conn_obj = Connection(
-        user=user,
-        password=password,
-        database=database,
-        host=host,
-        port=port,
-        ssl_context=True,
-                            )
-        
+            user=user,
+            password=password,
+            database=database,
+            host=host,
+            port=port,
+            ssl_context=True,
+        )
+
         return conn_obj
-    
+
     except Error:
-        # log exception 
+        # log exception
         # and stop code:
-        logger.exception(errors_lookup['err_2'])
+        logger.exception(errors_lookup["err_2"])
         raise
-
-
 
 
 def close_db(conn: Connection):
@@ -45,7 +43,7 @@ def close_db(conn: Connection):
         conn.close()
 
     except Error:
-        # log exception 
+        # log exception
         # and stop code:
-        logger.exception(errors_lookup['err_3'])
+        logger.exception(errors_lookup["err_3"])
         raise

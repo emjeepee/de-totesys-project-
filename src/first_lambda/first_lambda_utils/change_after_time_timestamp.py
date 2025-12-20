@@ -6,7 +6,6 @@ from datetime import datetime, UTC
 from .errors_lookup import errors_lookup
 
 
-
 # __name__ has value "change_after_time_timestamp.py"
 logger = logging.getLogger(__name__)
 
@@ -14,123 +13,113 @@ logger = logging.getLogger(__name__)
 def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
     """
     This function:
-        1) is the first utility 
-            function that the first 
+        1) is the first utility
+            function that the first
             lambda handler calls.
-        2) tries to read the 
-            timestamp string that 
-            the S3 ingestion bucket 
+        2) tries to read the
+            timestamp string that
+            the S3 ingestion bucket
             stores.
-            On success it returns 
-            the timestamp. 
-            On failure (ie if there 
-            is no timestamp in the 
-            bucket because this is 
-            the first ever run of 
-            the pipeline or there 
-            has been a failure in 
-            the reading of the S3 
+            On success it returns
+            the timestamp.
+            On failure (ie if there
+            is no timestamp in the
+            bucket because this is
+            the first ever run of
+            the pipeline or there
+            has been a failure in
+            the reading of the S3
             bucket) it returns
-            the default timestamp, 
-            which is for the year 
+            the default timestamp,
+            which is for the year
             1900.
-        3) overwrites the existing 
-            timestamp string in the 
-            bucket with one it 
-            creates for the current 
+        3) overwrites the existing
+            timestamp string in the
+            bucket with one it
+            creates for the current
             time.
-            
+
     Args:
-        1) bucket_name: a string 
-            for the name of the S3 
+        1) bucket_name: a string
+            for the name of the S3
             ingestion bucket.
 
-        2) s3_client: the boto3 S3 
+        2) s3_client: the boto3 S3
             client.
 
-        3) ts_key: the key under which 
-            the timestamp is saved in 
+        3) ts_key: the key under which
+            the timestamp is saved in
             the bucket (it is actually
             always "***timestamp***").
 
-        4) default_ts: set to 
+        4) default_ts: set to
             "1900-01-01T00-00-00".
-            This is the timestamp this 
+            This is the timestamp this
             function returns either
-             i)  on its first ever 
+             i)  on its first ever
                  read of the
                  ingestion bucket or
-             ii) if the attempt to get 
-                 the timestamp from the 
+             ii) if the attempt to get
+                 the timestamp from the
                  bucket fails.
 
 
     Returns:
         Either --
-            1) the previous timestamp 
-                if reading the bucket is 
-                a success. 
-            2) "1900-01-01T00-00-00" if 
-                it's the first time ever 
+            1) the previous timestamp
+                if reading the bucket is
+                a success.
+            2) "1900-01-01T00-00-00" if
+                it's the first time ever
                 that the pipeline has run.
-            3) "1900-01-01T00-00-00" if  
-                this is the 2nd-plus time 
-                the pipeline has run but 
-                reading the ingestion 
-                bucket for the previous 
+            3) "1900-01-01T00-00-00" if
+                this is the 2nd-plus time
+                the pipeline has run but
+                reading the ingestion
+                bucket for the previous
                 timestamp has failed.
 
     """
 
-    
-    # create a timestamp string 
+    # create a timestamp string
     # for the current time, eg
-    # "2025-06-04T08:28:12", ie 
+    # "2025-06-04T08:28:12", ie
     # no milliseconds:
     now_ts_datetime = datetime.now(UTC)
     now_ts = now_ts_datetime.isoformat()[:-13]
 
     try:
-        # Get previous timestamp 
+        # Get previous timestamp
         # from bucket:
-        response = s3_client.get_object(
-            Bucket=bucket_name, 
-            Key=ts_key)
+        response = s3_client.get_object(Bucket=bucket_name, Key=ts_key)
 
-    except ClientError: 
-        # boto3 raises this 
-        # exception either on the 
-        # first ever run of the 
-        # pipeline (because the 
-        # s3 bucket contains no 
-        # timestamp) or if there 
-        # is a problem with 
-        # AWS S3 and reading the 
-        # ingestion bucket fails. 
-        # Return the timestamp 
-        # for the year 1900:    
-        logger.exception(errors_lookup['err_0'])  # <-- logs full stacktrace
+    except ClientError:
+        # boto3 raises this
+        # exception either on the
+        # first ever run of the
+        # pipeline (because the
+        # s3 bucket contains no
+        # timestamp) or if there
+        # is a problem with
+        # AWS S3 and reading the
+        # ingestion bucket fails.
+        # Return the timestamp
+        # for the year 1900:
+        logger.exception(errors_lookup["err_0"])  # <-- logs full stacktrace
         return default_ts
-    
 
-    try:        
-        # Replace previous timestamp 
-        # in the bucket with new 
+    try:
+        # Replace previous timestamp
+        # in the bucket with new
         # timestamp:
-        s3_client.put_object(
-            Bucket=bucket_name, 
-            Key=ts_key, 
-            Body=now_ts)
+        s3_client.put_object(Bucket=bucket_name, Key=ts_key, Body=now_ts)
 
-    except ClientError: 
-        # if failure, log the 
-        # error but allow the 
+    except ClientError:
+        # if failure, log the
+        # error but allow the
         # code to continue:
-        logger.exception(errors_lookup['err_1'])  # <-- logs full stacktrace
-        
+        logger.exception(errors_lookup["err_1"])  # <-- logs full stacktrace
 
-    # Return the previous 
+    # Return the previous
     # timestamp:
     return response["Body"].read().decode("utf-8")
-
-    
