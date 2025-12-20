@@ -39,15 +39,15 @@ def test_convert_values_correctly_converts_values():
 
     # Arrange:
     updated_rows =     [ 
-        [20496, 'SALE', 14504, None, datetime.datetime(2025, 6, 4, 8, 58, 10, 6000), decimal.Decimal(3.1415), json.dumps('json_1')],
-        [20497, 'SALE', 14505, None, datetime.datetime(2025, 6, 4, 9, 26, 9, 972000), decimal.Decimal(3.1416), json.dumps('json_2')],
-        [20498, 'SALE', 14506, None, datetime.datetime(2025, 6, 4, 9, 29, 10, 166000), decimal.Decimal(3.1417), json.dumps('json_3')] 
+        [20496, 'SALE', 14504, None, datetime.datetime(2025, 6, 4, 8, 58, 10, 6000), decimal.Decimal(3.1415), json.dumps('python_string_1')],
+        [20497, 'SALE', 14505, None, datetime.datetime(2025, 6, 4, 9, 26, 9, 972000), decimal.Decimal(3.1416), json.dumps('python_string_2')],
+        [20498, 'SALE', 14506, None, datetime.datetime(2025, 6, 4, 9, 29, 10, 166000), decimal.Decimal(3.1417), json.dumps('python_string_3')] 
                         ]
     
     converted_updated_rows =   [ 
-        [20496, 'SALE', 14504, None, '2025-06-04T08:58:10.006000', 3.1415, 'json_1'],
-        [20497, 'SALE', 14505, None, '2025-06-04T09:26:09.972000', 3.1416, 'json_2'],
-        [20498, 'SALE', 14506, None, '2025-06-04T09:29:10.166000', 3.1417, 'json_3'] 
+        [20496, 'SALE', 14504, 'no data', '2025-06-04T08:58:10.006000', 3.1415, 'python_string_1'],
+        [20497, 'SALE', 14505, 'no data', '2025-06-04T09:26:09.972000', 3.1416, 'python_string_2'],
+        [20498, 'SALE', 14506, 'no data', '2025-06-04T09:29:10.166000', 3.1417, 'python_string_3'] 
                         ]
 
     expected_1 = converted_updated_rows
@@ -55,6 +55,13 @@ def test_convert_values_correctly_converts_values():
     # Act:
     result_1 = convert_values(updated_rows)
             
+
+    # problem:
+    # int -> None
+    # None -> None
+    # datetime.datetime obj -> None
+    # decimal.Decimal -> None
+
 
     # Assert
     assert result_1 == expected_1

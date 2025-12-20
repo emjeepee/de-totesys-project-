@@ -9,7 +9,17 @@ import json
 
 
 
-def test_calls_aux_function_when_non_json_string_passed_in():
+def test_calls_convert_cell_values_aux_function_when_necessary():
+    """
+    convert_cell_values_main(val) must call 
+    convert_cell_values_aux(val) when 
+    val is either:
+    1) a non-json string
+    2) a datetime.datetime object
+    3) a decimal.Decimal object
+    4) an int
+    5) None
+    """
     # Arrange
     not_json_string = 'this is not a json string'
 
@@ -44,9 +54,9 @@ def test_calls_aux_function_when_non_json_string_passed_in():
 
 
 
-def test_returns_correct_string_when_valid_json_passed_in():
+def test_returns_correct_string_when_valid_json_string_passed_in():
     # Arrange
-    not_json_string = 'this is a json string'
+    not_json_string = 'this is not a json string'
     json_string = json.dumps(not_json_string)
     expected = not_json_string
 

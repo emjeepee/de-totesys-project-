@@ -10,14 +10,14 @@ def get_env_vars():
     This function:
         1) gets the values of  
             environment variables
-            s othat all three lambda 
-            functions can employ 
+            so that the first lambda 
+            function can employ 
             them.
         2) puts those values in a 
             dictionary that will act 
-            as a lookup table (for 
+            as a lookup table for 
             use in 
-            first_lambda_handler())
+            first_lambda_handler().
 
     Args:
         None

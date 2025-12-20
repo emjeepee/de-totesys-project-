@@ -36,7 +36,7 @@ def S3_setup():
             {"design_id": 1, "name": "abdul", "team": 11, "project": "terraform"},
             {"design_id": 2, "name": "Mukund", "team": 12, "project": "terraform"},
             {"design_id": 3, "name": "Neil", "team": 13, "project": "terraform"},
-        ]
+                            ]
 
         # create mock jsonified table:
         mdt_json = json.dumps(mock_design_table)

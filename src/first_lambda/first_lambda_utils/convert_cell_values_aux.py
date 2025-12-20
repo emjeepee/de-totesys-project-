@@ -43,7 +43,7 @@ def convert_cell_values_aux(val):
     Args:
         val: will be one of 
          these types:
-         i)   a datetime object
+         i)   a datetime.datetime object
          ii)  a decimal.Decimal
               object
          iii) a non-json string

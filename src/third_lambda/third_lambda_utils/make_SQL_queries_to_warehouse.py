@@ -36,7 +36,8 @@ def make_SQL_queries_to_warehouse(qrs_list: list, conn):
 
     # Make SQL queries to 
     # the warehouse:
-    for q_str in qrs_list: conn.run(q_str)
+    for q_str in qrs_list: 
+        conn.run(q_str)
        
 
 

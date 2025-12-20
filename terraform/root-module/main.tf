@@ -84,6 +84,9 @@ terraform {
           }
                      }
 
+
+
+# The state bucket
 # I had previously provisioned the state
 # bucket here but you have to expose 
 # the name of the bucket here because
@@ -110,15 +113,13 @@ provider "aws" {
 
 
 
-
-
-
 # THE CODE BUCKET 
 # ===============
 resource "aws_s3_bucket" "code_bucket" {
-  # bucket = "totesys-code-bucket-m1x7qr0b"
     bucket = var.AWS_CODE_BUCKET
                                        }
+
+
 
 # POLICY TO LET CODE BUCKET BE 
 # READ BY THE AWS LAMBDA SERVICE 
@@ -157,8 +158,7 @@ resource "aws_s3_bucket_policy" "AWS_lambda_SERVICE_access" {
 resource "aws_s3_object" "layer_zip" {
   bucket = var.AWS_CODE_BUCKET
   key    = "zipped/layer.zip"
-  # source = "../../zipped_files/layer.zip"
-  source = "${path.module}/../../zipped_files/layer.zip"  # 
+  source = "${path.module}/../../zipped_files/layer.zip"   
 
   # ensure Terraform has 
   # provisioned the code 
@@ -169,7 +169,6 @@ resource "aws_s3_object" "layer_zip" {
   # Terraform re-uploads 
   # when the file changes
   etag   = filemd5("${path.module}/../../zipped_files/layer.zip")
-
 
                                      }
 

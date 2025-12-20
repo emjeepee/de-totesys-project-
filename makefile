@@ -1,16 +1,20 @@
 #################################################################################
 # Makefile to build the project
 #################################################################################
+
+# set variables:
 PROJECT_NAME = de-totesys-project-
 REGION = eu-west-2
 PYTHON_INTERPRETER = python
-PWD=$(shell pwd)
+PWD=$(shell pwd) # run command pwd, store result in var PWD
 PYTHONPATH=${PWD}
-SHELL := /bin/bash
+SHELL := /bin/bash # force Makefile to execute commands in bash
 # PROFILE = default
 PIP:=pip
 
-.create-environment:## Create python interpreter environment.
+
+# make a virtual environment:
+.create-environment:
 	@echo ">>> About to create environment: $(PROJECT_NAME)..."
 	@echo ">>> check python3 version"
 	( \
@@ -21,14 +25,16 @@ PIP:=pip
 	    $(PYTHON_INTERPRETER) -m venv venv; \
 	)
 
-# Define utility variable to help calling Python from the virtual environment
+# Define var to help calling 
+# Python from the venv:
 ACTIVATE_ENV := source venv/bin/activate
 # Execute python related functionalities from within the project's environment
 define execute_in_env
 	$(ACTIVATE_ENV) && $1
 endef
 
-## Build the environment requirements
+# Build the requirements.txt file 
+# from the requirements.in file: 
 .requirements: .create-environment
 	$(call execute_in_env, $(PIP) install pip-tools)
 	$(call execute_in_env, pip-compile requirements.in)

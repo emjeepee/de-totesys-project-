@@ -1,8 +1,7 @@
-boto3
-botocore
-currency_codes
+currency
 dotenv
-pandas
+duckdb
 pg8000
-pyarrow
+pytest
+
 

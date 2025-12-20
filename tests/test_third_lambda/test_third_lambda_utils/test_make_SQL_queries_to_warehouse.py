@@ -1,13 +1,42 @@
-import pytest
 
 from unittest.mock import Mock, patch, ANY
 from src.third_lambda.third_lambda_utils.make_SQL_queries_to_warehouse import make_SQL_queries_to_warehouse
 
-# make_SQL_queries_to_warehouse(qrs_list: list, conn)
 
-def test_raises_RuntimeError():
-    conn = Mock()
-    conn.run.side_effect = Exception("Failure to contact data warehouse")
-    with pytest.raises(RuntimeError):
-            make_SQL_queries_to_warehouse(ANY, conn)
-            return
+
+
+def test_runs_all_queries():
+    # arrange:
+    queries = [
+        "INSERT INTO table_a VALUES (1, 2, 3)",
+        "INSERT INTO table_b VALUES (4, 5, 6)"
+              ]
+
+    mock_conn = Mock()
+
+    # act:
+    result = make_SQL_queries_to_warehouse(queries, mock_conn)
+
+    # assert:
+    assert result is None
+    assert mock_conn.run.call_count == len(queries)
+
+
+
+
+def test_queries_passed_correctly():
+    # arrange:
+    queries = [
+        "INSERT INTO table_a VALUES (1, 2, 3)",
+        "INSERT INTO table_b VALUES (4, 5, 6)"
+              ]
+
+    mock_conn = Mock()
+
+
+    # act:
+    make_SQL_queries_to_warehouse(queries, mock_conn)
+
+    # assert:    
+    mock_conn.run.assert_any_call("INSERT INTO table_a VALUES (1, 2, 3)")
+    mock_conn.run.assert_any_call("INSERT INTO table_b VALUES (4, 5, 6)")    
