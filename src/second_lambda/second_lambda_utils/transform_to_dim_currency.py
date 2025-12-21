@@ -14,11 +14,11 @@ def transform_to_dim_currency(currency_data):
             unnecessary key-value
             pairs and adds one
             key-value pair:
-            'currency_name': <name-of-currency>.
+            'currency_name': <name-of-currency-here>.
 
     Args:
-        currency_data: a list of d
-        ictionaries that came from
+        currency_data: a list of
+        dictionaries that came from
         the ingestion bucket and
         represents the currency
         table. Each dictionary
@@ -39,7 +39,7 @@ def transform_to_dim_currency(currency_data):
     )
 
     for row_dict in pp_curr_dim_table:
-        # row dict look like: # {'currency_id': 3, 'currency_code': 'EUR'}
+        # row dict looks like: {'currency_id': 3, 'currency_code': 'EUR'}
         curr_obj = make_curr_obj(row_dict)
         curr_name = curr_obj.name
         row_dict["currency_name"] = curr_name
@@ -48,13 +48,16 @@ def transform_to_dim_currency(currency_data):
         # now the finished currency
         # dimension table.
         # Its columns are: 'currency_id', 'currency_code', 'currency_name'
-        #
-        #
-        #
         # Return it:
     return pp_curr_dim_table
 
-# Typical currency table cols and typical values
+
+# Typical passed-in currency table (cols and typical field values)
 # [['currency_id'], ['currency_code'], ['created_at'], ['last_updated']]
-# [[3, 'EUR', datetime.datetime(2022, 11, 3, 14, 20, 49, 962000),
-# datetime.datetime(2022, 11, 3, 14, 20, 49, 962000)]]
+# [
+# [3,
+# 'EUR',
+# datetime.datetime(2022, 11, 3, 14, 20, 49, 962000),
+# datetime.datetime(2022, 11, 3, 14, 20, 49, 962000)],
+# etc
+# ]

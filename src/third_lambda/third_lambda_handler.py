@@ -3,8 +3,8 @@ import logging
 
 from src.third_lambda.third_lambda_utils.third_lambda_init import (
     third_lambda_init)
-from src.third_lambda.third_lambda_utils.make_insert_queries_from_parquet \
-    import make_insert_queries_from_parquet
+from src.third_lambda.third_lambda_utils.make_insert_queries_from_parq import (
+    make_insert_queries_from_parq)
 from src.third_lambda.third_lambda_utils.make_SQL_queries_to_warehouse import (
     make_SQL_queries_to_warehouse)
 from src.third_lambda.third_lambda_utils.conn_to_db import conn_to_db, close_db
@@ -21,7 +21,7 @@ logging.basicConfig(
     level=logging.DEBUG,  # log anything above level DEBUG, the lowest level
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     filemode="a",
-                   )
+)
 
 
 def third_lambda_handler(event, context):
@@ -99,10 +99,10 @@ def third_lambda_handler(event, context):
     # is for inserting one row of a
     # table into that table in the
     # warehouse:
-    queries_list = make_insert_queries_from_parquet(
-                                                    pq_buff,
-                                                    lookup["table_name"]
-                                                    )
+    queries_list = make_insert_queries_from_parq(
+                                                 pq_buff,
+                                                 lookup["table_name"]
+                                                )
 
     # Use the SQL queries to put
     # table data into the

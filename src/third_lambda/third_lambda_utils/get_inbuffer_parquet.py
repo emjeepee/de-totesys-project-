@@ -10,10 +10,12 @@ from .errors_lookup import errors_lookup
 logger = logging.getLogger(__name__)
 
 
-def get_inbuffer_parquet(s3_client,
+def get_inbuffer_parquet(
+                         s3_client,
                          object_key: str,
                          bucket: str,
-                         table_name: str):
+                         table_name: str
+                         ):
     """
     This function:
         looks in the processed

@@ -36,12 +36,10 @@ def table_name_and_cols_lookup():
 
     dim_currency_cols = ["currency_id", "currency_code", "currency_name"]
 
-    dim_design_cols = [
-                    "design_id",
-                    "design_name",
-                    "file_location",
-                    "file_name"
-                      ]
+    dim_design_cols = ["design_id",
+                       "design_name",
+                       "file_location",
+                       "file_name"]
 
     dim_location_cols = [
         "address_line_1",

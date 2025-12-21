@@ -5,7 +5,7 @@ from .make_list_of_query_strings import make_list_of_query_strings
 from .get_columns_and_rows import get_columns_and_rows
 
 
-def make_insert_queries_from_parquet(parquet_buffer, table_name):
+def make_insert_queries_from_parq(parquet_buffer, table_name):
     """
     This function:
         generates a list of
@@ -56,9 +56,9 @@ def make_insert_queries_from_parquet(parquet_buffer, table_name):
     # strings and put them in
     # a list:
     queries = make_list_of_query_strings(
-                                        rows_cols[1],
-                                        table_name,
-                                        rows_cols[0]
+                                         rows_cols[1],
+                                         table_name,
+                                         rows_cols[0]
                                         )
 
     # close duckdb in-memory

@@ -1,13 +1,13 @@
-def make_dim_or_fact_table_keystring(table_name: str, timestamp_string: str):
+def make_dim_or_fact_tbl_keystr(table_name: str, timestamp_string: str):
     """
-    This table:
+    This function:
         makes a string that is
         a key under which
         another function will
-        store either a
+        store in the processed
+        bucket either a
         dimension table or a
-        fact table in the
-        processed bucket.
+        fact table.
 
     Args:
         table_name: the name of

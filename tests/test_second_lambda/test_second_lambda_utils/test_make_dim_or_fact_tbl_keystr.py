@@ -1,4 +1,6 @@
-from src.second_lambda.second_lambda_utils.make_dim_or_fact_table_keystring import make_dim_or_fact_table_keystring
+
+
+from second_lambda.second_lambda_utils.make_dim_or_fact_tbl_keystr import make_dim_or_fact_tbl_keystr
 
 
 
@@ -10,8 +12,8 @@ def test_returns_a_string():
     expected = str
 
     # act:
-    response_0 = make_dim_or_fact_table_keystring('sales_order', 'timestamp')
-    response_1 = make_dim_or_fact_table_keystring('design', 'timestamp')
+    response_0 = make_dim_or_fact_tbl_keystr('sales_order', 'timestamp')
+    response_1 = make_dim_or_fact_tbl_keystr('design', 'timestamp')
     result_0 = type(response_0)
     result_1 = type(response_1)
 
@@ -27,8 +29,8 @@ def test_returns_correct_string():
     expected_1 = "dim_design/timestamp.parquet"
 
     # act:
-    result_0 = make_dim_or_fact_table_keystring('sales_order', 'timestamp')
-    result_1 = make_dim_or_fact_table_keystring('design', 'timestamp')
+    result_0 = make_dim_or_fact_tbl_keystr('sales_order', 'timestamp')
+    result_1 = make_dim_or_fact_tbl_keystr('design', 'timestamp')
 
     # assert:
     result_0 = expected_0

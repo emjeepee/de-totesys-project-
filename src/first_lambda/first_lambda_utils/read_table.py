@@ -131,11 +131,7 @@ def read_table(table_name: str, conn: Connection, after_time: str):
         # Get only those rows from
         # the table that contain
         # updated data:
-        query_result_1 = (
-            get_updated_rows(
-                conn, after_time, table_name
-                            )
-                         )
+        query_result_1 = get_updated_rows(conn, after_time, table_name)
 
         # Convert query_result_2 to a
         # list of column-name strings:

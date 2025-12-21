@@ -70,9 +70,7 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
             table, conn, after_time
         )  # {'design': [{<updated-row data>}, {<updated-row data>}, etc]}
         clean_table_dict = clean_data(table, table_dict)
-        data_list.append(
-            clean_table_dict
-                        )
+        data_list.append(clean_table_dict)
         # data_list becomes: [{'design': [{<updated-row data>}, etc]},
         # {'sales': [{<updated-row data>}, etc]}, etc].
         # where {<updated-row data>} is, eg,

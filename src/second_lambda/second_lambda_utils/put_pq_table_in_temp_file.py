@@ -91,14 +91,14 @@ def put_pq_table_in_temp_file(
 
     # Insert the table's rows:
     for values in values_list:  # for each list
-        conn.execute(
-            f"INSERT INTO {table_name} VALUES ({placeholders})", values
-            )
+        conn.execute(f"INSERT INTO {table_name} VALUES ({placeholders})",
+                     values)
 
         conn.execute(
-            f"COPY (SELECT * FROM {table_name}) TO ? (FORMAT PARQUET)",
-            [tmp_path]
+                    f"COPY (SELECT * FROM {table_name}) TO ? (FORMAT PARQUET)",
+                    [tmp_path]
                     )
+
     # Write the Parquet file to
     # the temporary file:
     # SELECT * FROM {table_name} - get

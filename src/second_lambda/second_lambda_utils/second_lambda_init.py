@@ -94,6 +94,6 @@ def second_lambda_init(event, s3_client, dt_now, dt_start, num_rows):
         # value of "start_date" is datetime object for 1 Jan 2024
         # (includes time info for midnight)
         "num_rows": num_rows,  # a datetime object for 1 Jan 2024
-            }
+    }
 
     return lookup

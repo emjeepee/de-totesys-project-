@@ -40,7 +40,7 @@ def get_single_row_from_each_table():
         query_col_names = (
             "SELECT column_name FROM information_schema.columns "
             f"WHERE table_name = '{tables[i]}' ORDER BY ordinal_position"
-                          )
+        )
         try:
             column_names = conn.run(query_col_names)
             # column_names = [col[0] for col in column_names]

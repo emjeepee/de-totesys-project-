@@ -32,6 +32,7 @@ def make_SQL_queries_to_warehouse(qrs_list: list, conn):
     try:
         for q_str in qrs_list:
             conn.run(q_str)
+
     except DatabaseError:
         # log, stop code:
         logger.exception(errors_lookup["err_1"])

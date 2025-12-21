@@ -79,10 +79,10 @@ def make_dim_date_python(
     for i in range(loop_range):
         row = {  # 19Aug25 --HAVE CHECKED THESE:
             "date_id": start_date.date(),  # is datetime.date object.
-                                           # In warehouse, must be SQL date
+            # In warehouse, must be SQL date
             "year": start_date.year,  # is int. In warehouse, must be SQL INT
             "month": start_date.month,  # is int (1 for January).
-                                        # In warehouse, must be SQL INT
+            # In warehouse, must be SQL INT
             "day": start_date.day,  # is int. In warehouse, must be SQL INT
             "day_of_week": start_date.weekday()
             + 1,  # is int (1 for Monday). In warehouse, must be SQL INT

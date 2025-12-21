@@ -74,17 +74,17 @@ def make_updated_tables(data_for_s3: list, s3_client, bucket: str):
         # table of name table_name.
         latest_table = get_most_recent_table_data(
             table_name, s3_client, bucket
-                                                 )  # a list of dictionaries.
+        )  # a list of dictionaries.
 
         # Insert the updated rows into the
         # retrieved whole table, replacing
         # the outdated ones:
         updated_table = update_rows_in_table(  # [{<updated row>},
-                                            # {<updated row>}, etc]
-                                            member[table_name],
-                                            latest_table,
-                                            table_name
-                                            )
+            # {<updated row>}, etc]
+            member[table_name],
+            latest_table,
+            table_name,
+        )
 
         updated_tables.append({table_name: updated_table})
 

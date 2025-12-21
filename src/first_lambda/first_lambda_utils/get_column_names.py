@@ -1,7 +1,6 @@
-from pg8000.native import Error
-
 import logging
 
+from pg8000.native import Error
 from .errors_lookup import errors_lookup
 
 
@@ -33,7 +32,7 @@ def get_column_names(conn_obj, table_name: str):
     query = (
         f"SELECT column_name FROM information_schema.columns "
         f"WHERE table_name = '{table_name}' ORDER BY ordinal_position"
-            )
+    )
 
     try:
         response = conn_obj.run(query)

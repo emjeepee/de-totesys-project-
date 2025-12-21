@@ -47,9 +47,7 @@ def get_latest_table(s3_client, bucket: str, table_name: str):
         raise
 
     # Make a list of the keys:
-    keys_list = [
-        dict["Key"] for dict in resp.get("Contents", [])
-                ]
+    keys_list = [dict["Key"] for dict in resp.get("Contents", [])]
     # keys_list look like:
     # ['design/2025-06-02_22-17-19-2513.json',
     # 'design/2025-05-29_22-17-19-2513.json', etc]

@@ -81,4 +81,4 @@ def write_tables_to_ing_buck(s3_client, bucket_name, data_list):
             f"{table_name}/{timestamp}.json",
             # eg 'sales_order/2025-06-11_13-27-29.json'
             bucket_name,  # name of ingestion bucket
-                                )
+        )

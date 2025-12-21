@@ -74,13 +74,11 @@ def convert_to_parquet(data: list, table_name: str):
     # Parquet version of the
     # table and save it to
     # the temp path:
-    put_pq_table_in_temp_file(
-                            table_name,
-                            col_defs,
-                            values_list,
-                            placeholders,
-                            tmp_path
-                             )
+    put_pq_table_in_temp_file(table_name,
+                              col_defs,
+                              values_list,
+                              placeholders,
+                              tmp_path)
 
     # Write the Parquet file
     # in the temp location to

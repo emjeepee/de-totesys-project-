@@ -56,8 +56,7 @@ def get_updated_rows(conn_obj, after_time: str, table_name: str):
         # send the SQL query
         # to postgresql database
         # totesys:
-        response = conn_obj.run(query,
-                                after_time=after_time)  # [[...], [...], etc]
+        response = conn_obj.run(query, after_time=after_time)  # [[...], etc]
         # log status:
         return response
 

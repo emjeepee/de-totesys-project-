@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import Mock, patch, ANY
 from decimal import Decimal
 
-from src.third_lambda.third_lambda_utils.make_insert_queries_from_parquet import make_insert_queries_from_parquet
+from third_lambda.third_lambda_utils.make_insert_queries_from_parq import make_insert_queries_from_parquet
 
 
 @pytest.fixture(scope="function")

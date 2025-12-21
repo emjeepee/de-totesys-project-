@@ -17,4 +17,4 @@ info_1 = """
 info_lookup = {
     "info_0": info_0,
     "info_1": info_1,
-               }
+}

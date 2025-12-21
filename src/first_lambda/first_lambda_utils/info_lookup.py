@@ -30,4 +30,4 @@ info_lookup = {
     "info_1": info_1,
     "info_2": info_2,
     "info_3": info_3,
-               }
+}
