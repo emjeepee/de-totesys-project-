@@ -1,152 +1,89 @@
-name: Final-project
+name: totesys ETL pipeline # shown in GHA
 
-# Set up environment variables:
+
+# load secrets into environment variables.
+# These env vars are available to all jobs:
 env:
-  TF_VAR_AWS_INGEST_BUCKET:  ${{ secrets.AWS_INGEST_BUCKET }}
-  TF_VAR_AWS_PROCESS_BUCKET: ${{ secrets.AWS_PROCESS_BUCKET }}
-  TF_VAR_AWS_CODE_BUCKET:    ${{ secrets.AWS_CODE_BUCKET }}
-  TF_VAR_AWS_STATE_BUCKET:   ${{ secrets.AWS_STATE_BUCKET }}
-  TF_VAR_AWS_ALERT_EMAIL:    ${{ secrets.AWS_ALERT_EMAIL }}
-  TF_VAR_AWS_TABLES_LIST:    ${{ secrets.AWS_TABLES_LIST }}
+  # TF_AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+  # TF_AWS_SECRET_ACCESS_KEY: '${{ secrets.TF_AWS_SECRET_ACCESS_KEY }}'
+
+  TF_TOTESYS_DB_USER: "${{ secrets.TF_TOTESYS_DB_USER }}"
+  TF_TOTESYS_DB_HOST: '${{ secrets.TF_TOTESYS_DB_HOST }}'
+  TF_TOTESYS_DB_DB: '${{ secrets.TF_TOTESYS_DB_DB }}'
+  TF_TOTESYS_DB_PASSWORD: '${{ secrets.TF_TOTESYS_DB_PASSWORD }}'
+  TF_TOTESYS_DB_PORT: '${{ secrets.TF_TOTESYS_DB_PORT }}'
+
+  TF_WAREHOUSE_DB_DB: '${{ secrets.TF_WAREHOUSE_DB_DB }}'
+  TF_WAREHOUSE_DB_HOST: '${{ secrets.TF_WAREHOUSE_DB_HOST }}'
+  TF_WAREHOUSE_DB_PASSWORD: '${{ secrets.TF_WAREHOUSE_DB_PASSWORD }}'
+  TF_WAREHOUSE_DB_PORT: '${{ secrets.TF_WAREHOUSE_DB_PORT }}'
+  TF_WAREHOUSE_DB_USER: '${{ secrets.TF_WAREHOUSE_DB_USER }}' 
   
-
-  TF_VAR_TOTE_SYS_DB_DB:       ${{ secrets.TOTE_SYS_DB_DB }} 
-  TF_VAR_TOTE_SYS_DB_HOST:     ${{ secrets.TOTE_SYS_DB_HOST }} 
-  TF_VAR_TOTE_SYS_DB_PASSWORD: ${{ secrets.TOTE_SYS_DB_PASSWORD }} 
-  TF_VAR_TOTE_SYS_DB_PORT:     ${{ secrets.TOTE_SYS_DB_PORT }} 
-  TF_VAR_TOTE_SYS_DB_USER:     ${{ secrets.TOTE_SYS_DB_USER }} 
-
-
-  TF_VAR_WAREHOUSE_DB_DB:       ${{ secrets.WAREHOUSE_DB_DB }} 
-  TF_VAR_WAREHOUSE_DB_HOST:     ${{ secrets.WAREHOUSE_DB_HOST }} 
-  TF_VAR_WAREHOUSE_DB_PASSWORD: ${{ secrets.WAREHOUSE_DB_PASSWORD }}
-  TF_VAR_WAREHOUSE_DB_PORT:     ${{ secrets.WAREHOUSE_DB_PORT }} 
-  TF_VAR_WAREHOUSE_DB_USER:     ${{ secrets.WAREHOUSE_DB_USER }} 
-  
-
-  TF_VAR_OLTP_NAME:       ${{ secrets.OLTP_NAME }}
-  TF_VAR_WAREHOUSE_NAME:  ${{ secrets.WAREHOUSE_NAME }}
-
-
-
-
-# Run these jobs:
-# 1) testing: does the tests and runs coverage
-# 2) safety: runs safety and PEP8 compliance tool
-#    This depends on 1)
-# 3) zip-stuff: make folder zipped_files and zip 
-#    stuff and put it in this folder
-#    This depends on 2)
-# 4) get-credentials: do the amazon credentials 
-     # thing. 
-#    This depends on 2)
-# 5) deploy-project: do terraform init, plan and 
-#    apply.
-#    This depends on 4)
-
-
 
 on:
-  push:
-    branches:
-      - '**'
+  push: # this is an event
+    branches:  
+      # - '**' # would run GHA on push to any branch
+      - main  # run GHA only on push to branch main 
 
 jobs:
-# 1):   
-  testing:
-    name: Run tests and run command-line tool coverage
+  # Run tests and tool coverage  
+  run-tests-and-coverage:
+    name: Run all tests and tool coverage
     if: false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # always use a Linux VM
     steps:
         - name: Checkout the repo
-          uses: actions/checkout@v5
+          uses: actions/checkout@v5  # Download repo into runner
 
+         # Install Python
         - name: Set up Python
           uses: actions/setup-python@v5
           with:
             python-version: '3.12'
 
-        - name: Install make
-          run: sudo apt install make -y
-
-        - name: Install application requirements & run tests
-          run: make all
-
-        - name: Destroy the venv
-          run: make clean  
-
-# 2):
-  safety:
-    name: Check safety of code
-    if: false
-    runs-on: ubuntu-latest
-    needs: testing
-
-# 3):    
-  zip-stuff:
-    name: Zip lambda function plus code and the layer folder
-    if: false
-    runs-on: ubuntu-latest  
-    needs: safety    
+         # Install dependencies – needed
+         # so that the tests can run:
+        - name: Install deps
+          run: |
+              python -m pip install --upgrade pip
+              python -m pip install pip-tools
+              cd requirements
+              pip-compile requirements.in
+              cd ..
+              pip install -r requirements/requirements.txt            
 
 
-  get-AWS-credentials:
-    name: Get AWS credentials
-    if: false
-    runs-on: ubuntu-latest  
-    needs: zip-stuff    
+        # Now run the tests and if a test 
+        # fails, stop the job.
+        # If coverage < 90%, the step 
+        # fails and the job stops:
+        - name: Run tests with coverage (min 90%)
+          run: |
+            coverage run --source=src -m pytest
+            coverage report --fail-under=90
 
+        # If any previous step in this job 
+        # fails, stop the job. If all tests 
+        # pass, print this in GHA log:  
+        - name: Did tests and coverage pass?
+          if: success()
+          run: echo "All tests passed."
 
-  deploy-project:
-    name: deploy-project
-    if: false
-    runs-on: ubuntu-latest
-    needs: zip-stuff
-    steps:
-        - name: Checkout Repo
-          uses: actions/checkout@v5
-          
-        - name: Set Up Python
-          uses: actions/setup-python@v5
-          with:
-            python-version: '3.12'
-        
-        - name: Package Layer
-          run: pip install -r layer-requirements.txt -t layer/python/
-
-        - name: Make Layer Src Folder
-          run: mkdir layer/python/src
-
-        - name: Copy Local Source Files to Layer
-          run: cp src/change_after_time_timestamp.py src/conn_to_db.py src/First_util_for_3rd_lambda.py src/lambda_utils.py src/second_util_for_3rd_lambda.py src/utils_2.py src/utils_write_to_ingestion_bucket.py src/utils.py layer/python/src/ # add future src import files here (please don't make a new file for every function)
-
-        - name: Configure AWS Credentials
-          uses: aws-actions/configure-aws-credentials@v4.1.0
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: ${{ secrets.AWS_REGION}}
-
-        - name: Install Terraform
-          uses: hashicorp/setup-terraform@v3
-
-        - name: Initialise terraform
-          working-directory: terraform
-          run: terraform init
-
-        # - name: Terraform destroy
-        #   working-directory: terraform
-        #   run: terraform destroy --auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}"  -var="tf_totesys_db_user=${{ secrets.TOTESYS_DB_USER }}" -var="tf_totesys_db_host=${{ secrets.TOTESYS_DB_HOST }}" -var="tf_totesys_db_db=${{ secrets.TOTESYS_DB_DB }}" -var="tf_totesys_db_password=${{ secrets.TOTESYS_DB_PASSWORD }}" -var="tf_totesys_db_port=${{ secrets.TOTESYS_DB_PORT }}" -var="tf_warehouse_db_db=${{ secrets.WAREHOUSE_DB_DB }}" -var="tf_warehouse_db_host=${{ secrets.WAREHOUSE_DB_HOST }}" -var="tf_warehouse_db_password=${{ secrets.WAREHOUSE_DB_PASSWORD }}" -var="tf_warehouse_db_port=${{ secrets.WAREHOUSE_DB_PORT }}" -var="tf_warehouse_db_user=${{ secrets.WAREHOUSE_DB_USER }}"
+        - name: Did tests and coverage fail?
+          if: failure()
+          run: echo "One test or more failed or coverage is <90%. GHA job stopped."
 
 
 
-        - name: Terraform Plan
-          working-directory: terraform
-          run: terraform plan -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}"  -var="tf_totesys_db_user=${{ secrets.TOTESYS_DB_USER }}" -var="tf_totesys_db_host=${{ secrets.TOTESYS_DB_HOST }}" -var="tf_totesys_db_db=${{ secrets.TOTESYS_DB_DB }}" -var="tf_totesys_db_password=${{ secrets.TOTESYS_DB_PASSWORD }}" -var="tf_totesys_db_port=${{ secrets.TOTESYS_DB_PORT }}" -var="tf_warehouse_db_db=${{ secrets.WAREHOUSE_DB_DB }}" -var="tf_warehouse_db_host=${{ secrets.WAREHOUSE_DB_HOST }}" -var="tf_warehouse_db_password=${{ secrets.WAREHOUSE_DB_PASSWORD }}" -var="tf_warehouse_db_port=${{ secrets.WAREHOUSE_DB_PORT }}" -var="tf_warehouse_db_user=${{ secrets.WAREHOUSE_DB_USER }}"
 
-        - name: Terraform Apply
-          working-directory: terraform
-          run: terraform apply -auto-approve -var="alert_email_address=${{ secrets.TF_ALERT_EMAIL }}"  -var="tf_totesys_db_user=${{ secrets.TOTESYS_DB_USER }}" -var="tf_totesys_db_host=${{ secrets.TOTESYS_DB_HOST }}" -var="tf_totesys_db_db=${{ secrets.TOTESYS_DB_DB }}" -var="tf_totesys_db_password=${{ secrets.TOTESYS_DB_PASSWORD }}" -var="tf_totesys_db_port=${{ secrets.TOTESYS_DB_PORT }}" -var="tf_warehouse_db_db=${{ secrets.WAREHOUSE_DB_DB }}" -var="tf_warehouse_db_host=${{ secrets.WAREHOUSE_DB_HOST }}" -var="tf_warehouse_db_password=${{ secrets.WAREHOUSE_DB_PASSWORD }}" -var="tf_warehouse_db_port=${{ secrets.WAREHOUSE_DB_PORT }}" -var="tf_warehouse_db_user=${{ secrets.WAREHOUSE_DB_USER }}"
+
+
+
+
+
+
+
 
 
 

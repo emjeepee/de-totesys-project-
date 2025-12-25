@@ -18,7 +18,30 @@ venv/
 *.tfvars*
 .env
 
+
+# This folder is used in dev only 
+# (it's the folder in which the 
+# project installs dependencies 
+# and the project zips it so that 
+# in dev the project can use 
+# terraform to provision cloud 
+# infrastructure). the 
+# .github/workflow/workflow.yml 
+# file will make GitHub Actions
+# create this folder anew and 
+# install dependencies in it:
 layer/
+
+# The workflow.yml file makes the 
+# GHA runner generate the 
+# requirements/*requirements.txt 
+# files from the 
+# requirements/*requirements.in 
+# files, so no need to upload them
+# to the remote repository: 
+requirements/layer-requirements.txt
+requirements/requirements.txt
+
 
 
 
@@ -28,5 +51,8 @@ zz_other_tests/
 yet_to_do.txt
 
 
+makefile
 
 
+
+workflowOLD

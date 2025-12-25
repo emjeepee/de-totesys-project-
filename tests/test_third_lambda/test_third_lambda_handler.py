@@ -26,7 +26,7 @@ def set_up():
 
     path_to_miqfp = ('src.third_lambda.'
                     'third_lambda_handler.'
-                    'make_insert_queries_from_parquet')
+                    'make_insert_queries_from_parq')
 
     path_to_msqtw = ('src.third_lambda.'
                     'third_lambda_handler.'

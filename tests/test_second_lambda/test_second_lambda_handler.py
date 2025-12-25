@@ -5,9 +5,9 @@ import boto3
 import logging
 
 from moto import mock_aws
-from unittest.mock import patch, ANY, call, Mock
+from unittest.mock import patch, ANY, call
 from datetime import datetime 
-from botocore.exceptions import ClientError
+
 
 from src.second_lambda.second_lambda_handler import second_lambda_handler
 from src.second_lambda.second_lambda_utils.info_lookup import info_lookup
@@ -178,7 +178,7 @@ def test_integrates_correct_utility_functions_when_first_run_of_pipeline(general
         patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
         patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
         patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
-        patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table_keystring') as mock_mdoftk:
+        patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_tbl_keystr') as mock_mdoftk:
               
             mock_sli.return_value = mock_sli_return
             mock_rfs3.return_value = mock_json_tbl
@@ -286,7 +286,7 @@ def test_integrates_correct_utility_functions_when_2nd_plus_run_of_pipeline(gene
         patch('src.second_lambda.second_lambda_handler.upload_to_s3') as mock_uts3, \
         patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table') as mock_mdoft, \
         patch('src.second_lambda.second_lambda_handler.convert_to_parquet') as mock_ctp, \
-        patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_table_keystring') as mock_mdoftk:
+        patch('src.second_lambda.second_lambda_handler.make_dim_or_fact_tbl_keystr') as mock_mdoftk:
               
             mock_sli.return_value = mock_sli_return
             mock_rfs3.return_value = mock_json_tbl

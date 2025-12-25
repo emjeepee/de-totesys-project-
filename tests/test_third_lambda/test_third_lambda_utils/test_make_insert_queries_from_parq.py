@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import Mock, patch, ANY
 from decimal import Decimal
 
-from third_lambda.third_lambda_utils.make_insert_queries_from_parq import make_insert_queries_from_parquet
+from src.third_lambda.third_lambda_utils.make_insert_queries_from_parq import make_insert_queries_from_parq
 
 
 @pytest.fixture(scope="function")
@@ -46,22 +46,22 @@ def test_calls_all_functions_correctly_and_returns_a_list(setup):
 
     path_to_connect = ('src.third_lambda.'
                        'third_lambda_utils.'
-                       'make_insert_queries_from_parquet.'
+                       'make_insert_queries_from_parq.'
                        'duckdb.connect')
     
     path_to_read_pq = ('src.third_lambda.'
                         'third_lambda_utils.'
-                        'make_insert_queries_from_parquet.'
+                        'make_insert_queries_from_parq.'
                         'read_parquet_from_buffer')
 
     path_tp_mloqs = ('src.third_lambda.'
                     'third_lambda_utils.'
-                    'make_insert_queries_from_parquet.'
+                    'make_insert_queries_from_parq.'
                     'make_list_of_query_strings')
     
     path_tp_gcar = ('src.third_lambda.'
                     'third_lambda_utils.'
-                    'make_insert_queries_from_parquet.'
+                    'make_insert_queries_from_parq.'
                     'get_columns_and_rows')
 
     with patch(path_to_connect) as mock_connect, \
@@ -86,7 +86,7 @@ def test_calls_all_functions_correctly_and_returns_a_list(setup):
 
 
         # act:
-        response = make_insert_queries_from_parquet(mock_pq_in_buff, mock_table_name)
+        response = make_insert_queries_from_parq(mock_pq_in_buff, mock_table_name)
         result = type(response)
 
         # assert:

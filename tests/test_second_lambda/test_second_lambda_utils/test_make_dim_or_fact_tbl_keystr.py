@@ -1,6 +1,6 @@
 
 
-from second_lambda.second_lambda_utils.make_dim_or_fact_tbl_keystr import make_dim_or_fact_tbl_keystr
+from src.second_lambda.second_lambda_utils.make_dim_or_fact_tbl_keystr import make_dim_or_fact_tbl_keystr
 
 
 

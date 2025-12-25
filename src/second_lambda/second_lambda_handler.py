@@ -20,7 +20,7 @@ from src.second_lambda.second_lambda_utils.is_first_run_of_pipeline import (
 from src.second_lambda.second_lambda_utils.info_lookup import info_lookup
 from src.second_lambda.second_lambda_utils.create_formatted_timestamp import (
     create_formatted_timestamp)
-from second_lambda.second_lambda_utils.make_dim_or_fact_tbl_keystr import (
+from src.second_lambda.second_lambda_utils.make_dim_or_fact_tbl_keystr import(
     make_dim_or_fact_tbl_keystr)
 
 

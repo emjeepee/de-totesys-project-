@@ -3,5 +3,3 @@ python-dotenv
 duckdb
 pg8000
 pytest
-coverage
-
