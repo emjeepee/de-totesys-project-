@@ -27,10 +27,10 @@ on:
       - main  # run GHA only on push to branch main 
 
 jobs:
-  # Run tests and tool coverage  
+  # Run tests and tool coverage
   run-tests-and-coverage:
     name: Run all tests and tool coverage
-    if: false
+
     runs-on: ubuntu-latest # always use a Linux VM
     steps:
         - name: Checkout the repo
