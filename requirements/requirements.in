@@ -2,3 +2,6 @@ pg8000
 boto3
 currency-codes
 duckdb
+python-dotenv
+pytest
+coverage
