@@ -68,7 +68,7 @@ jobs:
         # pass, print this in GHA log:  
         - name: Did tests and coverage pass?
           if: success()
-          run: echo "All tests passed."
+          run: echo "All tests passed, coverage acceptable."
 
         - name: Did tests and coverage fail?
           if: failure()
