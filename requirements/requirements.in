@@ -1,7 +1,4 @@
-currency-codes
-python-dotenv
-duckdb
 pg8000
-pytest
-coverage
-
+boto3
+currency-codes
+duckdb
