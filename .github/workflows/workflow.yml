@@ -19,7 +19,29 @@ env:
   TF_WAREHOUSE_DB_PORT: '${{ secrets.TF_WAREHOUSE_DB_PORT }}'
   TF_WAREHOUSE_DB_USER: '${{ secrets.TF_WAREHOUSE_DB_USER }}' 
   
-  
+  AWS_ALERT_EMAIL: '${{ secrets.AWS_ALERT_EMAIL }}' 
+  AWS_CODE_BUCKET: '${{ secrets.AWS_CODE_BUCKET }}' 
+  AWS_INGEST_BUCKET: '${{ secrets.AWS_INGEST_BUCKET }}' 
+  AWS_PROCESS_BUCKET: '${{ secrets.AWS_PROCESS_BUCKET }}' 
+  AWS_STATE_BUCKET: '${{ secrets.AWS_STATE_BUCKET }}' 
+  AWS_TABLES_LIST: '${{ secrets.AWS_TABLES_LIST }}' 
+  OLTP_NAME: '${{ secrets.OLTP_NAME }}' 
+  TOTE_SYS_DB_DB: '${{ secrets.TOTE_SYS_DB_DB }}' 
+  TOTE_SYS_DB_HOST: '${{ secrets.TOTE_SYS_DB_HOST }}' 
+  TOTE_SYS_DB_PASSWORD: '${{ secrets.TOTE_SYS_DB_PASSWORD }}' 
+  TOTE_SYS_DB_PORT: '${{ secrets.TOTE_SYS_DB_PORT }}' 
+  TOTE_SYS_DB_USER: '${{ secrets.TOTE_SYS_DB_USER }}' 
+  WAREHOUSE_DB_DB: '${{ secrets.WAREHOUSE_DB_DB }}' 
+  WAREHOUSE_DB_HOST: '${{ secrets.WAREHOUSE_DB_HOST }}' 
+  WAREHOUSE_DB_PASSWORD: '${{ secrets.WAREHOUSE_DB_PASSWORD }}' 
+  WAREHOUSE_DB_PORT: '${{ secrets.WAREHOUSE_DB_PORT }}' 
+  WAREHOUSE_DB_USER: '${{ secrets.WAREHOUSE_DB_USER }}' 
+  WAREHOUSE_NAME: '${{ secrets.WAREHOUSE_NAME }}' 
+
+
+
+
+
 
 on:
   push: # this is an event
