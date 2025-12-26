@@ -111,29 +111,25 @@ The third invocation of this module by the root module provisions:    <br>
 The code in the lambda handlers of this project employs secret values that  <br>
 reside in environment variables. <br> 
 
-This project ensures that these secrets remain hidden from eavesdroppers by  <br>
-employing Terraform variables.  <br> 
+This project employs Terraform variables to help keep them secret.  <br> 
 
 For example the environment variable AWS_INGEST_BUCKET, set in development on a  <br>
-local machine, contains the name of the ingestion bucket. <br> 
-
-In production the AWS Lambda environment must also have environment variable <br> AWS_INGEST_BUCKET and its value must also be the name of the ingestion bucket.
-
-In development the local machine also creates environment variable  <br>
+local machine, contains the name of the ingestion bucket. In production the  <br>
+AWS Lambda environment must also have environment variable <br> 
+AWS_INGEST_BUCKET and its value must also be the name of the ingestion bucket.  <br>
+So in development the local machine also creates environment variable  <br>
 TF_VAR_AWS_INGEST_BUCKET and sets its value to the name of the ingestion <br>
 bucket. <br>
-<br><br>
+<br>
 
-
-After running <br>
+After running this in the command line:<br>
 `terraform apply`  <br>
-in the command line, Terraform reads the value of TF_VAR_AWS_INGEST_BUCKET, <br>
-searches for a Terraform variable AWS_INGEST_BUCKET (ie <br>
-'TF_VAR_AWS_INGEST_BUCKET' minus the 'TF_VAR_') and sets its value to the value <br>
-of TF_VAR_AWS_INGEST_BUCKET. <br>
+Terraform reads the value of TF_VAR_AWS_INGEST_BUCKET, searches for a Terraform <br>
+variable AWS_INGEST_BUCKET (ie 'TF_VAR_AWS_INGEST_BUCKET' minus 'TF_VAR_') and <br>
+sets its value to the value of TF_VAR_AWS_INGEST_BUCKET. <br>
 
 The Terraform lambda-function resource block is where code declares and sets <br>
-the environment variables that will must be available in the AWS Lambda runtime <br> environment. Hence the child module's main.tf file contains this code from the <br>
+the environment variables that will be available in the AWS Lambda runtime <br> environment. Hence the child module's main.tf file contains this code from the <br>
 lambda resource block: <br>
 
 ```hcl
@@ -155,11 +151,12 @@ locals {
 	etc 
             				}
 	    }	
-``` 
+```
 <br>
 
-Hence the secret string that is the name of the ingestion bucket remains hidden from eavesdroppers. <br>
-The same applies for ensuring that other secrets that are held in environment variables on the local development machine and that have to be present in the AWS Lambda runtime environment remain hidden from eavesdroppers. <br>
+The same applies for ensuring that other secrets that are held in environment <br>
+variables on the local development machine and that have to be present in the <br>
+AWS Lambda runtime environment remain secret. <br>
  <br>
   <br>
 
