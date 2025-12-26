@@ -32,38 +32,40 @@ logging.basicConfig(
     level=logging.DEBUG,  # Log level (includes INFO, WARNING, ERROR)
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",  # Log format
     filemode="a",  # 'a' appends. 'w' would overwrite
-)
+                    )
 
 
 def second_lambda_handler(event, context):
     """
     This function:
-        1) Either:
+        1) responds to an event that 
+            AWS S3 sends to it after 
+            the first lambda handler 
+            has put a table in the 
+            ingestion bucket.
+        
+        2) either:
             i)   Reads an object from the
                  ingestion bucket and
                  converts it into a
                  dimension table or fact
                  table, converts that
                  table into a Parquet
-                 file and writes the
-                 Parquet file to the
-                 processed S3 bucket.
+                 file, puts the Parquet 
+                 file into a BytesIO buffer 
+                 and writes the buffer
+                 to the processed S3 bucket.
 
             ii)  Creates a date
                  dimension table if this
                  is the first ever run of
                  the pipeline, converts
                  that table into a Parquet
-                 file and puts that file
-                 in the processed S3
-                 bucket.
+                 file, puts the Parquet 
+                 file into a BytesIO 
+                 buffer and puts the buffer 
+                 in the processed S3 bucket.
 
-        2) carries out 1)i) and 1)ii) in
-            in reponse to the event from
-            the S3 ingestion bucket that
-            S3 sends when the first
-            lambda has saved a table in
-            that bucket.
         3) gets the table stored under
             the key obtained from the
             event, converts it to a
@@ -73,7 +75,7 @@ def second_lambda_handler(event, context):
             that to a Parquet file and
             stores the Parquet file in
             a BytesIO buffer in the
-            processed S3 bucket under
+            processed bucket under
             key
             f"{timestamp}/fact_sales_orders.parquet"
               or
@@ -96,47 +98,36 @@ def second_lambda_handler(event, context):
     # log status:
     root_logger.info(info_lookup["info_0"])
 
-    # Make lookup table that contains
-    # values this handler requires:
+    # Make lookup table 
+    # that contains values 
+    # this handler requires:
     lookup = second_lambda_init(
-        event, boto3.client("s3"), datetime.now(), datetime(2024, 1, 1), 2557
-    )
+                            event,
+                            boto3.client("s3"),
+                            datetime.now(),
+                            datetime(2024, 1, 1),
+                            2557
+                               )
 
     # If the table just put in the
-    # ingestion bucket is "department"
-    # go no further (because there
-    # is no need to create a
-    # department dimension table):
+    # ingestion bucket is 
+    # "department", end the code 
+    # (because there is no need to 
+    # create a department dimension 
+    # table):
     if lookup["table_name"] == "department":
-        # simply stop this
-        # lambda handler:
+        # stop this lambda handler:
         return {
             "status": "Second lambda handler code skipped",
             "reason": "Because table_name is 'department' ",
-        }
+                }
 
-    # Get the jsonified python
-    # list that is the single
-    # table that this lambda
-    # handler has just been
-    # notified about:
+
     table_json = read_from_s3(
-        lookup["s3_client"],  # boto3 S3 client object,
-        lookup["ingestion_bucket"],  # name of bucket,
+        lookup["s3_client"], 
+        lookup["ingestion_bucket"],
         lookup["object_key"],
-    )  # bucket stores object
-    # under this key.
-    # table_json is
-    # jsonified [
-    # {<row data>},
-    # {<row data>},
-    # etc
-    #           ]
-    # where {<row data>} is, eg,
-    # {'design_id': 123,
-    # 'created_at': 'xxx',
-    # 'design_name': 'yyy',
-    # etc}
+                             )
 
     # convert the table into
     # a list:
@@ -149,25 +140,27 @@ def second_lambda_handler(event, context):
     # etc
     # }
 
-    # determine whether this
-    # is the first ever run
-    # of the pipeline:
+
     is_first_run = is_first_run_of_pipeline(lookup["proc_bucket"],
                                             lookup["s3_client"])
 
     if is_first_run:
         # make Parquet table,
         # put it in a buffer
-        # and return it:
+        # and return the buffer:
         pq_table_in_buff = create_dim_date_Parquet(
             lookup["start_date"],
             lookup["timestamp_string"],
             lookup["num_rows"]
                                                    )
 
+
         ts = create_formatted_timestamp()
+
         dim_date_key = f"dim_date/{ts}.parquet"
 
+        # write the table to 
+        # the processed bucket:
         upload_to_s3(
             lookup["s3_client"],
             lookup["proc_bucket"],

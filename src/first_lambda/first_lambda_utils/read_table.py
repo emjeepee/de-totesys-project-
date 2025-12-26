@@ -26,22 +26,22 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     This function:
          1) makes a dictionary that
             contains those rows of a
-            table in the toteSys
-            database that have been
-            updated. The dictionary's
-            sole key is the name of
-            the table. The value of
-            the key is a list of
-            dictionaries, each of
-            which represents an
-            updated row and contains
-            key-value pairs, each of
-            which is a
-            columnname-fieldvalue
-            pair.
+            table in database toteSys
+            that are new or contain 
+            updated data. The 
+            dictionary's sole key is 
+            the name of the table. 
+            The value of the key is a 
+            list of dictionaries, each 
+            dictionary representing an
+            updated. The key-value 
+            pairs of the dictionary are
+            columnname-fieldvalue 
+            pairs.
+
          2) makes the dictionary
             above by getting
-            i) updated rows from the
+            i) new/updated rows from the
             table in the form of a
             list of lists, each member
             list containing only cell
@@ -69,9 +69,10 @@ def read_table(table_name: str, conn: Connection, after_time: str):
          3) after_time: a time stamp
           of the form
           "2025-06-04T08:28:12". If
-          the ToteSys database has
-          changed a row of the table
-          after this time, this function
+          after this time database 
+          totesys has either hanged a 
+          row of the table or added 
+          new rows, this function
           considers the row updated.
           On the very first run of
           pipeline the value of
@@ -105,39 +106,40 @@ def read_table(table_name: str, conn: Connection, after_time: str):
 
     """
     # Get value of env var
-    # IS_OLAP_OK and convert
-    # to a boolean
-    # (IS_OLAP_OK is "False"
-    # when the info in the
-    # totesys database is
-    # no longer usable):
+    # IS_OLAP_OK, which is 
+    # "False" when database
+    # totesys stops working
+    # (ie post-Nov2025):
     IS_OLTP_OK = environ["IS_OLTP_OK"]  # "True" or "False"
     # Handle "True", "true", "TRUE", etc:
     IS_OLTP_OK = True if IS_OLTP_OK.lower() == "true" else False
 
-    # The following code no
-    # longer runs because
-    # maintenance of the data
-    # in the totesys database
-    # has stopped (Nov25)
+
+
     if IS_OLTP_OK:
         # Make a list of the column
-        # names of the table in
-        # question:
+        # names of the table:
         query_result_2 = get_column_names(
             conn, table_name
-        )  # [['staff_id'], ['first_name'], ['last_name'], etc]
+                                        )  # [
+                                           # ['staff_id'], 
+                                           # ['first_name'], 
+                                           # ['last_name'], 
+                                           # etc
+                                           # ]
 
         # Get only those rows from
         # the table that contain
+        # new rows or rows with 
         # updated data:
         query_result_1 = get_updated_rows(conn, after_time, table_name)
+
 
         # Convert query_result_2 to a
         # list of column-name strings:
         clean_col_names = [
-            col[0] for col in query_result_2
-        ]  # ['name', 'location', etc]
+                    col[0] for col in query_result_2
+                          ]  # ['name', 'location', etc]
 
         # convert field values in the
         # updated rows llike this:
@@ -151,7 +153,11 @@ def read_table(table_name: str, conn: Connection, after_time: str):
         # the key-value pairs of
         # each dictionary represent
         # <column-name>: <field-value>:
-        row_list_of_dicts = make_row_dicts(clean_col_names, cleaned_rows)
+        row_list_of_dicts = make_row_dicts(
+            clean_col_names,
+            cleaned_rows
+                                          )
+        # row_list_of_dicts looks like this:
         # [ ...
         #   {"design_id": 6,  "name": "aaa",  "value": 3.14,
         #               "date": '2024-05-01T10:30:00.123456', etc},
@@ -161,8 +167,9 @@ def read_table(table_name: str, conn: Connection, after_time: str):
 
     else:
         # This code will run
-        # once database totesys
-        # stops running:
+        # when database totesys
+        # stops running (ie 
+        # post-Nov2025):
         so_table = make_fake_so_table()
         de_table = make_fake_de_table()
         add_table = make_fake_ad_table()
@@ -179,7 +186,7 @@ def read_table(table_name: str, conn: Connection, after_time: str):
             "currency": curr_table,
             "counterparty": cp_table,
             "department": dept_table,
-        }
+                }
 
         row_list_of_dicts = lookup[table_name]
 

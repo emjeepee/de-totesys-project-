@@ -72,30 +72,43 @@ def first_lambda_handler(event, context):
         None
     """
 
-    # The .env file sets
-    # WHAT_ENV to "dev". The
-    # Lambda resource block in
-    # the child module's
-    # main.tf file sets it to
-    # "prod":
+    # If code is running in the 
+    # development environment
+    # WHAT_ENV has value "dev"
+    # and code below sets the 
+    # environment variables. 
+    # For the production 
+    # environment WHAT_ENV has 
+    # value "prod" and terraform 
+    # HCL code sets the 
+    # environment variables 
+    # (for AWS Lambda):
     if os.environ.get("WHAT_ENV") == "dev":
+        # Set env vars. Get values 
+        # from file .env:
         load_dotenv(override=True)
 
+
+    # log status of this
+    # lambda handler
     root_logger.info(info_lookup["info_0"])
+
 
     if event is None:
         event = {"time": "1900-01-01 00:00:00"}
 
-    # Get values this handler
-    # requires and put them
-    # in a lookup table:
-    lookup = get_env_vars()
+
+    # Make lookup table of 
+    # values this handler
+    # requires:
     # lookup['tables'] -> [<name string>, <name string>, etc]
     # lookup['s3_client' -> the boto3 s3 client
     # lookup['ing_bucket_name'] -> name of ingestion bucket
     # lookup['proc_bucket_name'] -> name of processed bucket
     # lookup['conn'] -> pg8000.native Connection object
-    # lookup['close_db'] -> function close_db()
+    # lookup['close_db'] -> function close_db():
+    lookup = get_env_vars()
+
 
     # Get the timestamp saved
     # in the S3 ingestion bucket
@@ -120,6 +133,7 @@ def first_lambda_handler(event, context):
         lookup["conn"],  # pg8000.native Connection object
         read_table,
     )
+    # new_table_data looks like this:
     # [
     # {'design': [{<updated-row data>}, etc]},
     # {'sales': [{<updated-row data>}, etc]},
@@ -135,61 +149,63 @@ def first_lambda_handler(event, context):
     # Log status:
     root_logger.info(info_lookup["info_1"])
 
+
     # If the department table or
     # the address table are in
-    # list updated_tables, move
-    # them to the front of the
-    # list. This ensures that
-    # updated versions of those
-    # tables are always
-    # available for the code in
-    # the second lambda handler
-    # that creates the dim_staff
-    # and dim_counterparty tables:
+    # list new_table_data, move
+    # them to indexes [0] and [1]
+    # to ensure that updated 
+    # versions of those tables 
+    # are always available for 
+    # certain code in the second 
+    # lambda handler:
     data_for_s3 = reorder_list(new_table_data, "address", "department")
 
-    # determine if this is the
-    # first ever run of the
-    # pipeline:
+
     is_first_run = is_first_run_of_pipeline(
         lookup["proc_bucket_name"], lookup["s3_client"]
-    )
+                                           )
 
-    # if it is the first ever
-    # run of the pipeline, save
+    # if first ever run of 
+    # the pipeline, write
     # all tables to the
     # ingestion bucket:
     if is_first_run:
         write_tables_to_ing_buck(
             lookup["s3_client"], lookup["ing_bucket_name"], data_for_s3
-        )
+                                )
 
-    # if it is the 2nd-plus
-    # run of the pipeline,
-    # update the tables and
-    # then save them to the
-    # ingestion bucket:
+    # if 2nd-plus run of 
+    # pipeline, update the 
+    # tables, then write them 
+    # to the ingestion bucket:
     if not is_first_run:
         updated_tables = make_updated_tables(
             data_for_s3, lookup["s3_client"], lookup["ing_bucket_name"]
-        )
+                                            )
 
         write_tables_to_ing_buck(
             lookup["s3_client"], lookup["ing_bucket_name"], updated_tables
-        )
+                                )
 
-    # Log status:
+
+    # Log status of this 
+    # lambda handler:
     root_logger.info(info_lookup["info_2"])
+
+
 
     # Close connection to
     # totesys database.
     # lookup['close_db']
     # returns function
-    # close_db, which
-    # closes the
-    # connection to a
-    # database:
+    # close_db. lookup["conn"]
+    # returns a pg8000.native
+    # Connection object:
     lookup["close_db"](lookup["conn"])
 
-    # Log status:
+
+
+    # Log status of this 
+    # lambda handler:
     root_logger.info(info_lookup["info_3"])

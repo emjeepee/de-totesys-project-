@@ -3,34 +3,43 @@
 <br><br>
 
 This document contains:  <br>
-#### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A conceptual breakdown of the infrastructure 
-#### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; An overview of the modules
-#### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The modules in detail
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+– A conceptual breakdown of the infrastructure <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+– An overview of the modules<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+– A description of the modules in detail<br>
 
-
-
-
-<br><br><br>
+<br><br>
 
 
 ## Conceptual breakdown of the infrastructure 
 
- We can arbitrarily split the cloud infrastructure of the project into four sections: <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;section (1):&nbsp;&nbsp;&nbsp;&nbsp;The provider, the code and backend buckets, the EventBridge Scheduler, associated infrastructure <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;section (2):&nbsp;&nbsp;&nbsp;&nbsp;The extract lambda plus associated infrastructure, and the ingestion bucket plus associated infrastructure <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;section (3):&nbsp;&nbsp;&nbsp;&nbsp;The transform lambda plus associated infrastructure, and the processed bucket plus associated infrastructure <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;section (4):&nbsp;&nbsp;&nbsp;&nbsp;The load lambda plus associated infrastructure <br>
+ We can arbitrarily split the cloud infrastructure of the project into four <br>
+ sections: <br> <br>
+*section 1*  <br>
+The provider, the code and backend buckets, the EventBridge <br>
+Scheduler, associated infrastructure <br> <br>
+*section 2* <br>
+The extract lambda plus associated infrastructure, and the <br>
+ingestion bucket plus associated infrastructure <br> <br>
+*section 3* <br>
+The transform lambda plus associated infrastructure, and the <br>
+processed bucket plus associated infrastructure <br> <br>
+*section 4* <br>
+The load lambda plus associated infrastructure <br>
 <br> <br> 
  This project employs two Terraform modules:   
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a root module to provision section (1) <br> 
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a child module that the root module invokes three times to provision sections (2), (3) and (4)
+   1) a root module to provision section (section 1) <br> 
+   2) a child module that the root module invokes three times to provision <br>(sections 2, 3 and 4)
 
 <br><br><br>
  
  ## Overview of the modules:
   
- The root module provisions section (1).  <br>
- The root module calls the child module three times to provision sections (2), (3) and (4).  <br>
+ The root module provisions section 1.  <br>
+ The root module calls the child module three times to provision sections 2, 3<br>
+ and 4.  <br>
  
  The child module conditionally provisions:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(a)&nbsp;&nbsp;&nbsp;&nbsp;a lambda function and associated infrastructure,  <br>
@@ -39,9 +48,18 @@ This document contains:  <br>
 <br> 
 
 The root module's <br> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; first invocation of the child module provisions section 2 (the extract lambda and the ingestion bucket);  <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; second invocation of the child module provisions section 3 (the transform lambda and the processed bucket);  <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; third invocation of the child module provisions section 4 (the load lambda only).  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+first invocation of the child module provisions section 2 (the extract lambda  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+and the ingestion bucket);  <br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+second invocation of the child module provisions section 3 (the transform  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+lambda and the processed bucket);  <br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+third invocation of the child module provisions section 4 (the load lambda  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+only). <br>
  
  <br><br><br>
 
@@ -61,7 +79,7 @@ The root module provisions the following non-repeated infrastructure: <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The loading of the zipped lambdas into the code bucket  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The loading of the zipped shared layer into the code bucket  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The lambda layer version  <br> <br>
-&nbsp;&nbsp;&nbsp;&nbsp;The root module also invokes the child module thrice, passing in boolean variables each time to provision some resources of the child module and to avoid provisioning others.
+The root module also invokes the child module thrice, passing in boolean variables each time to provision some resources of the child module and to avoid provisioning others.
 <br>
 <br>
 
@@ -90,31 +108,41 @@ The third invocation of this module by the root module provisions:    <br>
  <br><br><br>
 
 ## Environment variables and secrets:  <br>
-The code in the lambda handlers of this project employs secret values that reside in environment variables. <br> 
+The code in the lambda handlers of this project employs secret values that  <br>
+reside in environment variables. <br> 
 
-This project ensures that these secrets remain hidden from eavesdroppers by employing Terraform variables.  <br> 
+This project ensures that these secrets remain hidden from eavesdroppers by  <br>
+employing Terraform variables.  <br> 
 
-For example the environment variable AWS_INGEST_BUCKET, set in development on a local machine, contains the name of the ingestion bucket. <br> 
+For example the environment variable AWS_INGEST_BUCKET, set in development on a  <br>
+local machine, contains the name of the ingestion bucket. <br> 
 
-In production the AWS Lambda environment must also have environment variable AWS_INGEST_BUCKET and its value must also be the name of the ingestion bucket.
+In production the AWS Lambda environment must also have environment variable <br> AWS_INGEST_BUCKET and its value must also be the name of the ingestion bucket.
 
-In development the local machine also sets the value of environment variable TF_VAR_AWS_INGEST_BUCKET to the name of the ingestion bucket. <br>
+In development the local machine also creates environment variable  <br>
+TF_VAR_AWS_INGEST_BUCKET and sets its value to the name of the ingestion <br>
+bucket. <br>
 <br><br>
 
 
 After running <br>
 `terraform apply`  <br>
-in the command line, Terraform reads the value of TF_VAR_AWS_INGEST_BUCKET, searches for a Terraform variable AWS_INGEST_BUCKET (ie 'TF_VAR_AWS_INGEST_BUCKET' minus the 'TF_VAR_') and sets its value to the value of TF_VAR_AWS_INGEST_BUCKET. <br>
+in the command line, Terraform reads the value of TF_VAR_AWS_INGEST_BUCKET, <br>
+searches for a Terraform variable AWS_INGEST_BUCKET (ie <br>
+'TF_VAR_AWS_INGEST_BUCKET' minus the 'TF_VAR_') and sets its value to the value <br>
+of TF_VAR_AWS_INGEST_BUCKET. <br>
 
-The Terraform lambda-function resource block is where code declares and sets the environment variables that will must be available in the AWS Lambda runtime environment. Hence the child module's main.tf file contains this code from the lambda resource block: <br>
+The Terraform lambda-function resource block is where code declares and sets <br>
+the environment variables that will must be available in the AWS Lambda runtime <br> environment. Hence the child module's main.tf file contains this code from the <br>
+lambda resource block: <br>
 
 ```hcl
 resource "aws_lambda_function" "mod_lambda" {
 
   environment {
     variables = local.common_env_vars
-  }
-} 
+              }
+                                            }                  
 ```
 
 <br>
@@ -123,11 +151,10 @@ and the locals block in the child module's main.tf file contains this code: <br>
 ```hcl
 locals {
   common_env_vars = {
-    # The S3 bucket names:  
     AWS_INGEST_BUCKET  = var.AWS_INGEST_BUCKET 
 	etc 
-  				}
-	  }	
+            				}
+	    }	
 ``` 
 <br>
 
