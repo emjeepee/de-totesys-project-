@@ -15,51 +15,58 @@ This document contains:  <br>
 
 ## Conceptual breakdown of the infrastructure 
 
- We can arbitrarily split the cloud infrastructure of the project into four <br>
- sections: <br> <br>
+ We can arbitrarily split the terraform infrastructure as code for the project <br>
+ into four sections: <br> <br>
 *section 1*  <br>
-The provider, the code and backend buckets, the EventBridge <br>
-Scheduler, associated infrastructure <br> <br>
+Terraform HCL code for   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+The provider   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+The backend and code S3 buckets  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+The EventBridge Scheduler and associated infrastructure. <br> <br>
+
+
 *section 2* <br>
-The extract lambda plus associated infrastructure, and the <br>
-ingestion bucket plus associated infrastructure <br> <br>
+Terraform HCL code for   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+The extract Lambda plus associated infrastructure<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+The ingestion S3 bucket plus associated infrastructure. <br> <br>
+
+
 *section 3* <br>
-The transform lambda plus associated infrastructure, and the <br>
-processed bucket plus associated infrastructure <br> <br>
+Terraform HCL code for   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+The transform Lambda plus associated infrastructure<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+processed bucket plus associated infrastructure. <br> <br>
+
 *section 4* <br>
-The load lambda plus associated infrastructure <br>
+The load Lambda plus associated infrastructure. <br>
 <br> <br> 
- This project employs two Terraform modules:   
-   1) a root module to provision section (section 1) <br> 
-   2) a child module that the root module invokes three times to provision <br>(sections 2, 3 and 4)
+
+
+This project runs sections 1-4 in this way:   
+   1) &nbsp;&nbsp;&nbsp;by employing a root module to run *section 1* <br> 
+   2) &nbsp;&nbsp;&nbsp;by having the root module invoke the child module three <br> 
+   &nbsp;&nbsp;&nbsp;times - <br> 
+   &nbsp;&nbsp;&nbsp;- the first time to run *section 2*,<br>
+   &nbsp;&nbsp;&nbsp;- the second time to run *section 3*, <br> 
+   &nbsp;&nbsp;&nbsp;- the third time to run *section 4*.
 
 <br><br><br>
  
  ## Overview of the modules:
   
- The root module provisions section 1.  <br>
- The root module calls the child module three times to provision sections 2, 3<br>
- and 4.  <br>
- 
+
  The child module conditionally provisions:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(a)&nbsp;&nbsp;&nbsp;&nbsp;a lambda function and associated infrastructure,  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(b)&nbsp;&nbsp;&nbsp;&nbsp;an s3 bucket and associated infrastructure<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <br> 
 
-The root module's <br> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-first invocation of the child module provisions section 2 (the extract lambda  <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-and the ingestion bucket);  <br><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-second invocation of the child module provisions section 3 (the transform  <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-lambda and the processed bucket);  <br><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-third invocation of the child module provisions section 4 (the load lambda  <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-only). <br>
+
  
  <br><br><br>
 
@@ -74,8 +81,8 @@ The root module provisions the following non-repeated infrastructure: <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A policy to allow the scheduler to trigger a lambda function <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A policy attachment for the scheduler  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A backend S3 bucket to hold the state file  <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An S3 bucket to store the three zipped lambda handlers and shared zipped layer  <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A policy to allow AWS Lambda service to read the bucket that contains the zipped files  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An S3 code bucket to store the three zipped lambda handlers and shared zipped layer  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A policy to allow the AWS Lambda service to read the bucket that contains the zipped files  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The loading of the zipped lambdas into the code bucket  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The loading of the zipped shared layer into the code bucket  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The lambda layer version  <br> <br>
@@ -97,13 +104,14 @@ The second invocation of this module by the root module provisions:  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An execution role for the transform lambda <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A role policy for reading from the ingestion bucket <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The attachment for that policy <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A policy to write to the processed bucket <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A role policy to write to the processed bucket <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An attachment for that policy <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The processed S3 bucket <br><br>
 
 The third invocation of this module by the root module provisions:    <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The load lambda function <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A policy to let the lambda read from the processed bucket <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An execution role for the load lambda <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A role policy to let the lambda read from the processed bucket <br>
 
  <br><br><br>
 
@@ -111,10 +119,10 @@ The third invocation of this module by the root module provisions:    <br>
 The code in the lambda handlers of this project employs secret values that  <br>
 reside in environment variables. <br> 
 
-This project employs Terraform variables to help keep them secret.  <br> 
+This project employs Terraform variables to maintain their secrecy.  <br> 
 
 For example the environment variable AWS_INGEST_BUCKET, set in development on a  <br>
-local machine, contains the name of the ingestion bucket. In production cloud  <br>
+local machine, contains the name of the ingestion bucket. In production, cloud<br>
 service AWS Lambda must also make environment variable AWS_INGEST_BUCKET <br> available to code in the lambda handlers.  <br>
 
 This project keeps the values of environment variables secret by using this <br>
