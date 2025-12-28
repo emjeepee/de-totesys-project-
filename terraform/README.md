@@ -114,23 +114,13 @@ reside in environment variables. <br>
 This project employs Terraform variables to help keep them secret.  <br> 
 
 For example the environment variable AWS_INGEST_BUCKET, set in development on a  <br>
-local machine, contains the name of the ingestion bucket. In production the  <br>
-AWS Lambda environment must also have environment variable <br> 
-AWS_INGEST_BUCKET and its value must also be the name of the ingestion bucket.  <br>
-So in development the local machine also creates environment variable  <br>
-TF_VAR_AWS_INGEST_BUCKET and sets its value to the name of the ingestion <br>
-bucket. <br>
-<br>
+local machine, contains the name of the ingestion bucket. In production cloud  <br>
+service AWS Lambda must also make environment variable AWS_INGEST_BUCKET <br> available to code in the lambda handlers.  <br>
 
-After running this in the command line:<br>
-`terraform apply`  <br>
-Terraform reads the value of TF_VAR_AWS_INGEST_BUCKET, searches for a Terraform <br>
-variable AWS_INGEST_BUCKET (ie 'TF_VAR_AWS_INGEST_BUCKET' minus 'TF_VAR_') and <br>
-sets its value to the value of TF_VAR_AWS_INGEST_BUCKET. <br>
+This project keeps the values of environment variables secret by using this <br>
+code in file **main.tf** in directory child-module:  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-The Terraform lambda-function resource block is where code declares and sets <br>
-the environment variables that will be available in the AWS Lambda runtime <br> environment. Hence the child module's main.tf file contains this code from the <br>
-lambda resource block: <br>
 
 ```hcl
 resource "aws_lambda_function" "mod_lambda" {
@@ -142,26 +132,57 @@ resource "aws_lambda_function" "mod_lambda" {
 ```
 
 <br>
-and the locals block in the child module's main.tf file contains this code: <br>
+
+and the locals block in file **main.tf** of directory child-module contains <br> 
+this code: <br>
 
 ```hcl
 locals {
   common_env_vars = {
     AWS_INGEST_BUCKET  = var.AWS_INGEST_BUCKET 
 	etc 
-            				}
+       				}
 	    }	
 ```
 <br>
 
-The same applies for ensuring that other secrets that are held in environment <br>
-variables on the local development machine and that have to be present in the <br>
-AWS Lambda runtime environment remain secret. <br>
+Additionally in development this project sets the value of environment variable 
+TF_VAR_AWS_INGEST_BUCKET to the name of the ingestion bucket.<br>
+
+On running this in the command line:<br>
+```terraform apply``` <br>
+Terraform sets the value of *terraform* variable var.AWS_INGEST_BUCKET to the <br> 
+value of TF_VAR_AWS_INGEST_BUCKET, ie the string that is the name of the <br>
+ingestion bucket. <br>
+
+The same applies for other environment variables that hold secrets. <br>
  <br>
   <br>
 
-### Getting secrets into GitHub Actions 
+### CI/CD 
+This project uses GitHub Actions for CI/CD.<br>
 
-TO FOLLOW <br>
-TO FOLLOW <br>
-TO FOLLOW <br>
+The workflow.yml employs lines such as the following two to ensure that the <br>
+correct environment variables are available for running all tests and for <br>
+ensuring that cloud service AWS Lambda makes secret values available for the <br> 
+lambda handlers:
+
+1) to ensure that secret values are available for tests -<br>
+```AWS_INGEST_BUCKET: '${{ secrets.AWS_INGEST_BUCKET }}' ```   <br>
+
+2) to ensure that terraform sets environment variables for AWS Lambda to the <br>
+correct secret values -<br>
+```TF_VAR_AWS_INGEST_BUCKET: '${{ secrets.AWS_INGEST_BUCKET }}'``` <br>
+
+<br>
+In retrospect this project should have:<br>
+a) set only environment variable such as TF_VAR_AWS_INGEST_BUCKET in <br>
+development and should have avoided using environment variable such as <br> AWS_INGEST_BUCKET at all.<br>
+b) ensured that the code of the lambda handlers accessed secret values by <br> 
+reading environment variables such as TF_VAR_AWS_INGEST_BUCKET. <br>
+c) setting only environment variables such as TF_VAR_AWS_INGEST_BUCKET in <br> 
+GitHub Actions, like this <br>
+
+```TF_VAR_AWS_INGEST_BUCKET: '${{ secrets.AWS_INGEST_BUCKET }}'``` ,
+<br>
+ie avoiding setting ```AWS_INGEST_BUCKET``` at all.
