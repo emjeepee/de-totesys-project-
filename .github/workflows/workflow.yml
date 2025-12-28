@@ -72,9 +72,9 @@ jobs:
               python -m pip install --upgrade pip
               python -m pip install pip-tools
               cd requirements
-              pip-compile requirements.in
+              pip-compile GHA_test_requirements.in
               cd ..
-              pip install -r requirements/requirements.txt            
+              pip install -r requirements/GHA_test_requirements.txt            
 
 
         # Now run the tests and if a test 
@@ -95,7 +95,52 @@ jobs:
 
         - name: Did tests and coverage fail?
           if: failure()
-          run: echo "One test or more failed or coverage is <90%. GHA job stopped."
+          run: echo "One/2+ tests failed or coverage is <90%. GHA job stopped."
+
+  # Run tests and tool coverage
+  zip-lambdas:
+    name: Zip the lambdas and place in folder zipped_files
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout the repo
+          uses: actions/checkout@v5
+
+         # zip lambdas
+        - name: Zip lambdas
+          run: |
+            cd src/first_lambda
+            zip -r ../../zipped_files/first_lambda.zip .
+            cd "$GITHUB_WORKSPACE"
+            cd second_lambda
+            zip -r ../../zipped_files/second_lambda.zip .
+            cd "$GITHUB_WORKSPACE"
+            cd third_lambda
+            zip -r ../../zipped_files/third_lambda.zip .
+            cd "$GITHUB_WORKSPACE"
+
+         # Install Python
+        - name: Set up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.12'
+
+        - name: Make layer
+          run: |
+              python -m pip install --upgrade pip
+              python -m pip install pip-tools
+              cd requirements
+              pip-compile GHA_layer_requirements.in
+              cd ..
+              mkdir layer/python/lib/python3.12/site-packages
+              python -m pip install \
+              -r requirements/GHA_layer_requirements.txt \
+              -t layer/python/lib/python3.12/site-packages
+
+
+        - name: Zip layer and place in folder zipped_files
+          run: |
+              cd layer
+              zip -r ../zipped_files/layer.zip python            
 
 
 
