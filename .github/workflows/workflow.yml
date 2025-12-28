@@ -111,10 +111,10 @@ jobs:
             cd src/first_lambda
             zip -r ../../zipped_files/first_lambda.zip .
             cd "$GITHUB_WORKSPACE"
-            cd second_lambda
+            cd src/second_lambda
             zip -r ../../zipped_files/second_lambda.zip .
             cd "$GITHUB_WORKSPACE"
-            cd third_lambda
+            cd src/third_lambda
             zip -r ../../zipped_files/third_lambda.zip .
             cd "$GITHUB_WORKSPACE"
 
