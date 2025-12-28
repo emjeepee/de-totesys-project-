@@ -125,16 +125,21 @@ jobs:
             python-version: '3.12'
 
         - name: Make layer
+        # NOTE: when you use a 
+        # continuation character
+        # ('\') you have to have 
+        # an indent on the new 
+        # lines:
           run: |
               python -m pip install --upgrade pip
               python -m pip install pip-tools
               cd requirements
               pip-compile GHA_layer_requirements.in
               cd ..
-              mkdir layer/python/lib/python3.12/site-packages
+              mkdir -p layer/python/lib/python3.12/site-packages
               python -m pip install \
-              -r requirements/GHA_layer_requirements.txt \
-              -t layer/python/lib/python3.12/site-packages
+                -r requirements/GHA_layer_requirements.txt \
+                -t layer/python/lib/python3.12/site-packages
 
 
         - name: Zip layer and place in folder zipped_files
