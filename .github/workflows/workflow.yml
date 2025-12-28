@@ -109,6 +109,7 @@ jobs:
          # zip lambdas
         - name: Zip lambdas
           run: |
+            mkdir -p zipped_files
             cd src/first_lambda
             zip -r ../../zipped_files/first_lambda.zip .
             cd "$GITHUB_WORKSPACE"
