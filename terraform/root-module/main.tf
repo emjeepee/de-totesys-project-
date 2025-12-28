@@ -184,6 +184,17 @@ resource "aws_s3_object" "first_lambda_zip" {
                                               # the directory that contains
                                               # this file we are in, ie 
                                               # directory terraform/root-module
+  
+  # ensure Terraform has 
+  # provisioned the code 
+  # bucket first: 
+  depends_on = [aws_s3_bucket.code_bucket]
+  
+  # Add this to ensure 
+  # Terraform re-uploads 
+  # when the file changes
+  etag   = filemd5("${path.module}/../../zipped_files/first_lambda.zip")
+
                                             }
 
 # zipped handler for the second
@@ -192,6 +203,18 @@ resource "aws_s3_object" "second_lambda_zip" {
   bucket = var.AWS_CODE_BUCKET
   key    = "zipped/second_lambda.zip"
   source = "../../zipped_files/second_lambda.zip"  # must be relative to dir terraform/root-module
+
+  # ensure Terraform has 
+  # provisioned the code 
+  # bucket first: 
+  depends_on = [aws_s3_bucket.code_bucket]
+  
+  # Add this to ensure 
+  # Terraform re-uploads 
+  # when the file changes
+  etag   = filemd5("${path.module}/../../zipped_files/second_lambda.zip")
+
+
                                               }
 
 # zipped handler for the third
@@ -200,7 +223,19 @@ resource "aws_s3_object" "third_lambda_zip" {
   bucket = var.AWS_CODE_BUCKET
   key    = "zipped/third_lambda.zip"
   source = "../../zipped_files/third_lambda.zip"  # must be relative to dir terraform/root-module
-                                            }
+
+
+  # ensure Terraform has 
+  # provisioned the code 
+  # bucket first: 
+  depends_on = [aws_s3_bucket.code_bucket]
+  
+  # Add this to ensure 
+  # Terraform re-uploads 
+  # when the file changes
+  etag   = filemd5("${path.module}/../../zipped_files/third_lambda.zip")
+
+                                           }
 
 
 
