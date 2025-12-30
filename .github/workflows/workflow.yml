@@ -124,14 +124,7 @@ jobs:
 
         # - name: Terraform provisions cloud infra
         #   run: |
-        #     chmod +x scripts/build_layer.sh
-        #     ./scripts/build_layer.sh
 
-
-        # - name: Terraform provisions cloud infra
-        #   run: |
-        #     chmod +x scripts/build_layer.sh
-        #     ./scripts/build_layer.sh
 
          
 
