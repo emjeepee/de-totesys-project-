@@ -120,6 +120,7 @@ jobs:
           run: |
             chmod +x scripts/build_layer.sh
             ./scripts/build_layer.sh
+            mkdir this_is_a_test
 
 
         # - name: Terraform provisions cloud infra
