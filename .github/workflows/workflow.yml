@@ -120,12 +120,18 @@ jobs:
           run: |
             chmod +x scripts/build_layer.sh
             ./scripts/build_layer.sh
-            mkdir this_is_a_test
 
 
-        # - name: Terraform provisions cloud infra
-        #   run: |
+        - name: Set up Terraform
+          uses: hashicorp/setup-terraform@v3
+          with:
+            terraform_version: 1.14.3
 
+        - name: Let Terraform provision cloud infra
+          run: |
+            chmod +x scripts/provision_cloud_infra.sh
+            ./scripts/provision_cloud_infra.sh
+            
 
          
 
