@@ -39,15 +39,14 @@ __pycache__/
 # install dependencies in it:
 layer/
 
-# The workflow.yml file makes the 
-# GHA runner generate the 
+# DO NOT generate the 
 # requirements/*requirements.txt 
 # files from the 
 # requirements/*requirements.in 
-# files, so no need to upload them
-# to the remote repository: 
-requirements/layer-requirements.txt
-requirements/requirements.txt
+# files in GitHub Actions; do that 
+# locally: 
+requirements/GHA_layer_requirements.in
+requirements/GHA_test_requirements.in
 
 
 
