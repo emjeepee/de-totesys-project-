@@ -136,7 +136,7 @@ jobs:
             aws-region: eu-west-2
 
 
-        - name: Let Terraform provision cloud infra
-          run: |
-            chmod +x scripts/provision_cloud_infra.sh
-            ./scripts/provision_cloud_infra.sh
+        # - name: Let Terraform provision cloud infra
+        #   run: |
+        #     chmod +x scripts/provision_cloud_infra.sh
+        #     ./scripts/provision_cloud_infra.sh
