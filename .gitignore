@@ -39,12 +39,14 @@ __pycache__/
 # install dependencies in it:
 layer/
 
+
 # DO NOT generate the 
 # requirements/*requirements.txt 
 # files from the 
 # requirements/*requirements.in 
 # files in GitHub Actions; do that 
-# locally: 
+# locally (because it slows GitHub 
+# Actions down a lot): 
 requirements/GHA_layer_requirements.in
 requirements/GHA_test_requirements.in
 
