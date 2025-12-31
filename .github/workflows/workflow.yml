@@ -138,7 +138,7 @@ jobs:
 # Wed31Dec25 – all working up to this point
 
 
-        # - name: Let Terraform provision cloud infra
-        #   run: |
-        #     chmod +x scripts/provision_cloud_infra.sh
-        #     ./scripts/provision_cloud_infra.sh
+        - name: Let Terraform provision cloud infra
+          run: |
+            chmod +x scripts/provision_cloud_infra.sh
+            ./scripts/provision_cloud_infra.sh
