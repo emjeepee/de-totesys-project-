@@ -135,6 +135,8 @@ jobs:
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: eu-west-2
 
+# Wed31Dec25 – all working up to this point
+
 
         # - name: Let Terraform provision cloud infra
         #   run: |
