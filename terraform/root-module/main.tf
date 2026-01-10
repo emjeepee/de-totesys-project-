@@ -168,7 +168,7 @@ resource "aws_s3_object" "layer_zip" {
   # Add this to ensure 
   # Terraform re-uploads 
   # when the file changes
-  etag   = filemd5("${path.module}/../../zipped_files/layer.zip")
+  # etag   = filemd5("${path.module}/../../zipped_files/layer.zip")
 
                                      }
 
@@ -193,7 +193,7 @@ resource "aws_s3_object" "first_lambda_zip" {
   # Add this to ensure 
   # Terraform re-uploads 
   # when the file changes
-  etag   = filemd5("${path.module}/../../zipped_files/first_lambda.zip")
+  # etag   = filemd5("${path.module}/../../zipped_files/first_lambda.zip")
 
                                             }
 
@@ -212,7 +212,7 @@ resource "aws_s3_object" "second_lambda_zip" {
   # Add this to ensure 
   # Terraform re-uploads 
   # when the file changes
-  etag   = filemd5("${path.module}/../../zipped_files/second_lambda.zip")
+  # etag   = filemd5("${path.module}/../../zipped_files/second_lambda.zip")
 
 
                                               }
@@ -233,7 +233,7 @@ resource "aws_s3_object" "third_lambda_zip" {
   # Add this to ensure 
   # Terraform re-uploads 
   # when the file changes
-  etag   = filemd5("${path.module}/../../zipped_files/third_lambda.zip")
+  # etag   = filemd5("${path.module}/../../zipped_files/third_lambda.zip")
 
                                            }
 

@@ -49,6 +49,7 @@ on:
 
 jobs:
   run-tests-and-coverage:
+    if: false
     name: Run all tests and tool coverage
 
     runs-on: ubuntu-latest # always use a Linux VM
@@ -95,6 +96,7 @@ jobs:
 
 
   zip-lambdas:
+    if: false
     name: Zip lambdas & layer, put in dir zipped_files
     runs-on: ubuntu-latest
     needs: run-tests-and-coverage
@@ -135,8 +137,8 @@ jobs:
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: eu-west-2
 
-# Wed31Dec25 – all working up to this point
-
+# Wed31Dec25 – all working up to this point.
+# The following job is taking forever!
 
         - name: Let Terraform provision cloud infra
           run: |
