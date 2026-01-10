@@ -2,20 +2,26 @@
 from .clean_data import clean_data
 
 
-def get_data_from_db(table_names: list, after_time: str, conn, read_table):
+def get_data_from_db(table_names: list, 
+                     after_time: str, 
+                     conn, 
+                     read_table
+                     ):
     """
     This function:
         1) loops through a list of
             names of all tables in
-            the database toteSys
-        2) in the loop, for each
-           table in database totesys 
-           gets those rows of the 
-           table that contain
-           field data updated after 
-           passed-in time after_time.
+            database toteSys
+
+        2) in a loop gets those 
+           rows of each table that 
+           contain field data 
+           updated after passed-in 
+           time after_time.
+
         3) creates a list of such
            tables.
+
         4) returns that list.
 
     Args:
@@ -76,7 +82,7 @@ def get_data_from_db(table_names: list, after_time: str, conn, read_table):
         
         data_list.append(clean_table_dict)
         # data_list becomes: [{'design': [{<updated-row data>}, etc]},
-        # {'sales': [{<updated-row data>}, etc]}, etc].
+        #                     {'sales': [{<updated-row data>}, etc]}, etc].
         # where {<updated-row data>} is, eg,
         # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
     

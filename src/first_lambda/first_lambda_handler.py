@@ -37,7 +37,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     filemode="a",  # 'a' appends, 'w' would overwrite
-)
+                    )
 
 
 def first_lambda_handler(event, context):
@@ -84,8 +84,8 @@ def first_lambda_handler(event, context):
     # environment variables 
     # (for AWS Lambda):
     if os.environ.get("WHAT_ENV") == "dev":
-        # Set env vars. Get values 
-        # from file .env:
+        # Set the environment vars. 
+        # Get values from file .env:
         load_dotenv(override=True)
 
 
@@ -119,7 +119,7 @@ def first_lambda_handler(event, context):
         lookup["s3_client"],  # boto3 S3 client object
         "***timestamp***",
         "1900-01-01 00:00:00",
-    )
+                                            )
 
     # Get tables from database
     # totesys that have updated
@@ -132,7 +132,7 @@ def first_lambda_handler(event, context):
         after_time,
         lookup["conn"],  # pg8000.native Connection object
         read_table,
-    )
+                                      )
     # new_table_data looks like this:
     # [
     # {'design': [{<updated-row data>}, etc]},
@@ -164,15 +164,16 @@ def first_lambda_handler(event, context):
 
     is_first_run = is_first_run_of_pipeline(
         lookup["proc_bucket_name"], lookup["s3_client"]
-                                           )
+                                           ) # Boolean
 
     # if first ever run of 
     # the pipeline, write
     # all tables to the
     # ingestion bucket:
     if is_first_run:
-        write_tables_to_ing_buck(
-            lookup["s3_client"], lookup["ing_bucket_name"], data_for_s3
+        write_tables_to_ing_buck( lookup["s3_client"], 
+                                  lookup["ing_bucket_name"], 
+                                  data_for_s3
                                 )
 
     # if 2nd-plus run of 
@@ -180,12 +181,14 @@ def first_lambda_handler(event, context):
     # tables, then write them 
     # to the ingestion bucket:
     if not is_first_run:
-        updated_tables = make_updated_tables(
-            data_for_s3, lookup["s3_client"], lookup["ing_bucket_name"]
+        updated_tables = make_updated_tables( data_for_s3, 
+                                              lookup["s3_client"], 
+                                              lookup["ing_bucket_name"]
                                             )
 
-        write_tables_to_ing_buck(
-            lookup["s3_client"], lookup["ing_bucket_name"], updated_tables
+        write_tables_to_ing_buck( lookup["s3_client"], 
+                                  lookup["ing_bucket_name"], 
+                                  updated_tables
                                 )
 
 
