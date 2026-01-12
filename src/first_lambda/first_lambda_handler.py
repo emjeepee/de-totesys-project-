@@ -115,8 +115,8 @@ def first_lambda_handler(event, context):
     # and replace it with one
     # for the current time:
     after_time = change_after_time_timestamp(
-        lookup["ing_bucket_name"],  # name of ingestion bucket
-        lookup["s3_client"],  # boto3 S3 client object
+        lookup["ing_bucket_name"],  
+        lookup["s3_client"],  
         "***timestamp***",
         "1900-01-01 00:00:00",
                                             )
@@ -163,7 +163,8 @@ def first_lambda_handler(event, context):
 
 
     is_first_run = is_first_run_of_pipeline(
-        lookup["proc_bucket_name"], lookup["s3_client"]
+                                            lookup["proc_bucket_name"], 
+                                            lookup["s3_client"]
                                            ) # Boolean
 
     # if first ever run of 

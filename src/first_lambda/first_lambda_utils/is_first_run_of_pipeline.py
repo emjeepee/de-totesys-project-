@@ -29,11 +29,12 @@ def is_first_run_of_pipeline(proc_bucket: str, s3_client):
 
     try:
         objects_list = s3_client.list_objects_v2(Bucket=proc_bucket)
-
+        return objects_list["KeyCount"] == 0
+    
     except ClientError:
         # log exception and
         # stop the code:
         logger.exception(errors_lookup["err_2"])
         raise
 
-    return objects_list["KeyCount"] == 0
+    

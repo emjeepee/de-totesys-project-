@@ -1,16 +1,21 @@
 import logging
 
 from botocore.exceptions import ClientError
-from datetime import datetime, UTC
+from datetime            import datetime, UTC
 
-from .errors_lookup import errors_lookup
+from .errors_lookup      import errors_lookup
+from .get_timestamp      import get_timestamp
+from .replace_timestamp  import replace_timestamp
 
 
 # __name__ has value "change_after_time_timestamp.py"
 logger = logging.getLogger(__name__)
 
 
-def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
+def change_after_time_timestamp(bucket_name, 
+                                s3_client, 
+                                ts_key, 
+                                default_ts):
     """
     This function:
         1) is the first utility
@@ -88,38 +93,68 @@ def change_after_time_timestamp(bucket_name, s3_client, ts_key, default_ts):
     now_ts_datetime = datetime.now(UTC)
     now_ts = now_ts_datetime.isoformat()[:-13]
 
-    try:
-        # Get previous timestamp
-        # from bucket:
-        response = s3_client.get_object(Bucket=bucket_name, Key=ts_key)
+    timestamp = get_timestamp(s3_client, 
+                              bucket_name,
+                              ts_key,
+                              logger,
+                              errors_lookup,
+                              default_ts)
 
-    except ClientError:
-        # boto3 raises this
-        # exception either on the
-        # first ever run of the
-        # pipeline (because the
-        # s3 bucket contains no
-        # timestamp) or if there
-        # is a problem with
-        # AWS S3 and reading the
-        # ingestion bucket fails.
-        # Return the timestamp
-        # for the year 1900:
-        logger.exception(errors_lookup["err_0"])  # <-- logs full stacktrace
-        return default_ts
+    replace_timestamp(s3_client,
+                      bucket_name,
+                      ts_key,
+                      now_ts,
+                      logger,
+                      errors_lookup
+                      )
 
-    try:
-        # Replace previous timestamp
-        # in the bucket with new
-        # timestamp:
-        s3_client.put_object(Bucket=bucket_name, Key=ts_key, Body=now_ts)
+    # Return the previous/
+    # default timestamp:
+    return timestamp
 
-    except ClientError:
-        # if failure, log the
-        # error but allow the
-        # code to continue:
-        logger.exception(errors_lookup["err_1"])  # <-- logs full stacktrace
 
-    # Return the previous
-    # timestamp:
-    return response["Body"].read().decode("utf-8")
+
+
+
+
+
+
+
+
+
+
+# ====================== ====================== ======================
+# OLD CODE:
+    # try:
+    #     # Get previous timestamp
+    #     # from bucket:
+    #     response = s3_client.get_object(Bucket=bucket_name, Key=ts_key)
+    #     return response["Body"].read().decode("utf-8")  
+
+    # except ClientError:
+    #     # boto3 raises this
+    #     # exception either on the
+    #     # first ever run of the
+    #     # pipeline (because the
+    #     # s3 bucket contains no
+    #     # timestamp) or if there
+    #     # is a problem with
+    #     # AWS S3 and reading the
+    #     # ingestion bucket fails.
+    #     # Return the timestamp
+    #     # for the year 1900:
+    #     logger.exception(errors_lookup["err_0"])   
+    #     return default_ts
+
+    # try:
+    #     # Replace previous timestamp
+    #     # in the bucket with new
+    #     # timestamp:
+    #     s3_client.put_object(Bucket=bucket_name, Key=ts_key, Body=now_ts)
+
+    # except ClientError:
+    #     # if failure, log the
+    #     # error but allow the
+    #     # code to continue:
+    #     logger.exception(errors_lookup["err_1"])  
+

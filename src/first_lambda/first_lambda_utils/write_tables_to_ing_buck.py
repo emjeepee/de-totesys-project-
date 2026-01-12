@@ -68,17 +68,17 @@ def write_tables_to_ing_buck(s3_client, bucket_name, data_list):
     timestamp = create_formatted_timestamp()
 
     for member in data_list:  # member is, eg, {'design':
-        # [{<updated-row data>},
-        # {<updated-row data>},
-        # etc]}
+                                            # [{<updated-row data>},
+                                            # {<updated-row data>},
+                                            # etc]}
+                                            
         table_name = list(member.keys())[0]  # 'design'
 
         save_updated_table_to_S3(
-            json.dumps(
-                member[table_name]
-            ),  # jsonified [{<updated-row data>}, {<updated-row data>}, etc]
+            json.dumps( member[table_name] ), #jsonified [{<updated-row data>},
+                                                # {<updated-row data>}, etc]
             s3_client,
-            f"{table_name}/{timestamp}.json",
-            # eg 'sales_order/2025-06-11_13-27-29.json'
-            bucket_name,  # name of ingestion bucket
-        )
+            f"{table_name}/{timestamp}.json", # eg 
+                                              # 'sales_order/<timestamp>.json'
+            bucket_name  # name of ingestion bucket
+                                )

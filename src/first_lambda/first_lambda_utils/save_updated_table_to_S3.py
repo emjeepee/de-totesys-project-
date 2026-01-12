@@ -45,7 +45,9 @@ def save_updated_table_to_S3(
     try:
         table_name = new_key.split("/")[0]
 
-        S3_client.put_object(Bucket=bucket, Key=new_key, Body=updated_table)
+        S3_client.put_object(Bucket=bucket, 
+                             Key=new_key, 
+                             Body=updated_table)
 
     except ClientError:
         # log exception and

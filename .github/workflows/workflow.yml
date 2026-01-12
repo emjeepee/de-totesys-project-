@@ -4,8 +4,8 @@ name: totesys ETL pipeline # shown in GHA
 # load secrets into environment variables.
 # These env vars are available to all jobs:
 env:
-  # TF_AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
-  # TF_AWS_SECRET_ACCESS_KEY: '${{ secrets.TF_AWS_SECRET_ACCESS_KEY }}'
+  TF_AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+  TF_AWS_SECRET_ACCESS_KEY: '${{ secrets.TF_AWS_SECRET_ACCESS_KEY }}'
 
   TF_TOTESYS_DB_USER: "${{ secrets.TF_TOTESYS_DB_USER }}"
   TF_TOTESYS_DB_HOST: '${{ secrets.TF_TOTESYS_DB_HOST }}'
@@ -139,7 +139,6 @@ jobs:
 
 # Wed31Dec25 – all working up to this point.
 # The following job is taking forever!
-
         - name: Let Terraform provision cloud infra
           run: |
             chmod +x scripts/provision_cloud_infra.sh

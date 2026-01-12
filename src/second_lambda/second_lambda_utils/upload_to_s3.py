@@ -28,7 +28,10 @@ def upload_to_s3(S3_client, bucket_name: str, key: str, body):
     """
 
     try:
-        S3_client.put_object(Bucket=bucket_name, Key=key, Body=body)
+        S3_client.put_object(Bucket=bucket_name, 
+                             Key=key, 
+                             Body=body)
+
     except ClientError:
         # log the exception and
         # stop the code:

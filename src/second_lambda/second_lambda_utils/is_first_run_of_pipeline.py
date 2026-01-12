@@ -23,17 +23,28 @@ def is_first_run_of_pipeline(proc_bucket: str, s3_client):
 
     Returns:
         True if the processed
-        bucket is empty, returns
-        False otherwise.
+        bucket is empty and the 
+        attempt to read the processed 
+        bucket was successful, false
+        if the bucket was not empty 
+        and the attempt to read the 
+        processed bucket was a 
+        success, None (and logs an 
+        exception if the attempt to 
+        read the processed bucket 
+        failed).
+
     """
 
     try:
         objects_list = s3_client.list_objects_v2(Bucket=proc_bucket)
-
+        
+        return objects_list["KeyCount"] == 0
+    
     except ClientError:
         # log exception and
         # stop the code:
         logger.exception(errors_lookup["err_1"])
         raise
 
-    return objects_list["KeyCount"] == 0
+    

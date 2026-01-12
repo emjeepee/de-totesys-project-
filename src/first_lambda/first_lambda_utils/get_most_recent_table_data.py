@@ -65,6 +65,13 @@ def get_most_recent_table_data(
     try:
         response = S3_client.list_objects_v2(Bucket=bucket_name,
                                              Prefix=file_location)
+        
+        latest_tbl = get_latest_table(response, 
+                                      S3_client, 
+                                      bucket_name) # list
+        
+        return latest_tbl
+
 
     except ClientError:
         # log the error and
@@ -72,6 +79,3 @@ def get_most_recent_table_data(
         logger.exception(errors_lookup["err_4"] + f"{file_location}")
         raise
 
-    latest_tbl = get_latest_table(response, S3_client, bucket_name)  # list
-
-    return latest_tbl

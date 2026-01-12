@@ -84,7 +84,10 @@ def third_lambda_handler(event, context):
     # lookup['object_key']    -- key under which proc bucket saved Parquet file
     # lookup['table_name']    -- name of table
     # lookup['conn']   -- pg8000.native Connection obj that knows about w'house
-    lookup = third_lambda_init(event, conn_to_db, close_db, boto3.client("s3"))
+    lookup = third_lambda_init(event, 
+                               conn_to_db, 
+                               close_db, 
+                               boto3.client("s3"))
 
     pq_buff = get_inbuffer_parquet(
         lookup["s3_client"],

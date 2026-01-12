@@ -48,15 +48,17 @@ def get_inbuffer_parquet(
     """
 
     try:
-        dict_from_s3 = s3_client.get_object(Key=object_key, Bucket=bucket)
+        dict_from_s3 = s3_client.get_object(Key=object_key, 
+                                            Bucket=bucket)
+        raw_bytes = dict_from_s3["Body"].read()
+        pq_buff = BytesIO(raw_bytes)
+        return pq_buff
+
     except ClientError:
         # log exception
         # and stop code:
         logger.error(errors_lookup["err_0"] + table_name)
         raise
 
-    raw_bytes = dict_from_s3["Body"].read()
 
-    pq_buff = BytesIO(raw_bytes)
 
-    return pq_buff

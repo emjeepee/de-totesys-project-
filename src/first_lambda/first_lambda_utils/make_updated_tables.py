@@ -72,9 +72,9 @@ def make_updated_tables(data_for_s3: list, s3_client, bucket: str):
         # get the object that holds
         # the most recently updated
         # table of name table_name.
-        latest_table = get_most_recent_table_data(
-            table_name, s3_client, bucket
-        )  # a list of dictionaries.
+        latest_table = get_most_recent_table_data(table_name, 
+                                                  s3_client, 
+                                                  bucket ) # list of dicts.
 
         # Insert the updated rows into the
         # retrieved whole table, replacing

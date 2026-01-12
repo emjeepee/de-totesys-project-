@@ -1,9 +1,10 @@
 import copy
 
 
-def insert_updated_rows(
-    num_of_rows: int, whole_table: list, updated_rows: list, id_col_name: str
-):
+def insert_updated_rows( num_of_rows: int, 
+                         whole_table: list, 
+                         updated_rows: list, 
+                         id_col_name: str ):
     """
     This function:
         takes updated rows from a

@@ -15,7 +15,7 @@ def conn_to_db(DB_NAME):
     password = os.environ[f"{DB_NAME}_DB_PASSWORD"]
     database = os.environ[f"{DB_NAME}_DB_DB"]
     host = os.environ[f"{DB_NAME}_DB_HOST"]
-    port = os.environ[f"{DB_NAME}_DB_PORT"]  # default: 5432?
+    port = os.environ[f"{DB_NAME}_DB_PORT"]  
 
     try:
         # make an instance of
@@ -27,15 +27,18 @@ def conn_to_db(DB_NAME):
             host=host,
             port=port,
             ssl_context=True,
-        )
-
+                            )
         return conn_obj
+
 
     except Error:
         # log exception
         # and stop code:
         logger.exception(errors_lookup["err_2"])
         raise
+
+
+
 
 
 def close_db(conn: Connection):

@@ -1,16 +1,16 @@
-import json
 import boto3
 import logging
 
-from botocore.exceptions import ClientError
-
 from .errors_lookup import errors_lookup
+from .retrieve_latest_table import retrieve_latest_table
 
 
 logger = logging.getLogger(__name__)
 
 
-def get_latest_table(resp_dict, S3_client: boto3.client, bucket_name: str):
+def get_latest_table(resp_dict, 
+                     S3_client: boto3.client, 
+                     bucket_name: str):
     """
     This function:
         1) has the overall responsibility of
@@ -62,10 +62,10 @@ def get_latest_table(resp_dict, S3_client: boto3.client, bucket_name: str):
 
 
     Returns:
-        A python list of dictionaries.
-        The list represents a whole
-        table. Each dictionary
-        represents a row of the table.
+        A python list of dictionaries
+        that represents a whole table, 
+        each dictionary representing 
+        a row of the table.
 
     """
 
@@ -79,21 +79,42 @@ def get_latest_table(resp_dict, S3_client: boto3.client, bucket_name: str):
 
     # Get the key for the latest table:
     latest_table_key = sorted(keys_list)[-1]
-    # latest_table_key looks like: 'design/2025-06-02_22-17-19-2513.json'
+    # 'design/2025-06-02_22-17-19-2513.json'
     table_name = latest_table_key.split("/")[0]
 
-    try:
-        # Get the latest
-        # table itself:
-        response = S3_client.get_object(Bucket=bucket_name,
-                                        Key=latest_table_key)
-        data = response["Body"].read().decode("utf-8")
 
-        # Unjsonify the table and return it:
-        return json.loads(data)
+    return retrieve_latest_table(S3_client,
+                                 bucket_name,
+                                 latest_table_key,
+                                 logger,
+                                 errors_lookup,
+                                 table_name   
+                                       )
 
-    except ClientError:
-        # log the error
-        # and stop the code:
-        logger.exception(errors_lookup["err_5"] + f"{table_name}")
-        raise
+
+
+
+
+
+
+
+
+
+
+
+# OLD CODE:
+    # try:
+    #     # Get the latest
+    #     # table itself:
+    #     response = S3_client.get_object(Bucket=bucket_name,
+    #                                     Key=latest_table_key)
+    #     data = response["Body"].read().decode("utf-8")
+
+    #     # Unjsonify the table and return it:
+    #     return json.loads(data)
+
+    # except ClientError:
+    #     # log the error
+    #     # and stop the code:
+    #     logger.exception(errors_lookup["err_5"] + f"{table_name}")
+    #     raise

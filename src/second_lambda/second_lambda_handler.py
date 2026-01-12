@@ -191,9 +191,9 @@ def second_lambda_handler(event, context):
     # Convert the dim/fact
     # table into a Parquet
     # file in a buffer:
-    pq_dim_or_fact = convert_to_parquet(
-        dim_or_fact_table, lookup["table_name"]
-    )  # a buffer
+    pq_dim_or_fact = convert_to_parquet(dim_or_fact_table, 
+                                        lookup["table_name"]
+                                        )  # a buffer
 
     # Create the key string
     # under which to save

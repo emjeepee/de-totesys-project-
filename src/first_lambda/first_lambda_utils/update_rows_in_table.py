@@ -84,8 +84,10 @@ def update_rows_in_table(updated_rows: list,
     name_of_id_col = table_name + "_id"  # 'design_id'
     num_of_rows = len(whole_table)
 
-    updated_table = insert_updated_rows(
-        num_of_rows, whole_table, updated_rows, name_of_id_col
-    )
+    updated_table = insert_updated_rows(num_of_rows, 
+                                        whole_table, 
+                                        updated_rows, 
+                                        name_of_id_col
+                                        )
 
     return updated_table
