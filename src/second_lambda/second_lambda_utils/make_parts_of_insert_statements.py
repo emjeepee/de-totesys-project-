@@ -63,6 +63,11 @@ def make_parts_of_insert_statements(data):
     # member list contains
     # string versions of the
     # values of a row.
+
+    # replace lines 71-78 with the following single line:
+    # values_list = [[str(row[col]) for col in columns] for row in data]
+
+
     values_list = []
     for row in data:  # {"col_name_1": "val_1", "col_name_2": "val_2", etc}
         # columns is ["col_name_1", "col_name_2", "col_name_3", etc]

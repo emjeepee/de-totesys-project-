@@ -13,8 +13,6 @@ def setup():
 
     mock_arg_1 = "department"
 
-    mock_arg_2 = "aaaaaaa"
-
     mock_list =     [
        {'design': [{}, {}, {}]},
        {'sales_order': [{}, {}, {}]},
@@ -25,8 +23,8 @@ def setup():
                     ]
     
     expected_list =     [
-       {'department': [{}, {}, {}]}, 
        {'address': [{}, {}, {}]},
+       {'department': [{}, {}, {}]}, 
        {'design': [{}, {}, {}]},
        {'sales_order': [{}, {}, {}]},
        {'counterparty': [{}, {}, {}]},
@@ -61,11 +59,8 @@ def test_returns_list_with_correct_items_at_the_beginning(setup):
     # Arrange:
     mock_arg_0, mock_arg_1, mock_list, expected_list = setup
 
-    expected_fail_0 = 'x' 
-    expected_fail_1 = 'x'
-     
-    expected_0 = {'department': [{}, {}, {}]}
-    expected_1 = {'address': [{}, {}, {}]}
+    expected_0 = {'address': [{}, {}, {}]}
+    expected_1 = {'department': [{}, {}, {}]}
   
     # Act:
     response = reorder_list(mock_list, mock_arg_0, mock_arg_1 )
@@ -83,11 +78,9 @@ def test_returns_list_with_correct_items_at_the_beginning(setup):
 def test_returns_correct_list(setup):
     # Arrange:
     mock_arg_0, mock_arg_1, mock_list, expected_list = setup
-    expected_fail = "expected_fail"
 
     # Act:
     result = reorder_list(mock_list, mock_arg_0, mock_arg_1)
-
 
     # Assert:
     assert result == expected_list

@@ -17,6 +17,8 @@ from src.first_lambda.first_lambda_utils.is_first_run_of_pipeline import (
     is_first_run_of_pipeline)
 from src.first_lambda.first_lambda_utils.make_updated_tables import (
     make_updated_tables)
+from src.first_lambda.first_lambda_utils.make_one_updated_table import (
+    make_one_updated_table )
 
 
 root_logger = logging.getLogger()
@@ -82,7 +84,7 @@ def first_lambda_handler(event, context):
     # value "prod" and terraform 
     # HCL code sets the 
     # environment variables 
-    # (for AWS Lambda):
+    # for AWS Lambda:
     if os.environ.get("WHAT_ENV") == "dev":
         # Set the environment vars. 
         # Get values from file .env:
@@ -102,11 +104,11 @@ def first_lambda_handler(event, context):
     # values this handler
     # requires:
     # lookup['tables'] -> [<name string>, <name string>, etc]
-    # lookup['s3_client' -> the boto3 s3 client
+    # lookup['s3_client' -> boto3 s3 client
     # lookup['ing_bucket_name'] -> name of ingestion bucket
     # lookup['proc_bucket_name'] -> name of processed bucket
     # lookup['conn'] -> pg8000.native Connection object
-    # lookup['close_db'] -> function close_db():
+    # lookup['close_db'] -> close_db(), closes connection to database totesys
     lookup = get_env_vars()
 
 
@@ -123,15 +125,18 @@ def first_lambda_handler(event, context):
 
     # Get tables from database
     # totesys that have updated
-    # rows (for the first ever
+    # field data. Each table 
+    # will contain only updated 
+    # rows. For the first ever
     # run of the pipeline
-    # that will be all tables
-    # and all rows in them):
+    # new_table_data will contain 
+    # all tables and all rows 
+    # in them:
     new_table_data = get_data_from_db(
-        lookup["tables"],  # list of names of tables of interest
-        after_time,
-        lookup["conn"],  # pg8000.native Connection object
-        read_table,
+                       lookup["tables"], # list of names of all seven tables 
+                       after_time,
+                       lookup["conn"],  # pg8000.native Connection object
+                       read_table
                                       )
     # new_table_data looks like this:
     # [
@@ -172,8 +177,8 @@ def first_lambda_handler(event, context):
     # all tables to the
     # ingestion bucket:
     if is_first_run:
-        write_tables_to_ing_buck( lookup["s3_client"], 
-                                  lookup["ing_bucket_name"], 
+        write_tables_to_ing_buck( lookup["s3_client"],
+                                  lookup["ing_bucket_name"],
                                   data_for_s3
                                 )
 
@@ -182,10 +187,16 @@ def first_lambda_handler(event, context):
     # tables, then write them 
     # to the ingestion bucket:
     if not is_first_run:
-        updated_tables = make_updated_tables( data_for_s3, 
-                                              lookup["s3_client"], 
-                                              lookup["ing_bucket_name"]
-                                            )
+        updated_tables = [make_one_updated_table(member,
+                                                 lookup["s3_client"],
+                                                 lookup["ing_bucket_name"])
+                          for member in data_for_s3 ]
+        
+        # TO REMOVE:
+        # updated_tables = make_updated_tables( data_for_s3, 
+        #                                       lookup["s3_client"], 
+        #                                       lookup["ing_bucket_name"]
+        #                                     )
 
         write_tables_to_ing_buck( lookup["s3_client"], 
                                   lookup["ing_bucket_name"], 

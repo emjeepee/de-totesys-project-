@@ -111,15 +111,14 @@ def second_lambda_handler(event, context):
 
     # If the table just put in the
     # ingestion bucket is 
-    # "department", end the code 
-    # (because there is no need to 
+    # "department" simply end the code 
+    # because there is no need to 
     # create a department dimension 
-    # table):
+    # table:
     if lookup["table_name"] == "department":
-        # stop this lambda handler:
         return {
             "status": "Second lambda handler code skipped",
-            "reason": "Because table_name is 'department' ",
+            "reason": "The table is 'department' ",
                 }
 
 
@@ -131,7 +130,7 @@ def second_lambda_handler(event, context):
 
     # convert the table into
     # a list:
-    table_python = json.loads(table_json)  # [{<row data>}, {<row data>}, etc]
+    table_python = json.loads(table_json) # [{<row data>}, {<row data>}, etc]
     # where {<row data>} is, eg,
     # {
     # 'design_id': 123,

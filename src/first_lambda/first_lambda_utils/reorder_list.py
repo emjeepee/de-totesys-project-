@@ -1,6 +1,7 @@
 import copy
 
 
+
 def reorder_list(lst, *items):
     """
     This function:
@@ -41,16 +42,48 @@ def reorder_list(lst, *items):
 
     """
 
-    list_to_return = []
-    lst_deep_copy = copy.deepcopy(lst)
-    for item in items:  # items is, eg, ('department', 'address')
-        for member in lst:  # member is, eg, {'design': [{}, {}, {}] }
-            if item in member:
-                # eg if 'department' is in {'department': [{}, {}, {}] }
-                member_deep_copy = copy.deepcopy(member)
-                lst_deep_copy.remove(member)
-                list_to_return.insert(0, member_deep_copy)
+    # make list of the 
+    # dictionaries that must
+    # be moved to the front:
+    lst_copy = copy.deepcopy(lst)
+    moved_items = [member
+                    for item in items 
+                    for member in lst_copy
+                    if item in member] 
+                    # [{'design': [{}, {}] }, {'sales': [{}, {}] }]
 
-    list_to_return.extend(lst_deep_copy)
+    # make copy of the 
+    # passed-in list but 
+    # without the items to 
+    # move to the front:
+    redacted_list = [ member
+                      for member in lst_copy
+                      if member not in moved_items
+                      ]
 
-    return list_to_return
+    reordered_list = moved_items + redacted_list
+
+    return reordered_list
+
+
+
+
+
+
+
+
+
+    # OLD CODE:
+    # list_to_return = []
+    # lst_deep_copy = copy.deepcopy(lst)
+    # for item in items:  # items is, eg, ('department', 'address')
+    #     for member in lst:  # member is, eg, {'design': [{}, {}, {}] }
+    #         if item in member:
+    #             # eg if 'department' is in {'department': [{}, {}, {}] }
+    #             member_deep_copy = copy.deepcopy(member)
+    #             lst_deep_copy.remove(member)
+    #             list_to_return.insert(0, member_deep_copy)
+
+    # list_to_return.extend(lst_deep_copy)
+
+    # return list_to_return

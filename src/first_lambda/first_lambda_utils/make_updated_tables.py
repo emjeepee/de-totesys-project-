@@ -1,5 +1,6 @@
 from .get_most_recent_table_data import get_most_recent_table_data
 from .update_rows_in_table import update_rows_in_table
+from .make_one_updated_table import make_one_updated_table
 
 
 def make_updated_tables(data_for_s3: list, s3_client, bucket: str):
@@ -63,6 +64,16 @@ def make_updated_tables(data_for_s3: list, s3_client, bucket: str):
           updated field data.
     """
 
+
+    updated_tables = [make_one_updated_table(member, s3_client, bucket) 
+                     for member in data_for_s3 ]
+
+    return updated_tables
+
+
+
+
+
     updated_tables = []
 
     for member in data_for_s3:
@@ -79,12 +90,11 @@ def make_updated_tables(data_for_s3: list, s3_client, bucket: str):
         # Insert the updated rows into the
         # retrieved whole table, replacing
         # the outdated ones:
-        updated_table = update_rows_in_table(  # [{<updated row>},
-            # {<updated row>}, etc]
+        updated_table = update_rows_in_table(  
             member[table_name],
             latest_table,
-            table_name,
-        )
+            table_name
+                                    ) # [{<updated row>}, {<updated row>}, etc]
 
         updated_tables.append({table_name: updated_table})
 
