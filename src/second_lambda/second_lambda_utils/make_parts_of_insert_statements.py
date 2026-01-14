@@ -64,17 +64,24 @@ def make_parts_of_insert_statements(data):
     # string versions of the
     # values of a row.
 
-    # replace lines 71-78 with the following single line:
-    # values_list = [[str(row[col]) for col in columns] for row in data]
+    # row is {"col_name_1": "val_1", "col_name_2": "val_2", etc}
+    # columns is ["col_name_1", "col_name_2", "col_name_3", etc]
+    # [["val_1", "val_2", etc], ["val_1", "val_2", etc], etc]
+    values_list = [[str(row[col]) for col in columns] for row in data]
 
-
-    values_list = []
-    for row in data:  # {"col_name_1": "val_1", "col_name_2": "val_2", etc}
-        # columns is ["col_name_1", "col_name_2", "col_name_3", etc]
-        values = [str(row[col]) for col in columns]
-        # values looks like: ["val_1", "val_2", "val_3", etc]
-        values_list.append(
-            values
-        )  # [["val_1", "val_2", etc], ["val_1", "val_2", etc], etc]
 
     return [placeholders, values_list]
+
+
+
+
+
+# OLD CODE:
+    # values_list = []
+    # for row in data:  # {"col_name_1": "val_1", "col_name_2": "val_2", etc}
+    #     # columns is ["col_name_1", "col_name_2", "col_name_3", etc]
+    #     values = [str(row[col]) for col in columns]
+    #     # values looks like: ["val_1", "val_2", "val_3", etc]
+    #     values_list.append(
+    #         values
+    #     )  # [["val_1", "val_2", etc], ["val_1", "val_2", etc], etc]
