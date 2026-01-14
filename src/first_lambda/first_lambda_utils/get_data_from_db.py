@@ -60,30 +60,68 @@ def get_data_from_db(table_names: list,
         columnname-fieldvalue pairs.
         The list takes this form:
          [
-         {'design': [{<updated-row data>}, {<updated-row data>}, etc]},
-         {'staff': [{<updated-row data>}, {<updated-row data>}, etc]},
-                etc, etc
+         {'design': [{<clean updated-row>}, {<clean updated-row>}, etc]},
+         {'staff': [{<clean updated-row>}, {<clean updated-row>}, etc]},
+                etc
          ]
 
     """
 
-    data_list = []
-    for table in table_names:
-        table_dict = read_table(
-                                table,
-                                conn,
-                                after_time
-                               )  # {'design': 
-                                  # [{<updated-row data>}, 
-                                  # {<updated-row data>}, 
-                                  # etc]}
+    # Note: code could alternatively 
+    # generate list dirty_tables 
+    # like this:
+    # dirty_tables = list(map(lambda table: read_table(table, conn, after_time), 
+    #                     table_names))
+    dirty_tables = [
+                    read_table(table, conn, after_time)
+                    for table in table_names
+                   ]
+    # dirty_tables is a list
+    # of dictionaries like:
+    # [
+    #  {'design': [{<unclean-but-updated-row data>}, etc]},
+    #  {'sales': [{<unclean-but-updated-row data>}, etc]},
+    #  etc
+    # ].
 
-        clean_table_dict = clean_data(table, table_dict)
-        
-        data_list.append(clean_table_dict)
-        # data_list becomes: [{'design': [{<updated-row data>}, etc]},
-        #                     {'sales': [{<updated-row data>}, etc]}, etc].
-        # where {<updated-row data>} is, eg,
-        # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
+    # below next(iter(table_dict)
+    # returns the sole key (ie the
+    # table name) from dict
+    # table_dict:
+    clean_tables = [
+                    clean_data( next(iter(table_dict)), table_dict )
+                    for table_dict in dirty_tables
+                   ]
     
-    return data_list
+    return clean_tables
+
+
+
+
+
+
+
+
+
+
+# OLD CODE:
+    # data_list = []
+    # for table in table_names:
+    #     table_dict = read_table(
+    #                             table,
+    #                             conn,
+    #                             after_time
+    #                            )  # {'design': 
+    #                               # [{<updated-row data>}, 
+    #                               # {<updated-row data>}, 
+    #                               # etc]}
+
+    #     clean_table_dict = clean_data(table, table_dict)
+        
+    #     data_list.append(clean_table_dict)
+    #     # data_list becomes: [{'design': [{<updated-row data>}, etc]},
+    #     #                     {'sales': [{<updated-row data>}, etc]}, etc].
+    #     # where {<updated-row data>} is, eg,
+    #     # {'design_id': 123, 'created_at': 'xxx', 'design_name': 'yyy', etc}
+    
+    # return data_list

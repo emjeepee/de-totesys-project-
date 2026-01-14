@@ -4,7 +4,7 @@ import logging
 
 from .create_formatted_timestamp import create_formatted_timestamp
 from .save_updated_table_to_S3 import save_updated_table_to_S3
-
+from .put_updated_table_in_bucket import put_updated_table_in_bucket
 
 logger = logging.getLogger(__name__)
 
@@ -63,22 +63,51 @@ def write_tables_to_ing_buck(s3_client, bucket_name, data_list):
 
     """
 
-    # Make timestamp that has this form:
+    # Make timestamp that 
+    # has this form:
     # '2025-06-13_13-13-13'
     timestamp = create_formatted_timestamp()
 
-    for member in data_list:  # member is, eg, {'design':
+    # write each table to 
+    # the ingestion bucket:
+    for table_dict in data_list:  # table_dict is, eg, {'design':
                                             # [{<updated-row data>},
                                             # {<updated-row data>},
                                             # etc]}
-                                            
-        table_name = list(member.keys())[0]  # 'design'
 
-        save_updated_table_to_S3(
-            json.dumps( member[table_name] ), #jsonified [{<updated-row data>},
-                                                # {<updated-row data>}, etc]
-            s3_client,
-            f"{table_name}/{timestamp}.json", # eg 
-                                              # 'sales_order/<timestamp>.json'
-            bucket_name  # name of ingestion bucket
-                                )
+        put_updated_table_in_bucket(table_dict,
+                                    timestamp,
+                                    s3_client,
+                                    bucket_name)
+    
+
+
+
+
+
+
+
+
+# OLD CODE:
+        # table_name = list(table_dict.keys())[0]  # 'design'
+
+        # # make a list of the 
+        # # rows of the table:
+        # list_of_rows = table_dict[table_name]
+
+        # # convert the list of
+        # # rows to json:
+        # json_list_of_rows = json.dumps(list_of_rows)
+
+        # # make key under which
+        # # to store the table in
+        # # the ingestion bucket:
+        # table_key = f"{table_name}/{timestamp}.json" 
+        #                                     # 'sales_order/<timestamp>.json'
+
+        # save_updated_table_to_S3(
+        #     json_list_of_rows,
+        #     s3_client,
+        #     table_key,
+        #     bucket_name  # name of ingestion bucket
+        #                         )

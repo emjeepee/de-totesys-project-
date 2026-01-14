@@ -25,22 +25,24 @@ def read_table(table_name: str, conn: Connection, after_time: str):
     """
     This function:
          1) makes a dictionary that
-            contains those rows of a
-            table in database toteSys
-            that are new or contain 
-            updated data. The 
+            contains only those rows 
+            of a table from database 
+            toteSys that are new or 
+            contain updated data. The 
             dictionary's sole key is 
             the name of the table. 
             The value of the key is a 
             list of dictionaries, each 
             dictionary representing an
-            updated. The key-value 
-            pairs of the dictionary are
+            updated row. The key-value 
+            pairs of each dictionary 
+            in the list are
             columnname-fieldvalue 
             pairs.
 
          2) makes the dictionary
-            above by getting
+            detailed in 1) above by 
+            getting
             i) new/updated rows from the
             table in the form of a
             list of lists, each member
@@ -88,13 +90,19 @@ def read_table(table_name: str, conn: Connection, after_time: str):
          a dictionary that looks
          like this: {
                     "sales_order": [
-                        {"Name": "xx", "Month": "January",
-                            "Value": 123.45, etc}, <-- one updated row
-                        {"Name": "yy", "Month": "January",
-                            "Value": 223.45, etc}, <-- one updated row
-                        {"Name": "zz", "Month": "January",
-                            "Value": 323.45, etc}, <-- one updated row
-                                        etc
+                        {
+                        "Name": "xx", "Month": "January",
+                         "Value": 123.45, etc
+                        }, <-- one updated row
+                        {
+                        "Name": "yy", "Month": "January",
+                         "Value": 223.45, etc
+                         }, <-- one updated row
+                        {
+                        "Name": "zz", "Month": "January",
+                        "Value": 323.45, etc
+                        }, <-- one updated row
+                                       etc
                                          ]
                     }
         where "sales_order" is the
@@ -152,7 +160,8 @@ def read_table(table_name: str, conn: Connection, after_time: str):
         # each updated row where
         # the key-value pairs of
         # each dictionary represent
-        # <column-name>: <field-value>:
+        # columnname-field-value
+        # pairs:
         row_list_of_dicts = make_row_dicts(
             clean_col_names,
             cleaned_rows
@@ -161,7 +170,7 @@ def read_table(table_name: str, conn: Connection, after_time: str):
         # [ ...
         #   {"design_id": 6,  "name": "aaa",  "value": 3.14,
         #               "date": '2024-05-01T10:30:00.123456', etc},
-        #   {"design_id": 7,  "name": "bbb",  "value": 3.15,
+        #   {"design_id": 13,  "name": "bbb",  "value": 3.15,
         #               "date": '2024-06-01T10:30:00.123456', etc},
         #   etc ]
 
