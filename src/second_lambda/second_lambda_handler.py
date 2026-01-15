@@ -122,6 +122,9 @@ def second_lambda_handler(event, context):
                 }
 
 
+    # get the table just 
+    # put in the ingestion 
+    # bucket:
     table_json = read_from_s3(
         lookup["s3_client"], 
         lookup["ingestion_bucket"],

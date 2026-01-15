@@ -62,6 +62,6 @@ def make_column_defs(data):
     # DuckDB types:
     col_defs = ", ".join(  # "col_1_name INT, col_2_name TEXT, etc"
         f"{col} {type_map.get(type(val))}" for col, val in first_row.items()
-    )
+                        )
 
     return col_defs
