@@ -52,9 +52,6 @@ def put_tables_in_ing_bucket(is_first_run: bool,
    
     """
 
-
-
-
     # if first ever run of 
     # the pipeline, write
     # all tables to the

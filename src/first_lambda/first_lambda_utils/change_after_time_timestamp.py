@@ -1,9 +1,7 @@
 import logging
 
-from botocore.exceptions import ClientError
 from datetime            import datetime, UTC
 
-from .errors_lookup      import errors_lookup
 from .get_timestamp      import get_timestamp
 from .replace_timestamp  import replace_timestamp
 
@@ -96,16 +94,12 @@ def change_after_time_timestamp(bucket_name,
     timestamp = get_timestamp(s3_client, 
                               bucket_name,
                               ts_key,
-                              logger,
-                              errors_lookup,
                               default_ts)
 
     replace_timestamp(s3_client,
                       bucket_name,
                       ts_key,
                       now_ts,
-                      logger,
-                      errors_lookup
                       )
 
     # Return the previous/

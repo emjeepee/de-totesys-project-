@@ -3,6 +3,7 @@ import logging
 
 from .errors_lookup import errors_lookup
 from .retrieve_latest_table import retrieve_latest_table
+from .make_table_name_and_key import make_table_name_and_key
 
 
 logger = logging.getLogger(__name__)
@@ -13,21 +14,37 @@ def get_latest_table(resp_dict,
                      bucket_name: str):
     """
     This function:
-        1) has the overall responsibility of
-            getting from the ingestion bucket
-            data that represents the most
-            recently saved table.
-        2) gets the key of the most recent
-            version of the table in the
-            ingestion bucket (the table being
-            in the form of a jsonified Python
-            list of dictionaries).
-        3) once it knows the key gets the
-            data in the bucket saved under
-            that key and returns it as a
-            Python list.
-        4) gets called by
+        1) has the job of getting the 
+            latest version of table 
+            table_name from the 
+            ingestion bucket
+
+        2) looks at the passed-in resp_dict,
+            which is a response to a call 
+            to a boto3 S3_client to list 
+            all objects that have a 
+            particular table name in their 
+            keys.
+            
+        3) gets a list of those keys from 
+            that response.
+
+        4) sorts the list in time order
+
+        5) gets the latest key
+
+        6) passes that key to function
+            retrieve_latest_table() to 
+            get the latest table (which 
+            the ingestion bucket has 
+            stored under that key)
+
+        7) returns the table
+
+        8) gets called by
             get_most_recent_table_data().
+
+            
 
     Args:
         1) resp_dict: a dictionary that boto3
@@ -40,7 +57,7 @@ def get_latest_table(resp_dict,
                     'Key': 'string',  # objects of interest are stored
                                       # under this key, which looks
                                       # like this:
-                                      # 'design/<timestamp-here>.json'
+                                      # '<table_name_here>/<timestamp_here>.json'
 
                     'LastModified': datetime(2015, 1, 1),
                     etc
@@ -57,7 +74,8 @@ def get_latest_table(resp_dict,
 
         2) S3_client: a boto3 S3 client.
 
-        3) bucket_name: name of the ingestion bucket.
+        3) bucket_name: name of the 
+            ingestion bucket.
 
 
 
@@ -69,28 +87,17 @@ def get_latest_table(resp_dict,
 
     """
 
-    # Get the list of keys
-    # under which the versions
-    # of the table are
-    # stored:
-    keys_list = [dict["Key"] for dict in resp_dict.get("Contents", [])]
-    # ['design/2025-06-02_22-17-19-2513.json',
-    # 'design/2025-05-29_22-17-19-2513.json', etc]
+    latest_table_key, table_name = make_table_name_and_key(resp_dict)
+    
 
-    # Get the key for the latest table:
-    latest_table_key = sorted(keys_list)[-1]
-    # 'design/2025-06-02_22-17-19-2513.json'
-    table_name = latest_table_key.split("/")[0]
-
-
-    return retrieve_latest_table(S3_client,
+    latest_table = retrieve_latest_table(S3_client,
                                  bucket_name,
                                  latest_table_key,
-                                 logger,
-                                 errors_lookup,
                                  table_name   
                                        )
 
+
+    return latest_table
 
 
 

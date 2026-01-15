@@ -1,5 +1,13 @@
+import logging
+
+from .errors_lookup      import errors_lookup
+
 from botocore.exceptions import ClientError
 
+
+
+# __name__ has value "replace_timestamp.py"
+logger = logging.getLogger(__name__)
 
 
 
@@ -7,9 +15,7 @@ from botocore.exceptions import ClientError
 def replace_timestamp(s3_client,
                       bucket_name: str,
                       ts_key: str,
-                      now_ts: str,
-                      logger,
-                      errors_lookup: dict
+                      now_ts: str
                       ):
     
     """
@@ -33,16 +39,14 @@ def replace_timestamp(s3_client,
         ts_key: the key under which 
             the ingestion bucket 
             must store the timestamp
+            (it is actually always 
+            "***timestamp***").
 
         now_ts: a timestamp string
             for the current time, eg
             "2025-06-04T08:28:12", ie
             no milliseconds            
 
-        logger: a logging object
-
-        errors_lookup: a lookup table
-            of error messages
 
             
     Returns:
@@ -55,10 +59,12 @@ def replace_timestamp(s3_client,
         # Replace previous timestamp
         # in the bucket with new
         # timestamp:
-        s3_client.put_object(Bucket=bucket_name, Key=ts_key, Body=now_ts)
+        s3_client.put_object(Bucket=bucket_name,
+                             Key=ts_key,
+                             Body=now_ts)
 
     except ClientError:
-        # if failure, log the
-        # error but allow the
-        # code to continue:
-        logger.exception(errors_lookup["err_1"]) 
+        # log the error and 
+        # stop the code:
+        logger.exception(errors_lookup["err_1"])
+        raise

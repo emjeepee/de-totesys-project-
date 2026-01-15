@@ -1,6 +1,13 @@
 import json
+import logging
 
 from botocore.exceptions import ClientError
+from .errors_lookup      import errors_lookup
+
+
+
+# __name__ has value "retrieve_latest_table.py"
+logger = logging.getLogger(__name__)
 
 
 
@@ -9,11 +16,10 @@ from botocore.exceptions import ClientError
 def retrieve_latest_table(S3_client,
                           bucket_name: str,
                           latest_table_key: str,
-                          logger,
-                          errors_lookup: dict,
                           table_name  
                           ):
 
+    
     """
     This function:
         1) tries to get the latest 
@@ -36,18 +42,13 @@ def retrieve_latest_table(S3_client,
             bucket has stored the 
             table 
 
-        logger: a logging object
-
-        errors_lookup: a lookup table 
-            of error messages 
-
         table_name: the name of the 
             table
 
     Returns:
         Either the table in the 
-        form of a ;ist of dictionaries
-        of, if the attempt to get the 
+        form of a list of dictionaries
+        or, if the attempt to get the 
         table fails, None.
 
     """
@@ -60,10 +61,10 @@ def retrieve_latest_table(S3_client,
         
         data = response["Body"].read().decode("utf-8")
 
-        # Convert the table 
-        # to python and return 
-        # it:
-        return json.loads(data)
+        table_dict = json.loads(data)
+        
+        return table_dict
+    
 
     except ClientError:
         # log the error

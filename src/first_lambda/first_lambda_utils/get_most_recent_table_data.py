@@ -12,35 +12,34 @@ logger = logging.getLogger(__name__)
 
 
 def get_most_recent_table_data(
-    file_location: str, S3_client: boto3.client, bucket_name: str
-):
+                                file_location: str, 
+                                S3_client: boto3.client, 
+                                bucket_name: str
+                              ):
+    
     """
     This function:
-        1) gets the latest table of name
-            file_location from the
-            ingestion bucket. The table is
-            in the form of a jsonified
-            python list of dictionaries.
-            Each dictionary contains data
-            from one row of the table.
-            The ingestion bucket stores
+        1) polls a boto3 S3 client for 
+            a response to a request for 
+            a list of objects in 
+            the ingestion bucket that 
+            the bucket stores under keys 
+            that begin '<file_location>'
+            (the ingestion bucket stores
             each table under a key that
             looks like this:
-            <file_location>/<timestamp-here>.json.
-        2) gets the latest table by getting
-            from the ingestion bucket a list
-            of keys whose first part is
+            <file_location>/<timestamp>.json.
+            The passed-in file_location
+            is the name of the table).
+            
+        2) passes the response to function 
+            get_latest_table(), which 
+            ues the response to get the 
+            most recent table of name 
             file_location.
-        3) sorts the list of keys according
-            to the value of the timestamp,
-            descending.
-        4) gets the most recent key from the
-            sorted list.
-        5) finds the table that the ingestion
-            bucket has stored under that most
-            recent key and returns that
-            table in the form of a Python
-            list of dictionaries.
+
+        3) gets called by make_one_updated_table()            
+
 
     Args:
         1) file_location: part of a key under
@@ -51,7 +50,10 @@ def get_most_recent_table_data(
             represents a row of the table.
             This arg is also the name of a
             table, eg 'design'.
-        2) S3_client: the boto3 S3 bucket client
+
+        2) S3_client: the boto3 S3 bucket 
+            client
+
         3) bucket_name: the bucket name
 
     Returns:

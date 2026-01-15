@@ -26,6 +26,7 @@ def conn_to_db(DB_NAME: str):
             port=port,
             ssl_context=True,
         )
+        return conn
 
     except Error:
         # log exception
@@ -33,7 +34,7 @@ def conn_to_db(DB_NAME: str):
         logger.exception(errors_lookup["err_8"])
         raise
 
-    return conn
+
 
 
 def close_db(conn: Connection):

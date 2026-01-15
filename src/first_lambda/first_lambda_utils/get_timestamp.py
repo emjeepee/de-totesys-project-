@@ -1,12 +1,16 @@
+import logging
+
 from botocore.exceptions import ClientError
+from .errors_lookup      import errors_lookup
+
+# __name__ has value "get_timestamp.py"
+logger = logging.getLogger(__name__)
 
 
 
 def get_timestamp(s3_client, 
                   bucket_name: str,
                   ts_key: str,
-                  logger,
-                  errors_lookup: dict,
                   default_ts: str
                   ):
     
@@ -32,8 +36,6 @@ def get_timestamp(s3_client,
         ts_key: the key under which 
             the ingestion bucket 
             has stored the timestamp
-
-        logger: a logging object
 
         errors_lookup: a lookup table
             of error messages

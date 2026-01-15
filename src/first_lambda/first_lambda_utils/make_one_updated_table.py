@@ -8,7 +8,7 @@ def make_one_updated_table(table_of_updates, s3_client, bucket:str):
     """
     This function:
         1) gets called by 
-            first_lambda_handler()
+            put_tables_in_ing_bucket()
     
         2) gets from the ingestion 
             bucket the most recent
