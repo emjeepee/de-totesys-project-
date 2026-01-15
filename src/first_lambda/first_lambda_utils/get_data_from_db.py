@@ -67,15 +67,11 @@ def get_data_from_db(table_names: list,
 
     """
 
-    # Note: code could alternatively 
-    # generate list dirty_tables 
-    # like this:
-    # dirty_tables = list(map(lambda table: read_table(table, conn, after_time), 
-    #                     table_names))
-    dirty_tables = [
-                    read_table(table, conn, after_time)
-                    for table in table_names
-                   ]
+    dirty_tables = []
+    for table in table_names:
+        table_dict = read_table(table, conn, after_time)
+        if table_dict != []:
+            dirty_tables.append(table_dict)
     # dirty_tables is a list
     # of dictionaries like:
     # [
@@ -88,11 +84,14 @@ def get_data_from_db(table_names: list,
     # returns the sole key (ie the
     # table name) from dict
     # table_dict:
-    clean_tables = [
+    if dirty_tables != []:
+        clean_tables = [
                     clean_data( next(iter(table_dict)), table_dict )
                     for table_dict in dirty_tables
-                   ]
-    
+                       ]
+    else: 
+        clean_tables = []
+
     return clean_tables
 
 

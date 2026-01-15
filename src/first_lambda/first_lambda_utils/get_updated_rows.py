@@ -47,23 +47,20 @@ def get_updated_rows(conn_obj, after_time: str, table_name: str):
     # query = (f"SELECT * FROM {table_name}
     # WHERE last_updated > :after_time LIMIT 20;")
 
-    # Same as above but
-    # without a limit for
-    # the number of rows:
-    query = f"SELECT * FROM {table_name} WHERE last_updated > :after_time ;"
-
     try:
-        # send the SQL query
-        # to postgresql database
-        # totesys:
-        response = conn_obj.run(query, after_time=after_time)  # [[...], etc]
+        # Same as above but
+        # without a limit for
+        # the number of rows:
+        qry = f"SELECT * FROM {table_name} WHERE last_updated > :after_time ;"
+
+        # make the SQL query
+        # to database totesys:
+        response = conn_obj.run(qry, after_time=after_time)  # [[...], etc]
         # log status:
         return response
 
     except Error:
         # log the error
         # and stop the code:
-        logger.exception(
-            errors_lookup["err_3"] + f"{table_name}"
-        )  # <-- logs full stacktrace
+        logger.exception(errors_lookup["err_3"] + f"{table_name}")
         raise

@@ -143,6 +143,11 @@ def read_table(table_name: str, conn: Connection, after_time: str):
         query_result_1 = get_updated_rows(conn, after_time, table_name)
 
 
+        # If there are no updated: 
+        if query_result_1 == []:
+            return []
+
+
         # Convert query_result_2 to a
         # list of column-name strings:
         clean_col_names = [

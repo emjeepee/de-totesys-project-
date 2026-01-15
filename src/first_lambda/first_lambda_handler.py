@@ -144,6 +144,16 @@ def first_lambda_handler(event, context):
                        lookup["conn"],  # pg8000.native Connection object
                        read_table
                                       )
+    
+    # If database totesys has 
+    # updated no rows, stop 
+    # the code: 
+    if new_table_data  == []:
+        return {
+            "status": "First lambda handler code skipped",
+            "reason": "Database totesys has updated no tables since last run.",
+                }
+
     # new_table_data looks like this:
     # [
     # {'design': [{<updated-row data>}, etc]},
