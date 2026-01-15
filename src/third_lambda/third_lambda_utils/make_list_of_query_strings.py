@@ -59,23 +59,21 @@ def make_list_of_query_strings(rows, table_name, column_str):
     queries = []
     for row in rows:
         # form_vals_list will be
-        # a list containing the
-        # formatted values for
+        # a list representing
         # one row, like this:
-        # ['5',
-        # '"xyz"',
-        # '75.5',
-        # '"TRUE"',
-        # '"NULL"']
-        form_vals_list = make_list_of_formatted_row_values(
-            row
-        )  # ['5', '"xyz"', '75.5', '"TRUE"', '"NULL"']
+        # ['5', '"xyz"', '75.5', '"TRUE"', '"NULL"']
+        form_vals_list = make_list_of_formatted_row_values(row)
+        
         # make a list of query
         # strings:
         query_str = make_query_string_for_one_row(
-            form_vals_list, table_name, column_str
-        )
+                                                 form_vals_list,
+                                                 table_name,
+                                                 column_str
+                                                  )
 
         queries.append(query_str)
 
     return queries
+
+

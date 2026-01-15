@@ -4,10 +4,9 @@ def make_dim_or_fact_tbl_keystr(table_name: str, timestamp_string: str):
         makes a string that is
         a key under which
         another function will
-        store in the processed
-        bucket either a
-        dimension table or a
-        fact table.
+        store either a dimension 
+        table or a fact table
+        in the processed bucket.
 
     Args:
         table_name: the name of
@@ -32,9 +31,7 @@ def make_dim_or_fact_tbl_keystr(table_name: str, timestamp_string: str):
 
     """
 
-    if table_name == "sales_order":
-        table_key = f"fact_{table_name}/{timestamp_string}.parquet"
-    else:
-        table_key = f"dim_{table_name}/{timestamp_string}.parquet"
+    prefix = "fact" if table_name == "sales_order" else "dim"
+    table_key = f"{prefix}_{table_name}/{timestamp_string}.parquet"
 
     return table_key

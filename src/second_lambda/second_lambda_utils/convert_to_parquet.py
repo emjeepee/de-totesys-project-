@@ -42,8 +42,7 @@ def convert_to_parquet(data: list, table_name: str):
     """
 
     # make a string of column names:
-    col_defs = make_column_defs(data)
-    # col_defs has this form: "some_col_name INT, some_col_name TEXT ..."
+    col_defs = make_column_defs(data) # "col_name_1 INT, col_name_2 TEXT ..."
 
     # make parts of the insert
     # statements that DuckDB

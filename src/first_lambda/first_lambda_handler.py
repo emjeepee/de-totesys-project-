@@ -19,6 +19,11 @@ from src.first_lambda.first_lambda_utils.make_updated_tables import (
     make_updated_tables)
 from src.first_lambda.first_lambda_utils.make_one_updated_table import (
     make_one_updated_table )
+from src.first_lambda.first_lambda_utils.put_tables_in_ing_bucket import (
+    put_tables_in_ing_bucket)
+
+
+
 
 
 root_logger = logging.getLogger()
@@ -39,7 +44,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     filemode="a",  # 'a' appends, 'w' would overwrite
-                    )
+                   )
 
 
 def first_lambda_handler(event, context):
@@ -67,7 +72,8 @@ def first_lambda_handler(event, context):
              previous table in place).
 
     Args:
-        1) event: object received from ?????
+        1) event: object received 
+        from event scehduler
         2) context: meta data
 
     Returns:
@@ -172,39 +178,15 @@ def first_lambda_handler(event, context):
                                             lookup["s3_client"]
                                            ) # Boolean
 
-    # if first ever run of 
-    # the pipeline, write
-    # all tables to the
-    # ingestion bucket:
-    if is_first_run:
-        write_tables_to_ing_buck( lookup["s3_client"],
-                                  lookup["ing_bucket_name"],
-                                  data_for_s3
-                                )
 
-    # if 2nd-plus run of 
-    # pipeline, update the 
-    # tables, then write them 
-    # to the ingestion bucket:
-    if not is_first_run:
-        updated_tables = [make_one_updated_table(member,
-                                                 lookup["s3_client"],
-                                                 lookup["ing_bucket_name"])
-                          for member in data_for_s3 ]
-        
-        # TO REMOVE:
-        # updated_tables = make_updated_tables( data_for_s3, 
-        #                                       lookup["s3_client"], 
-        #                                       lookup["ing_bucket_name"]
-        #                                     )
-
-        write_tables_to_ing_buck( lookup["s3_client"], 
-                                  lookup["ing_bucket_name"], 
-                                  updated_tables
-                                )
+    put_tables_in_ing_bucket(is_first_run,
+                             lookup["s3_client"],
+                             lookup["ing_bucket_name"],
+                             data_for_s3
+                            )
 
 
-    # Log status of this 
+    # Log status of this
     # lambda handler:
     root_logger.info(info_lookup["info_2"])
 
@@ -221,6 +203,6 @@ def first_lambda_handler(event, context):
 
 
 
-    # Log status of this 
+    # Log status of this
     # lambda handler:
     root_logger.info(info_lookup["info_3"])

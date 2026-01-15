@@ -3,7 +3,7 @@ import duckdb
 
 def put_pq_table_in_temp_file(
     table_name: str, col_defs: str, values_list, placeholders, tmp_path: str
-):
+                             ):
     """
 
     This function:
@@ -47,9 +47,10 @@ def put_pq_table_in_temp_file(
          pairs.
 
         col_defs: a string of the
-         column names of the table,
-         eg
-         'col_name_1, col_name_2, etc'.
+         table's column names and 
+         the types of their filed 
+         data, eg
+         'col_name_1 INT, col_name_2 TEXT ...'
 
         values_list: a list of lists,
          where each member list
@@ -80,37 +81,69 @@ def put_pq_table_in_temp_file(
     # interaction with it:
     conn = duckdb.connect(":memory:")
 
-    # make a table, starting with
-    # the column names:
-    conn.execute(f"CREATE TABLE {table_name} ({col_defs});")
-    # eg CREATE TABLE staff  /
-    # (design_id INT, /
-    # xxxx TEXT, yyyy INT, /
-    # zzzzz TEXT, /
-    # etc );
 
-    # Insert the table's rows:
-    for values in values_list:  # for each list
-        conn.execute(f"INSERT INTO {table_name} VALUES ({placeholders})",
-                     values)
 
-        conn.execute(
-                    f"COPY (SELECT * FROM {table_name}) TO ? (FORMAT PARQUET)",
-                    [tmp_path]
-                    )
+    # make SQL strings for duckdb.
+    # For making the table:
+    make_table_string = f"CREATE TABLE {table_name} ({col_defs});"
+    # For inserting the rows:
+    insert_rows_string = f"INSERT INTO {table_name} VALUES ({placeholders})"
+    # For storing the table in
+    # Parquet form in temp file 
+    # path:
+    put_pq_file_in_tmp_string = (
+                             f"COPY (SELECT * FROM {table_name}) "
+                             "TO ? (FORMAT PARQUET)"
+                            )
 
-    # Write the Parquet file to
-    # the temporary file:
-    # SELECT * FROM {table_name} - get
-    # DuckDB to read the table in
-    # the list.
-    # COPY ... TO ? - save the
-    # results to a file
-    # [tmp_path] - replace ? with the
-    # temp file path
-    # FORMAT PARQUET - save in Parquet
-    # format
+    # Use the strings made above:
+    for index, values in enumerate(values_list): # values is a list
+        if index == 0:
+            conn.execute(make_table_string)
+        conn.execute(insert_rows_string, values)
+
+    conn.execute(put_pq_file_in_tmp_string, tmp_path)
+
+    # Above: 
+    # SELECT * FROM {table_name} - gets
+    # DuckDB to read the table in the list.
+    # COPY ... TO ? - saves the results to 
+    # a file 
+    # [tmp_path] - replace ? with the temp 
+    # file path
+    # FORMAT PARQUET - format to save in
 
     # Close the connection to
     # the database:
     conn.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+#--------------------------------------------------------------
+# OLD CODE:
+    # # make a table, starting with
+    # # the column names:
+    # conn.execute(f"CREATE TABLE {table_name} ({col_defs});")
+    # eg CREATE TABLE staff (staff_id INT, xxx TEXT, yyy INT, zzzz TEXT, etc );
+
+    # # Insert the rows into
+    # # the duckdb table:
+    # for values in values_list:  # values is a list
+    #     conn.execute(f"INSERT INTO {table_name} VALUES ({placeholders})",
+    #                  values)
+
+    #     conn.execute(
+    #               f"COPY (SELECT * FROM {table_name}) TO ? (FORMAT PARQUET)",
+    #               [tmp_path]
+    #                 )
+#--------------------------------------------------------------

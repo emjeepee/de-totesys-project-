@@ -3,7 +3,7 @@ import logging
 from io import BytesIO
 from botocore.exceptions import ClientError
 
-
+from . return_inbuffer_parquet_file import return_inbuffer_parquet_file
 from .errors_lookup import errors_lookup
 
 
@@ -41,17 +41,16 @@ def get_inbuffer_parquet(
         of the table.
 
     returns:
-        a buffer that
-        contains the parquet
-        file.
+        a buffer that contains 
+        the parquet file.
 
     """
 
     try:
-        dict_from_s3 = s3_client.get_object(Key=object_key, 
-                                            Bucket=bucket)
-        raw_bytes = dict_from_s3["Body"].read()
-        pq_buff = BytesIO(raw_bytes)
+        pq_buff = return_inbuffer_parquet_file(s3_client,
+                                               object_key,
+                                               bucket
+                                              )
         return pq_buff
 
     except ClientError:

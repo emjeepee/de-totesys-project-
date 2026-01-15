@@ -202,7 +202,8 @@ def second_lambda_handler(event, context):
     # the dim/fact table in
     # the processed bucket:
     key = make_dim_or_fact_tbl_keystr(
-        lookup["table_name"], lookup["timestamp_string"]
+                                      lookup["table_name"],
+                                      lookup["timestamp_string"]
                                      )
 
     # Put the dim/fact table
@@ -210,7 +211,8 @@ def second_lambda_handler(event, context):
     # processed bucket:
     upload_to_s3(lookup["s3_client"],
                  lookup["proc_bucket"],
-                 key, pq_dim_or_fact
+                 key, 
+                 pq_dim_or_fact
                  )
 
     # log status:
