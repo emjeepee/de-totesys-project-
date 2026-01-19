@@ -15,8 +15,6 @@ from src.first_lambda.first_lambda_utils.reorder_list import reorder_list
 from src.first_lambda.first_lambda_utils.info_lookup import info_lookup
 from src.first_lambda.first_lambda_utils.is_first_run_of_pipeline import (
     is_first_run_of_pipeline)
-from src.first_lambda.first_lambda_utils.make_updated_tables import (
-    make_updated_tables)
 from src.first_lambda.first_lambda_utils.make_one_updated_table import (
     make_one_updated_table )
 from src.first_lambda.first_lambda_utils.put_tables_in_ing_bucket import (

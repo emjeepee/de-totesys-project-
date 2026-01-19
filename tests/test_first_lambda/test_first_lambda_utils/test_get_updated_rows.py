@@ -14,11 +14,13 @@ from src.first_lambda.first_lambda_utils.errors_lookup import errors_lookup
 
 @pytest.fixture
 def test_list():
-    mock_returned = [ [20496, 'SALE', 14504, None, datetime(2025, 6, 4, 8, 58, 10, 6000), datetime(2025, 6, 4, 8, 58, 10, 6000)],
+    mock_returned = [ 
+    [20496, 'SALE', 14504, None, datetime(2025, 6, 4, 8, 58, 10, 6000), datetime(2025, 6, 4, 8, 58, 10, 6000)],
     [20497, 'SALE', 14505, None, datetime(2025, 6, 4, 9, 26, 9, 972000), datetime(2025, 6, 4, 9, 26, 9, 972000)],
-    [20498, 'SALE', 14506, None, datetime(2025, 6, 4, 9, 29, 10, 166000), datetime(2025, 6, 4, 9, 29, 10, 166000)]]
+    [20498, 'SALE', 14506, None, datetime(2025, 6, 4, 9, 29, 10, 166000), datetime(2025, 6, 4, 9, 29, 10, 166000)]
+                    ]
 
-    return mock_returned
+    yield mock_returned
 
 
 

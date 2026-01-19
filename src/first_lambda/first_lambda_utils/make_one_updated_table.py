@@ -4,21 +4,21 @@ from .update_rows_in_table import update_rows_in_table
 
 
 
-def make_one_updated_table(table_of_updates, s3_client, bucket:str):
+def make_one_updated_table(table_of_updates: dict, s3_client, bucket:str):
     """
     This function:
         1) gets called by 
             put_tables_in_ing_bucket()
     
-        2) gets from the ingestion 
-            bucket the most recent
+        2) gets the most recent
             table of a certain 
-            name (eg 'design') 
+            name (eg 'design') from 
+            the ingestion bucket 
 
         3) updates the rows of that 
-            table that now have new 
-            field data from database 
-            totesys with rows
+            table with new field 
+            data from database 
+            totesys
 
         4) returns the updated 
             version of the table                    
@@ -42,6 +42,7 @@ def make_one_updated_table(table_of_updates, s3_client, bucket:str):
         bucket: the name of the 
             ingestion bucket
 
+            
     Returns:
         the updated table as a 
         dictionary like this:
@@ -77,6 +78,6 @@ def make_one_updated_table(table_of_updates, s3_client, bucket:str):
     updated_table = update_rows_in_table(table_of_updates[table_name],
                                          latest_table,
                                          table_name
-                                    ) # [{<updated row>}, {<updated row>}, etc]
+                                 ) # [{<updated row>}, {<updated row>}, etc]
     
     return updated_table

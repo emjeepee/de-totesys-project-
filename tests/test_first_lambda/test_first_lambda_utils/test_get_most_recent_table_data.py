@@ -5,12 +5,13 @@ import json
 import logging
 
 from moto import mock_aws
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, ANY
 from datetime import datetime
 
 from botocore.exceptions import ClientError
 from src.first_lambda.first_lambda_utils.get_most_recent_table_data import get_most_recent_table_data
 from src.first_lambda.first_lambda_utils.errors_lookup import errors_lookup   
+
 
 # a pytest fixture runs before 
 # each test function that uses it:
@@ -32,9 +33,9 @@ def aws_credentials(): # aws_credentials is the name of the fixture
 def test_list():
     
     mock_design_table_1 = [
-            {"design_id": 1, "name": "abdul", "team": 11, "project": "terraform"},
-            {"design_id": 2, "name": "Mukund", "team": 12, "project": "terraform"},
-            {"design_id": 3, "name": "Neil", "team": 13, "project": "terraform"},
+            {"design_id": 1, "name": "Arty", "team": 11, "project": "ETL"},
+            {"design_id": 2, "name": "Beverley", "team": 12, "project": "ETL"},
+            {"design_id": 3, "name": "Larry", "team": 13, "project": "ETL"},
                         ]
     
     key = 'design/2025-06-02T22-17-19-2513.json'
@@ -54,6 +55,8 @@ def test_list():
 @pytest.fixture(scope="module")
 def S3_setup(test_list):
     """
+    Make a mock ingestion bucket that
+    contains 
     Here neither S3_client.list_objects_v2()
     nor S3_client.get_object() raises a
     ClientError exception.
@@ -65,9 +68,16 @@ def S3_setup(test_list):
             Bucket=bucket_name,
             CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
                                )
-        S3_client.put_object(Bucket=bucket_name, Key=test_list[2], Body=test_list[0])
+        S3_client.put_object(Bucket=bucket_name, 
+                             Key=test_list[2], 
+                             Body=test_list[0])
+        
         # test_list is [mock_json_table, mock_design_table_1, key]
         yield S3_client, bucket_name, test_list[1]
+
+
+
+
 
 
 
@@ -86,7 +96,8 @@ def S3_setup_list_objs_err(S3_setup):
             "ListObjectsV2",
         )
     S3_client.list_objects_v2 = mock_list_objects_v2
-    yield S3_client, bucket_name, design_table
+    yield_list = [S3_client, bucket_name, design_table]
+    yield yield_list
 
 
 
@@ -109,6 +120,59 @@ def S3_setup_get_obj_err(S3_setup):
     S3_client.get_object = mock_get_object
     yield S3_client, bucket_name, design_table
 
+
+
+
+# @pytest.mark.skip
+def test_get_most_recent_table_data_calls_S3_client_list_objects_v2_functions_correctly(
+        S3_setup
+        ):
+    
+    # arrange:    
+    S3_client = S3_setup[0]
+    bucket_name = S3_setup[1]
+
+    with patch.object(
+                    S3_client,
+                    "list_objects_v2",
+                    wraps=S3_client.list_objects_v2
+                     ) as spy: 
+                # act:
+        most_recent_table = get_most_recent_table_data(
+                                                      'design',
+                                                       S3_client,
+                                                       bucket_name
+                                                       )
+            
+        spy.assert_called_once_with(
+                Bucket=bucket_name,
+                Prefix='design'
+                                   )
+            
+
+# @pytest.mark.skip
+def test_get_most_recent_table_data_calls_get_latest_table_correctly(
+        S3_setup
+        ):
+    
+    # arrange:    
+    S3_client = S3_setup[0]
+    bucket_name = S3_setup[1]
+    
+    with patch('src.first_lambda.first_lambda_utils.get_most_recent_table_data.get_latest_table') as mock_glt:
+        
+        # act:
+        most_recent_table = get_most_recent_table_data(
+                                                      'design',
+                                                       S3_client,
+                                                       bucket_name
+                                                       )
+
+        # assert: 
+        mock_glt.assert_called_once_with(ANY,
+                                         S3_client,
+                                         bucket_name
+                                        )
 
 
 
@@ -137,7 +201,7 @@ def test_get_most_recent_table_data_returns_correct_list(S3_setup):
 
 # @pytest.mark.skip
 def test_function_raises_exception_if_attempt_to_list_objects_in_bucket_fails(
-    S3_setup_list_objs_err
+                                        S3_setup_list_objs_err
                                                                              ):
     S3_client, bucket_name, mock_design_table_1 = S3_setup_list_objs_err
 
